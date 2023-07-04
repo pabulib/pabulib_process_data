@@ -36,7 +36,7 @@ pip install -r requirements.txt
     to check all files in output directory:
         "files_in_output_dir": "*"
     or in provided absolute path:
-        #"files_in_absolute_dir": "/"
+        "files_in_absolute_dir": "/.*" (remember about `*` to match all files)
 2. run output checks:
     python run_output_checks.py
 ```
