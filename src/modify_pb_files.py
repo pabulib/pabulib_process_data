@@ -1,3 +1,14 @@
+"""Modify and save new .pb files.
+
+This script modifies already created .pb files. It can be used to count
+votes / projects, to sort projects by score, to replace commas in floats
+or to calculate selected projects from budget value.
+
+It loads pb file (from output directory), makes some changes and (if wanted)
+saves new files to output/cleaned dir.
+"""
+
+
 import csv
 import glob
 import os
@@ -16,16 +27,19 @@ class ModifyPBFiles:
         if not self.input_files_path:
             self.input_files_path = os.path.join(pabulib_dir, "output", "*.pb")
         if not self.output_files_path:
-            self.output_files_path = os.path.join(
-                pabulib_dir, "output", "cleaned")
+            self.output_files_path = os.path.join(pabulib_dir, "output", "cleaned")
 
     def iterate_through_pb_files(self):
         files = glob.glob(self.input_files_path)
         utils.human_sorting(files)
         for idx, pb_file in enumerate(files):
             self.filename = os.path.basename(pb_file)
-            self.meta, self.projects, self.votes, self.check_scores =\
-                utils.load_pb_file(pb_file)
+            (
+                self.meta,
+                self.projects,
+                self.votes,
+                self.check_scores,
+            ) = utils.load_pb_file(pb_file)
             self.do_some_modifications(idx)
             # IF YOU WANT TO SAVE ONLY MODIFIED FILES
             if self.modified:
@@ -42,38 +56,46 @@ class ModifyPBFiles:
     def update_projects_votes(self):
         self.counted_votes = utils.count_votes_per_project(self.votes)
         for project_id, votes in self.counted_votes.items():
-            self.projects[project_id]['votes'] = votes
+            self.projects[project_id]["votes"] = votes
 
     def update_projects_scores(self):
         if self.check_scores:
             self.counted_scores = utils.count_points_per_project(self.votes)
             for project_id, score in self.counted_scores.items():
-                self.projects[project_id]['score'] = score
+                self.projects[project_id]["score"] = score
 
     def replace_commas_in_floats(self):
-        if ',' in self.meta["budget"]:
-            self.meta["budget"] = float(self.meta["budget"].replace(',', '.'))
+        if "," in self.meta["budget"]:
+            self.meta["budget"] = float(self.meta["budget"].replace(",", "."))
             self.modified = True
-        if self.meta.get('max_sum_cost'):
-            if ',' in self.meta['max_sum_cost']:
+        if self.meta.get("max_sum_cost"):
+            if "," in self.meta["max_sum_cost"]:
                 self.meta["max_sum_cost"] = float(
-                    self.meta["max_sum_cost"].replace(',', '.'))
+                    self.meta["max_sum_cost"].replace(",", ".")
+                )
                 self.modified = True
         for project_number, project_data in self.projects.items():
-            cost = project_data['cost']
+            cost = project_data["cost"]
             if not isinstance(cost, int):
-                if ',' in cost:
-                    self.projects[project_number]['cost'] = float(
-                        cost.replace(',', '.'))
+                if "," in cost:
+                    self.projects[project_number]["cost"] = float(
+                        cost.replace(",", ".")
+                    )
                     self.modified = True
 
     def sort_projects_by_score(self):
         first_project_dict = next(iter(self.projects.values()))
-        if 'score' in first_project_dict:
-            score_field = 'score'
+        if "score" in first_project_dict:
+            score_field = "score"
         else:
-            score_field = 'votes'
-        self.projects = dict(sorted(self.projects.items(), key=lambda x: int(x[1][score_field]), reverse=True))
+            score_field = "votes"
+        self.projects = dict(
+            sorted(
+                self.projects.items(),
+                key=lambda x: int(x[1][score_field]),
+                reverse=True,
+            )
+        )
 
     def do_some_modifications(self, idx):
         self.modified = True  # set it to True if you want to save new file
@@ -91,40 +113,40 @@ class ModifyPBFiles:
         # be sure projects are sorted by score!
         self.sort_projects_by_score()
 
-        budget = float(self.meta['budget'])
+        budget = float(self.meta["budget"])
 
         for project_id, project_dict in self.projects.items():
             selected = 0
-            project_cost = float(project_dict['cost'])
+            project_cost = float(project_dict["cost"])
             if budget > project_cost:
                 selected = 1
                 budget -= project_cost
-            self.projects[project_id]['selected'] = selected
+            self.projects[project_id]["selected"] = selected
 
     def add_selected_to_projects_section(self, idx):
         if idx == 0:
-            country = 'Poland'
-            city = 'Kraków'
-            year = '2019'
-            file_name = f'{country}_{city}_{year}_projects_dict_per_district'
-            self.project_selected_mapping =\
+            country = "Poland"
+            city = "Kraków"
+            year = "2019"
+            file_name = f"{country}_{city}_{year}_projects_dict_per_district"
+            self.project_selected_mapping = (
                 utils.create_project_selected_mapping_by_district(file_name)
-        district = self.meta.get('district', 'OGÓLNOMIEJSKIE')
+            )
+        district = self.meta.get("district", "OGÓLNOMIEJSKIE")
         for project, project_dict in self.projects.items():
             selected = self.project_selected_mapping[district][project]
-            project_dict['selected'] = selected
+            project_dict["selected"] = selected
             self.projects[project] = project_dict
 
     def replace_semicolons_in_votes(self):
         for vote, vote_dict in self.votes.items():
-            input_vote = vote_dict['vote']
-            changed_vote = input_vote.replace(';', ',')
-            self.votes[vote]['vote'] = changed_vote
+            input_vote = vote_dict["vote"]
+            changed_vote = input_vote.replace(";", ",")
+            self.votes[vote]["vote"] = changed_vote
 
     def write_votes_section(self, writer):
         writer.writerow(["VOTES"])
-        votes_headers = ["voter_id"] + \
-            list(self.votes[next(iter(self.votes))].keys())
+        votes_headers = ["voter_id"] + list(self.votes[next(iter(self.votes))].keys())
         writer.writerow(votes_headers)
         for voter_id, vote in self.votes.items():
             writer.writerow([voter_id] + list(vote.values()))
@@ -137,16 +159,17 @@ class ModifyPBFiles:
 
     def write_projects_section(self, writer):
         writer.writerow(["PROJECTS"])
-        projects_headers = ["project_id"] + \
-            list(self.projects[next(iter(self.projects))].keys())
+        projects_headers = ["project_id"] + list(
+            self.projects[next(iter(self.projects))].keys()
+        )
         writer.writerow(projects_headers)
         for project_id, project_info in self.projects.items():
             writer.writerow([project_id] + list(project_info.values()))
 
     def save_to_file(self):
         pb_file = os.path.join(self.output_files_path, self.filename)
-        with open(pb_file, 'a+', newline='', encoding="utf-8") as file:
-            writer = csv.writer(file, delimiter=';')
+        with open(pb_file, "a+", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file, delimiter=";")
             self.write_meta_section(writer)
             self.write_projects_section(writer)
             self.write_votes_section(writer)
