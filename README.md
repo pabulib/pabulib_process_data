@@ -7,7 +7,7 @@ http://pabulib.org
 <br>
 
 ### <b>NOTE</b>
-This repository is still in "work in progress" mode: at the beginnig we wrote a code just for ourselves. Now we need to beautify this it to make it understandable and usable for everyone. We will do it, just give as some time :) Till then we think that even in such format it could be useful for someone. If something is unclear just contact us!
+This repository is still in "work in progress" mode: at the beginnig we wrote the code just for ourselves. Now we need to beautify this to make it understandable and usable for everyone. We will do it, just give us some time :) Till then we think that even in such not-perfect format it could be useful for someone. If something is unclear just contact us!
 <br>
 Authors
 
