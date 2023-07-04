@@ -1,0 +1,10 @@
+# Ignore all data files
+*.xlsx
+*.xls
+*.pdf
+*.doc
+*.docx
+*.csv
+*.pb
+
+# but keep directories

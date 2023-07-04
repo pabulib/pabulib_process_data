@@ -1,0 +1,34 @@
+# Python trash
+__pycache__/
+
+# Venvs
+venv/
+
+# VS Code
+.idea/
+.DS_Store
+/.vscode
+
+# credentials
+db_credentials.sh
+.env
+
+# ChromeDriver
+chromedriver.exe
+chromedriver
+
+# Other
+test_*.py
+src/scrapcio/speceurlex/__init__.py
+
+# Jupyter Notebooks
+dont_*.ipynb
+
+# dont
+dont_*.py
+
+# Output reports
+output_check_report*.txt
+
+# Secrets
+client_secret.json
