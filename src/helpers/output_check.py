@@ -21,7 +21,7 @@ class CheckOutputFiles:
     def __post_init__(self):
         self.check_scores = False
         if self.files_in_absolute_dir:
-            self.path_to_all_files = self.files_in_absolute_dir
+            self.path_to_all_files = f"{self.files_in_absolute_dir}.pb"
         else:
             self.path_to_all_files = f"{output_path}/{self.files_in_output_dir}.pb"
 
