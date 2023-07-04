@@ -34,8 +34,8 @@ params = {
     # just files in output/cleaned dir
     # "files_in_output_dir": "/cleaned/*",
 
-    # provide your own absolute path
-    # "files_in_absolute_dir": "/",
+    # provide your own absolute path (remember about `*` to match all files)
+    # "files_in_absolute_dir": "/*",
 
     # save output to txt file
     "create_txt_report": False,
