@@ -2,7 +2,6 @@ import csv
 import glob
 import json
 import os
-import pickle
 import re
 import sys
 from collections import defaultdict

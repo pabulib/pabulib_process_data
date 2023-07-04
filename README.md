@@ -18,7 +18,7 @@ Authors
 ## Environment
 ```
 python -m venv venv
-
+pip install -r requirements.txt
 ```
 
 ### Process the data (from csv, excel, pdf):
@@ -32,7 +32,13 @@ python -m venv venv
 
 ### Check if output .pb files are correct
 ```
-run_output_checks.py
+1. set in params path to .pb files you want to check:
+    to check all files in output directory:
+        "files_in_output_dir": "*"
+    or in provided absolute path:
+        #"files_in_absolute_dir": "/"
+2. run output checks:
+    python run_output_checks.py
 ```
 
 ### Modify .pb files: for example to count votes or to change columns order
