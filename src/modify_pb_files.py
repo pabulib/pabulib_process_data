@@ -16,6 +16,8 @@ from dataclasses import dataclass
 
 import helpers.utilities as utils
 
+logger = utils.create_logger()
+
 
 @dataclass
 class ModifyPBFiles:
@@ -27,7 +29,8 @@ class ModifyPBFiles:
         if not self.input_files_path:
             self.input_files_path = os.path.join(pabulib_dir, "output", "*.pb")
         if not self.output_files_path:
-            self.output_files_path = os.path.join(pabulib_dir, "output", "cleaned")
+            self.output_files_path = os.path.join(
+                pabulib_dir, "output", "cleaned")
 
     def iterate_through_pb_files(self):
         files = glob.glob(self.input_files_path)
@@ -56,7 +59,13 @@ class ModifyPBFiles:
     def update_projects_votes(self):
         self.counted_votes = utils.count_votes_per_project(self.votes)
         for project_id, votes in self.counted_votes.items():
-            self.projects[project_id]["votes"] = votes
+            try:
+                self.projects[project_id]["votes"] = votes
+            except KeyError:
+                logger.critical(
+                    'There is a project with no votes! Removing it!'
+                    f'File: {self.filename}, project ID: {project_id}'
+                )
 
     def update_projects_scores(self):
         if self.check_scores:
@@ -99,7 +108,6 @@ class ModifyPBFiles:
 
     def do_some_modifications(self, idx):
         self.modified = True  # set it to True if you want to save new file
-        self.sort_projects_by_score()
         # self.update_number_of_votes()
         # self.update_number_of_projects()
         # self.update_projects_votes()
@@ -108,6 +116,7 @@ class ModifyPBFiles:
         # self.replace_semicolons_in_votes()
         # self.add_selected_to_projects_section(idx)
         # self.calculate_selected_from_budget()
+        self.sort_projects_by_score()
 
     def calculate_selected_from_budget(self):
         # be sure projects are sorted by score!
@@ -146,7 +155,8 @@ class ModifyPBFiles:
 
     def write_votes_section(self, writer):
         writer.writerow(["VOTES"])
-        votes_headers = ["voter_id"] + list(self.votes[next(iter(self.votes))].keys())
+        votes_headers = ["voter_id"] + \
+            list(self.votes[next(iter(self.votes))].keys())
         writer.writerow(votes_headers)
         for voter_id, vote in self.votes.items():
             writer.writerow([voter_id] + list(vote.values()))
