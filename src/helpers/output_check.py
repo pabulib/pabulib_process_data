@@ -167,10 +167,12 @@ class CheckOutputFiles:
 
         for project_number, project_votes in self.counted_scores.items():
             if not projects.get(project_number):
-                self.log_different_votes(project_number, 0, project_votes, "score")
+                self.log_different_votes(
+                    project_number, 0, project_votes, "score")
 
             elif "votes" not in projects[project_number]:
-                self.log_different_votes(project_number, 0, project_votes, "score")
+                self.log_different_votes(
+                    project_number, 0, project_votes, "score")
 
     def remove_last_empty_line(self, filename: str) -> None:
         """If last line of file is empty, remove it."""
@@ -202,10 +204,12 @@ class CheckOutputFiles:
         """Check if number of projects is the same as in META, log if not."""
 
         if int(meta_projects) != len(projects):
-            text = f"""Different number of projects!
-                In meta: {meta_projects}
-                vs counted in file (number of rows in PROJECTS section): 
-                {str(len(projects))}"""
+            text = (
+                f"Different number of projects! "
+                f"In meta: {meta_projects} "
+                f"vs counted in file (number of rows in PROJECTS section): "
+                f"{str(len(projects))}"
+            )
             self.log_and_add_to_report(text)
 
     def log_comma_in_float(self, text: str) -> None:
@@ -290,10 +294,12 @@ class CheckOutputFiles:
             selected_field = project_data.get("selected")
             if selected_field:
                 if int(selected_field) == 1:
-                    all_projects.append([_, project_data["cost"], project_data["name"]])
+                    all_projects.append(
+                        [_, project_data["cost"], project_data["name"]])
                     budget_spent += int(project_data["cost"])
             if int(project_data["cost"]) > budget_available:
-                self.log_project_exceeded_budget(project_data, budget_available)
+                self.log_project_exceeded_budget(
+                    project_data, budget_available)
         if budget_spent > budget_available:
             self.log_exceeded_budget(meta["budget"], budget_spent)
             for project in all_projects:
