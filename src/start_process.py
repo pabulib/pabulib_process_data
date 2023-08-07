@@ -13,7 +13,8 @@ logger = create_logger()
 # city = "Warszawa"
 # city = "Łódź"
 # city = "Poznań"
-city = "Gdynia"
+# city = "Gdynia"
+city = "mechanical_turk"
 
 settings["unit"] = city
 

@@ -5,16 +5,29 @@ from process_data.create_projects_section import CreateProjectsSections
 from process_data.create_votes_section import CreateVotesSections
 from process_data.get_votes_excel import GetVotesExcel
 
+unusual_units = ["mechanical_turk"]
+
 
 def run_it(year, unit, scrape_data=False, get_pdf_data=False):
+
     unit_package = utils.remove_accents_from_str(unit)
     packages = f'process_data.cities.{unit_package.lower()}'
-    budgets = getattr(__import__(
-        f'{packages}.budgets', fromlist=["budgets"]), "budgets")
+
     all_data = getattr(__import__(
         f'{packages}.settings', fromlist=["all_data"]), "all_data")
 
     data = all_data[year]
+
+    if unit in unusual_units:
+        ProcessData = getattr(__import__(f'{packages}.process_data', fromlist=[
+            "ProcessData"]), "ProcessData")
+        pd = ProcessData(**data["base_data"], **{"metadata": data["metadata"]})
+        pd.start()
+        return
+
+    budgets = getattr(__import__(
+        f'{packages}.budgets', fromlist=["budgets"]), "budgets")
+
     logger = utils.create_logger()
 
     # SCRAPE PROJECTS FROM WEBPAGE
