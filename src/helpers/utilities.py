@@ -569,3 +569,19 @@ def largest_remainder_method(numbers):
 
 def get_str_with_sep_from(number):
     return f'{number:,d}'.replace(',', ' ')
+
+
+def sort_projects_by_results(projects):
+    first_project_dict = next(iter(projects.values()))
+    if "score" in first_project_dict:
+        score_field = "score"
+    else:
+        score_field = "votes"
+    projects = dict(
+        sorted(
+            projects.items(),
+            key=lambda x: int(x[1][score_field]),
+            reverse=True,
+        )
+    )
+    return projects
