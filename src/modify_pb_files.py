@@ -108,19 +108,29 @@ class ModifyPBFiles:
 
     def do_some_modifications(self, idx):
         self.modified = True  # set it to True if you want to save new file
+        self.remove_projects_with_no_cost()
+        self.remove_projects_with_no_votes()
         # self.update_number_of_votes()
-        # self.update_number_of_projects()
+        self.update_number_of_projects()
         # self.update_projects_votes()
         # self.update_projects_scores()
         # self.replace_commas_in_floats()
         # self.replace_semicolons_in_votes()
         # self.add_selected_to_projects_section(idx)
         # self.calculate_selected_from_budget()
-        self.sort_projects_by_score()
+        self.projects = utils.sort_projects_by_results(self.projects)
+
+    def remove_projects_with_no_votes(self):
+        self.projects = {project_id: project_dict for project_id,
+                         project_dict in self.projects.items() if int(project_dict['votes'] or 0) != 0}
+
+    def remove_projects_with_no_cost(self):
+        self.projects = {project_id: project_dict for project_id,
+                         project_dict in self.projects.items() if int(project_dict['cost'] or 0) != 0}
 
     def calculate_selected_from_budget(self):
         # be sure projects are sorted by score!
-        self.sort_projects_by_score()
+        self.projects = utils.sort_projects_by_results(self.projects)
 
         budget = float(self.meta["budget"])
 

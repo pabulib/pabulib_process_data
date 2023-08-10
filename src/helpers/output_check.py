@@ -93,6 +93,24 @@ class CheckOutputFiles:
         )
         self.log_and_add_to_report(text)
 
+    def log_greedy_difference(self, greedy: dict, selected: dict) -> None:
+        """Create log text: cost of selected projects exceeded budget."""
+
+        text = ""
+        if selected:
+            text += 'PROJECTS SELECTED IN FILE:\n'
+
+            for project in selected.values():
+                text += f'{str(project)}\n'
+
+        if greedy:
+            text += 'PROJECTS THAT SHOULD BE SELECTED IN GREEDY WINNERS:\n'
+
+            for project in greedy.values():
+                text += f'{str(project)}\n'
+
+        self.log_and_add_to_report(text)
+
     def log_all_projects_funded(self, budget: float, all_projects_cost: float) -> None:
         """Create log text: cost of selected projects exceeded budget."""
 
@@ -296,25 +314,36 @@ class CheckOutputFiles:
             self.check_if_correct_scores_number(projects, votes)
 
     def check_if_greedy_winners(self, budget, projects):
+        projects = utils.sort_projects_by_results(projects)
+        results = 'votes'
+        if self.check_scores:
+            results = 'score'
         budget = float(budget.replace(",", "."))
-        selected_projects = set()
-        greedy_winners = set()
+        selected_projects = dict()
+        greedy_winners = dict()
         for project_id, project_dict in projects.items():
             project_cost = float(project_dict["cost"])
+            cost_printable = utils.make_cost_printable(project_cost)
+            row = [project_id, project_dict[results], cost_printable]
             if int(project_dict["selected"]) == 1:
-                selected_projects.add(project_id)
+                selected_projects[project_id] = row
             if budget > project_cost:
-                greedy_winners.add(project_id)
+                greedy_winners[project_id] = row
                 budget -= project_cost
-        should_be_selected = greedy_winners.difference(selected_projects)
+        gw_set = set(greedy_winners.keys())
+        selected_set = set(selected_projects.keys())
+        should_be_selected = gw_set.difference(selected_set)
         if should_be_selected:
             text = f'Projects not selected but should be: {should_be_selected}'
             self.log_wrong_greedy_winners(text)
 
-        shouldnt_be_selected = selected_projects.difference(greedy_winners)
+        shouldnt_be_selected = selected_set.difference(gw_set)
         if shouldnt_be_selected:
             text = f'Projects selected but should not: {shouldnt_be_selected}'
             self.log_wrong_greedy_winners(text)
+
+        if should_be_selected or should_be_selected:
+            self.log_greedy_difference(greedy_winners, selected_projects)
 
     def iterate_through_pb_files(self) -> None:
         """Create list of pb files from a given path and iterate."""
