@@ -118,7 +118,7 @@ class GetVotesExcel(BaseConfig):
 
     def sort_rows_by_voter_id(self):
         self.data = [self.sheet.row_values(i) for i in range(self.sheet.nrows)]
-        self.data = self.data[self.first_row :]
+        self.data = self.data[self.first_row:]
         self.data.sort(key=lambda x: x[self.col["voter_id"]])
 
     def get_votes(self):
@@ -145,7 +145,8 @@ class GetVotesExcel(BaseConfig):
                 row_values = [str(value) for value in row_values]
                 row_txt = "".join(row_values)
                 if row_txt in all_rows:
-                    raise RuntimeError(f"There is a duplicated row! {row_values}")
+                    raise RuntimeError(
+                        f"There is a duplicated row! {row_values}")
                 all_rows.add(row_txt)
 
     def handle_poznan_district(self, district):
@@ -199,7 +200,8 @@ class GetVotesExcel(BaseConfig):
             for district, votes in self.voter_votes.items():
                 voter_item_cp = deepcopy(voter_item)
                 voter_item_cp.vote = ",".join(votes)
-                self.votes_data_per_district[district].append(vars(voter_item_cp))
+                self.votes_data_per_district[district].append(
+                    vars(voter_item_cp))
             self.voter_votes = collections.defaultdict(list)
 
     def iterate_through_rows(self):
@@ -249,7 +251,8 @@ class GetVotesExcel(BaseConfig):
         unit_votes = row[self.col["unit_votes"]]
         if unit_votes and unit_votes not in utils.wrong_votes:
             voter_item.vote = self.clean_votes_field(unit_votes)
-            self.votes_data_per_district["OGOLNOMIEJSKI"].append(vars(voter_item))
+            self.votes_data_per_district["OGOLNOMIEJSKI"].append(
+                vars(voter_item))
         for subdistrict, column_index in self.district_columns.items():
             district_votes = row[column_index]
             if district_votes and district_votes not in utils.wrong_votes:

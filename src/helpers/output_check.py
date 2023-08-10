@@ -79,8 +79,29 @@ class CheckOutputFiles:
 
         text = (
             f"Cost of selected projects exceeded budget!"
-            f"Budget: {budget},"
+            f"Budget: {budget}, "
             f"cost of projects: {budget_spent}"
+        )
+        self.log_and_add_to_report(text)
+
+    def log_wrong_greedy_winners(self, txt: str) -> None:
+        """Create log text: cost of selected projects exceeded budget."""
+
+        text = (
+            f"Wrong selected projects if Greedy Winners rule! "
+            f"{txt}"
+        )
+        self.log_and_add_to_report(text)
+
+    def log_all_projects_funded(self, budget: float, all_projects_cost: float) -> None:
+        """Create log text: cost of selected projects exceeded budget."""
+
+        text = (
+            f"Budget is higher than cost of all projects! "
+            "Voting made no sense, all projets were funded. "
+            f"Budget: {utils.get_str_with_sep_from(budget)}, "
+            "cost of all projects: "
+            f"{utils.get_str_with_sep_from(all_projects_cost)}"
         )
         self.log_and_add_to_report(text)
 
@@ -96,15 +117,39 @@ class CheckOutputFiles:
 
         self.log_and_add_to_report(text)
 
+    def log_project_no_cost(self, project_data: dict) -> None:
+        """Create log text: single project exceeded whole budget."""
+
+        text = (
+            f"There is project with no cost! "
+            f"It's possible that it was not approved for voting! "
+            f"project: {project_data['name']} "
+        )
+
+        self.log_and_add_to_report(text)
+
     def log_exceeded_vote_length(
         self, voter_id: str, max_length: int, voter_votes: int
     ) -> None:
         """Create log text: voter has more votes than allowed."""
 
         text = (
-            f"Vote lenght exceeded! "
+            f"Vote length exceeded! "
             f"Voter ID: {voter_id}, "
             f"max vote length: {max_length}, "
+            f"number of voter votes: {voter_votes}"
+        )
+        self.log_and_add_to_report(text)
+
+    def log_too_short_vote_length(
+        self, voter_id: str, min_length: int, voter_votes: int
+    ) -> None:
+        """Create log text: voter has more votes than allowed."""
+
+        text = (
+            f"Vote length is too short! "
+            f"Voter ID: {voter_id}, "
+            f"min vote length: {min_length}, "
             f"number of voter votes: {voter_votes}"
         )
         self.log_and_add_to_report(text)
@@ -244,10 +289,32 @@ class CheckOutputFiles:
         self.check_budgets(meta, projects)
         self.check_number_of_votes(meta["num_votes"], votes)
         self.check_number_of_projects(meta["num_projects"], projects)
-        self.check_if_max_vote_length_exceeded(meta, votes)
+        self.check_vote_length(meta, votes)
         self.check_if_correct_votes_number(projects, votes)
+        self.check_if_greedy_winners(meta["budget"], projects)
         if self.check_scores:
             self.check_if_correct_scores_number(projects, votes)
+
+    def check_if_greedy_winners(self, budget, projects):
+        budget = float(budget.replace(",", "."))
+        selected_projects = set()
+        greedy_winners = set()
+        for project_id, project_dict in projects.items():
+            project_cost = float(project_dict["cost"])
+            if int(project_dict["selected"]) == 1:
+                selected_projects.add(project_id)
+            if budget > project_cost:
+                greedy_winners.add(project_id)
+                budget -= project_cost
+        should_be_selected = greedy_winners.difference(selected_projects)
+        if should_be_selected:
+            text = f'Projects not selected but should be: {should_be_selected}'
+            self.log_wrong_greedy_winners(text)
+
+        shouldnt_be_selected = selected_projects.difference(greedy_winners)
+        if shouldnt_be_selected:
+            text = f'Projects selected but should not: {shouldnt_be_selected}'
+            self.log_wrong_greedy_winners(text)
 
     def iterate_through_pb_files(self) -> None:
         """Create list of pb files from a given path and iterate."""
@@ -269,38 +336,61 @@ class CheckOutputFiles:
             f.write(self.report_txt)
         print(f"Report saved to {filename}")
 
-    def check_if_max_vote_length_exceeded(self, meta: dict, votes: dict) -> None:
-        """Check if voter has more votes than allowed."""
+    def check_vote_length(self, meta: dict, votes: dict) -> None:
+        """Check if voter has more or less votes than allowed."""
 
         max_length = (
             meta.get("max_length")
             or meta.get("max_length_unit")
             or meta.get("max_length_district")
         )
-        if max_length:
+
+        min_length = (
+            meta.get("min_length")
+            or meta.get("min_length_unit")
+            or meta.get("min_length_district")
+        )
+        check_length = max_length or min_length or None
+
+        if check_length:
             for voter, vote_data in votes.items():
-                if len(vote_data["vote"].split(",")) > int(max_length):
-                    self.log_exceeded_vote_length(
-                        voter, max_length, len(vote_data["vote"].split(","))
-                    )
+                if max_length:
+                    if len(vote_data["vote"].split(",")) > int(max_length):
+                        self.log_exceeded_vote_length(
+                            voter, max_length, len(
+                                vote_data["vote"].split(","))
+                        )
+                if min_length:
+                    if len(vote_data["vote"].split(",")) < int(min_length):
+                        self.log_too_short_vote_length(
+                            voter, min_length, len(
+                                vote_data["vote"].split(","))
+                        )
 
     def check_budgets(self, meta: dict, projects: dict) -> None:
         """Check if budget exceeded or if too expensive project."""
 
         budget_spent = 0
-        budget_available = float(meta["budget"].replace(",", "."))
+        all_projects_cost = 0
+        budget_available = int(meta["budget"].replace(",", "."))
         all_projects = list()
         for _, project_data in projects.items():
             selected_field = project_data.get("selected")
+            project_cost = int(project_data["cost"])
+            all_projects_cost += project_cost
             if selected_field:
                 if int(selected_field) == 1:
                     all_projects.append(
-                        [_, project_data["cost"], project_data["name"]])
-                    budget_spent += int(project_data["cost"])
-            if int(project_data["cost"]) > budget_available:
+                        [_, project_cost, project_data["name"]])
+                    budget_spent += project_cost
+            if project_cost == 0:
+                self.log_project_no_cost(project_data)
+            elif project_cost > budget_available:
                 self.log_project_exceeded_budget(
                     project_data, budget_available)
         if budget_spent > budget_available:
-            self.log_exceeded_budget(meta["budget"], budget_spent)
+            self.log_exceeded_budget(budget_available, budget_spent)
             for project in all_projects:
                 print(project)
+        if budget_available > all_projects_cost:
+            self.log_all_projects_funded(budget_available, all_projects_cost)
