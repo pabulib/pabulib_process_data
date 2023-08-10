@@ -8,15 +8,11 @@ all_data = {
         },
         "metadata": {
             "description": "description",
-            "vote_type": "approval",
             "rule": "greedy",
             "date_begin": "08.06.2020",
             "date_end": "22.06.2020",
-            "language": "polish",
-            "min_length": "1",
-            "max_length": "3",
-            "edition": "7",
-            "language": "polish",
+            "language": "english",
+            "edition": "1",  # ?
             "comment": "comment"
         },
     },

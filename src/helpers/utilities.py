@@ -6,6 +6,7 @@ import re
 import sys
 from collections import defaultdict
 
+import numpy as np
 import requests
 import unidecode
 import xlrd
@@ -267,35 +268,6 @@ def check_if_json_files_in_output(country, unit, year, logger):
                 "remove JSON files."
             )
             return True
-
-
-def clean_files_from_additional_project_titles():
-    cleaned_path = os.path.join(
-        settings.output_path, "cleaned").replace("\\", "/")
-    os.mkdir(cleaned_path)
-    dir_path = settings.output_path.replace("\\", "/") + "/*.pb"
-
-    for my_file in glob.glob(dir_path):
-        delete_next_title = False
-        with open(my_file, "r", newline="", encoding="utf-8") as infile, open(
-            my_file.replace("\\Poland", "/cleaned/Poland"),
-            "w",
-            newline="",
-            encoding="utf-8",
-        ) as outfile:
-            writer = csv.writer(outfile)
-            for row in csv.reader(infile):
-                if delete_next_title:
-                    if "PROJECTS" in row[0]:
-                        pass
-                    elif "project_id" in row[0]:
-                        pass
-                    else:
-                        writer.writerow(row)
-                else:
-                    writer.writerow(row)
-                    if "project_id" in row[0]:
-                        delete_next_title = True
 
 
 def remove_charmaps(string):
@@ -560,3 +532,40 @@ def get_selected_output_files(country, city, year, files):
         return [os.path.join(settings.output_path, name) for name in names]
     if files == "jsons":
         return [os.path.join(settings.output_path, "jsons", name) for name in names]
+
+
+def largest_remainder_method(numbers):
+    numbers = np.array(numbers)
+
+    # Normalize the numbers so they sum to 1
+    norm_numbers = numbers / numbers.sum()
+
+    # Multiply the normalized numbers by the target total (100 in your case) and floor the result
+    quotients = np.floor(norm_numbers * 100)
+
+    # Calculate the remainders
+    remainders = norm_numbers * 100 - quotients
+
+    # Calculate how many points we still have to distribute
+    points_left = 100 - quotients.sum()
+
+    # While we still have points left to distribute
+    while points_left > 0:
+        # Find the index of the maximum remainder
+        max_remainder_index = np.argmax(remainders)
+
+        # Add a point to the number with the maximum remainder
+        quotients[max_remainder_index] += 1
+
+        # This number's remainder is now 0
+        remainders[max_remainder_index] = 0
+
+        # We've distributed a point
+        points_left -= 1
+
+    quotients = quotients.astype(int)
+    return list(quotients)
+
+
+def get_str_with_sep_from(number):
+    return f'{number:,d}'.replace(',', ' ')

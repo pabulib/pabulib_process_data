@@ -131,6 +131,28 @@ class ProcessData(BaseConfig):
         logger.info(f'Removed votes! Voters IDs: {list(votes_removed.keys())}')
         return votes
 
+    def check_if_exceeded_points(self, points, voter):
+        # TODO set the threshold
+        NORMALIZE_THRESHOLD = 104
+
+        if sum(points) > 100:
+            if sum(points) < NORMALIZE_THRESHOLD:
+
+                quotients = utils.largest_remainder_method(points)
+                logger.info(
+                    f'\nSum of points higher than 100 but less than '
+                    f'{NORMALIZE_THRESHOLD}! Normalizing to 100...\n'
+                    f'before: {points}\nafter: {quotients}')
+                if sum(quotients) == 100:
+                    return quotients
+                else:
+                    raise RuntimeError("Largest remainder method doesn't work")
+            else:
+                logger.info(
+                    f'Voter {voter} was removed! Sum of points: {sum(points)}')
+                return
+        return points
+
     def aggregate_votes(self, votes):
 
         self.aggregated_votes = {}
@@ -151,11 +173,10 @@ class ProcessData(BaseConfig):
                             zipped.items(), key=lambda item: item[1], reverse=True)}
                         projects = list(sorted_by_points.keys())
                         points = list(sorted_by_points.values())
-                        # CHECK IF SUM OF POINTS NOT HIGHER THAN 100
-                        if sum(points) > 100:
-                            logger.error(
-                                f'Too many points for user {voter}, sum: {sum(points)}')
-                            # TODO if < 103, normilize to 100, if more then delete this vote
+                        points = self.check_if_exceeded_points(points, voter)
+                        if not points:
+                            continue
+
                         self.aggregated_votes[voter] = {
                             "projects": projects, "points": points}
             else:
@@ -294,9 +315,9 @@ class ProcessData(BaseConfig):
 
         file_.close()
 
-        self.add_metadata()
+        self.add_metadata(election, election_type)
 
-    def add_metadata(self, election):
+    def add_metadata(self, election, election_type):
         # add meta section
         path_to_file = utils.get_path_to_file(election)
         num_projects, num_votes = utils.count_projects_and_votes(path_to_file)
@@ -313,8 +334,21 @@ class ProcessData(BaseConfig):
             f"instance;{self.instance}\n"
             f"num_projects;{num_projects}\n"
             f"num_votes;{num_votes}\n"
+            f"vote_type;{election_type}\n"
             f"budget;{budget}\n"
         )
+        if election_type == "approval":
+            pass
+        elif election_type == "ordinal":
+            pass
+        elif election_type == "cumulative":
+            metadata += "max_sum_points;100\n"
+            metadata += "min_sum_points;100\n"
+            # max_sum_cost ?
+
+            # max_sum_cost ??
+            # "min_length": "1",
+            # "max_length": "3",
         for key, value in temp_meta.items():
             metadata += f"{key};{value}\n"
 
