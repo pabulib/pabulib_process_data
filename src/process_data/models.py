@@ -24,6 +24,9 @@ class ProjectItem:
         self.district = district
         self.district_upper = utils.change_district_into_name(district)
 
+    def add_votes(self, votes):
+        self.votes = int(votes.replace(' ', ''))
+
     def add_category_from_list(self, category_list):
         self.category = ",".join(category_list)
 
@@ -63,15 +66,15 @@ class VoterItem:
 
     def add_sex(self, sex):
         if sex:
-            if sex.startswith('M'):
+            if sex.lower().startswith('m'):
                 self.sex = 'M'
-            elif sex.startswith(('K', 'F')):
-                self.sex = 'K'
+            elif sex.lower().startswith(('k', 'f')):
+                self.sex = 'F'
 
     def add_voting_method(self, method):
-        if method.lower() in ("elektronicznie", "internet"):
+        if method.lower() in ("elektronicznie", "internet", "internetowe", "i"):
             self.voting_method = "internet"
-        elif method.lower() in ("papierowo", "papier"):
+        elif method.lower() in ("papierowo", "papier", "papierowe", "p"):
             self.voting_method = "paper"
 
     def add_neighborhood(self, district):

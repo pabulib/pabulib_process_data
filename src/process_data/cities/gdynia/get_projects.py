@@ -27,18 +27,18 @@ class GetProjects(BaseConfig):
         path_to_pdf = None
         if self.projects_docx.endswith(".pdf"):
             pdf_name = self.projects_docx.replace(".pdf", "")
-            path_to_pdf = utils.get_path_to_excel_file_by_unit(
+            path_to_pdf = utils.get_path_to_file_by_unit(
                 pdf_name, self.unit, self.data_dir, "pdf"
             )
 
-            self.path_to_docx = utils.get_path_to_excel_file_by_unit(
+            self.path_to_docx = utils.get_path_to_file_by_unit(
                 pdf_name, self.unit, self.data_dir, "docx"
             )
 
             pdf2docx.parse(path_to_pdf, self.path_to_docx)
 
         else:
-            self.path_to_docx = utils.get_path_to_excel_file_by_unit(
+            self.path_to_docx = utils.get_path_to_file_by_unit(
                 self.projects_docx, self.unit, self.data_dir, "docx"
             )
 
@@ -64,6 +64,25 @@ class GetProjects(BaseConfig):
             project_id = project_id.split("\t")[1]
         return project_id
 
+    def get_district_subdistrict_from_merged_cell(self, value):
+        if "miejskie ogólne" in value:
+            district = "CITYWIDE"
+            subdistrict = "CITYWIDE"
+        elif "miejske klimatyczny" in value:
+            district = "GREEN"
+            subdistrict = "GREEN"
+        elif "projekty duże" in value:
+            subdistrict = "large"
+            value = value.replace(" projekty duże", "")
+            district = value.title()
+        elif "projekty małe" in value:
+            subdistrict = "small"
+            value = value.replace(" projekty małe", "")
+            district = value.title()
+        else:
+            raise RuntimeError(f"Different value in merged cell! {value}")
+        return district, subdistrict
+
     def get_data_from_docx_table(self, doc):
         for page_no in range(len(doc.tables)):
             table = doc.tables[page_no]
@@ -87,19 +106,25 @@ class GetProjects(BaseConfig):
 
                 if len(unique_values) == 1:
                     value = list(unique_values)[0]
-                    if value == "Ogólnomiejskie":
-                        district = "OGOLNOMIEJSKI"
-                        subdistrict = "OGOLNOMIEJSKI"
-                        continue
+                    if self.instance == 2020:
+                        if value == "Ogólnomiejskie":
+                            district = "CITYWIDE"
+                            subdistrict = "CITYWIDE"
+                            continue
 
-                    if cell_colour.lower() == self.cell_colours["district"]:
-                        district = value.title()
-                        continue
-                    elif cell_colour.lower() == self.cell_colours["size"]:
-                        if "małe" in value.lower():
-                            subdistrict = "small"
-                        elif "duże" in value.lower():
-                            subdistrict = "large"
+                        if cell_colour.lower() == self.cell_colours["district"]:
+                            district = value.title()
+                            continue
+                        elif cell_colour.lower() == self.cell_colours["size"]:
+                            if "małe" in value.lower():
+                                subdistrict = "small"
+                            elif "duże" in value.lower():
+                                subdistrict = "large"
+                            continue
+                    elif self.instance > 2020:
+                        district, subdistrict =\
+                            self.get_district_subdistrict_from_merged_cell(
+                                value.lower())
                         continue
 
                 # Construct a dictionary for this row, mapping keys to values
@@ -153,7 +178,8 @@ class GetProjects(BaseConfig):
 
     def create_district_upper_mapping(self):
         self.district_upper_district_mapping = {
-            "OGOLNOMIEJSKI": "Ogólnomiejskie"}
+            "CITYWIDE": "citywide"
+        }
         for district in self.district_projects_mapping.keys():
             district_upper = utils.change_district_into_name(district)
             self.district_upper_district_mapping[district_upper] = district

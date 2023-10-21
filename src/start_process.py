@@ -5,7 +5,7 @@ from helpers.utilities import create_logger
 settings = {
     "year": 2020,
     "scrape_data": True,
-    "get_pdf_data": True
+    # "preprocessing": False
 }
 
 logger = create_logger()
@@ -14,7 +14,9 @@ logger = create_logger()
 # city = "Łódź"
 # city = "Poznań"
 # city = "Gdynia"
-city = "mechanical_turk"
+# city = "mechanical_turk"
+city = "Lublin"
+# city = "Wrocław"
 
 settings["unit"] = city
 

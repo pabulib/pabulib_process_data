@@ -18,7 +18,7 @@ from xlsxwriter.workbook import Workbook
 
 from helpers import settings
 
-wrong_votes = (r"\N", "NULL", "---")
+wrong_votes = (r"\N", "NULL", "---", "0", 0)
 
 
 def count_projects_and_votes(path_to_file):
@@ -124,7 +124,7 @@ def get_path_to_excel_file(excel_filename):
     return path_to_file
 
 
-def get_path_to_excel_file_by_unit(excel_filename, unit, extra_dir="", ext="xlsx"):
+def get_path_to_file_by_unit(excel_filename, unit, extra_dir="", ext="xlsx"):
     path_to_excel_file = settings.get_path_to_excel_files(
         unit, extra_dir=extra_dir)
     excel_filename = f"{excel_filename}.{ext}"
@@ -475,15 +475,16 @@ def get_cost_from_text(text):
 
 
 def make_cost_printable(cost):
+    cost = float(cost)
     return str("{:.2f}".format(cost) if cost % 1 else int(cost))
 
 
-def convert_csv_to_xl(path_to_csv, delimiter=";", excel_name=None):
+def convert_csv_to_xl(path_to_csv, delimiter=";", excel_name=None, encoding="utf8"):
     if not excel_name:
         excel_name = path_to_csv[:-4] + ".xlsx"
     workbook = Workbook(excel_name)
     worksheet = workbook.add_worksheet()
-    with open(path_to_csv, "rt", encoding="utf8") as f:
+    with open(path_to_csv, "rt", encoding=encoding) as f:
         reader = csv.reader(f, delimiter=delimiter)
         for r, row in enumerate(reader):
             for c, col in enumerate(row):

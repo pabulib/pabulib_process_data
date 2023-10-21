@@ -13,8 +13,6 @@ election_type_mapping = {
     "Utilities": "cumulative"
 }
 
-logger = utils.create_logger()
-
 
 @dataclass
 class ProcessData(BaseConfig):
@@ -23,6 +21,7 @@ class ProcessData(BaseConfig):
 
     def __post_init__(self):
         self.prepare_excel()
+        return super().__post_init__()
 
     def get_sheet_and_col_names(self, name):
         sheet = self.workbook.sheet_by_name(name)
@@ -32,7 +31,7 @@ class ProcessData(BaseConfig):
         return data, col_names
 
     def prepare_excel(self):
-        excel_path = utils.get_path_to_excel_file_by_unit(
+        excel_path = utils.get_path_to_file_by_unit(
             self.excel_filename, self.unit,
         )
         self.workbook = utils.get_workbook(excel_path)
@@ -80,7 +79,7 @@ class ProcessData(BaseConfig):
                 self.experiments[exp_id]["education"] = education
                 self.experiments[exp_id]["sex"] = sex
             except KeyError:
-                logger.error(
+                self.logger.error(
                     f'There is no exp_id: {exp_id}, "{participant_id}"')
 
     def get_votes(self):
@@ -128,7 +127,8 @@ class ProcessData(BaseConfig):
 
                 vote_list = []
 
-        logger.info(f'Removed votes! Voters IDs: {list(votes_removed.keys())}')
+        self.logger.info(
+            f'Removed votes! Voters IDs: {list(votes_removed.keys())}')
         return votes
 
     def check_if_exceeded_points(self, points, voter):
@@ -139,7 +139,7 @@ class ProcessData(BaseConfig):
             if sum(points) < NORMALIZE_THRESHOLD:
 
                 quotients = utils.largest_remainder_method(points)
-                logger.info(
+                self.logger.info(
                     f'\nSum of points higher than 100 but less than '
                     f'{NORMALIZE_THRESHOLD}! Normalizing to 100...\n'
                     f'before: {points}\nafter: {quotients}')
@@ -148,7 +148,7 @@ class ProcessData(BaseConfig):
                 else:
                     raise RuntimeError("Largest remainder method doesn't work")
             else:
-                logger.info(
+                self.logger.info(
                     f'Voter {voter} was removed! Sum of points: {sum(points)}')
                 return
         return points
@@ -273,7 +273,7 @@ class ProcessData(BaseConfig):
         return vote
 
     def handle_election(self, election, voters):
-        logger.info(f"Processing election: {election}...")
+        self.logger.info(f"Processing election: {election}...")
 
         e_type, e_number = election.rsplit('_', 1)
         election_type = election_type_mapping[e_type]
@@ -377,7 +377,8 @@ class ProcessData(BaseConfig):
                 vote = self.get_approval_votes(votes)
                 vote_rows.append(voter_row + [vote])
             else:
-                logger.error(f'Election type not recognized: {election_type}')
+                self.logger.error(
+                    f'Election type not recognized: {election_type}')
         return vote_rows
 
     def sort_projects(self, e_number, save_points):
