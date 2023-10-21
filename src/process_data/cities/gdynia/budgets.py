@@ -4,7 +4,7 @@
 
 budgets = {
     2021: {
-        "OGOLNOMIEJSKI": [2000517],
+        "CITYWIDE": [2000517],
         "Babie Doły": [219835, 24426],
         "Chwarzno-Wiczlino": [952142, 105794],
         "Chylonia": [507072, 56341],
@@ -28,7 +28,7 @@ budgets = {
         "Wzgórze Św. Maksymiliana": [309553, 34395],
     },
     2020: {
-        "OGOLNOMIEJSKI": [1500000],
+        "CITYWIDE": [1500000],
         "Babie Doły": [219780, 24420],
         "Chwarzno-Wiczlino": [691650, 76850],
         "Chylonia": [511110, 56790],

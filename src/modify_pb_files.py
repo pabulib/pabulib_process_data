@@ -12,6 +12,7 @@ saves new files to output/cleaned dir.
 import csv
 import glob
 import os
+from copy import deepcopy
 from dataclasses import dataclass
 
 import helpers.utilities as utils
@@ -37,6 +38,7 @@ class ModifyPBFiles:
         utils.human_sorting(files)
         for idx, pb_file in enumerate(files):
             self.filename = os.path.basename(pb_file)
+            logger.info(f'Processing file: {self.filename}')
             (
                 self.meta,
                 self.projects,
@@ -57,15 +59,25 @@ class ModifyPBFiles:
         self.meta["num_projects"] = len(self.projects)
 
     def update_projects_votes(self):
+        remove_projects_with_no_votes = True
         self.counted_votes = utils.count_votes_per_project(self.votes)
-        for project_id, votes in self.counted_votes.items():
-            try:
-                self.projects[project_id]["votes"] = votes
-            except KeyError:
-                logger.critical(
-                    'There is a project with no votes! Removing it!'
-                    f'File: {self.filename}, project ID: {project_id}'
-                )
+        updated_projects = self.projects.copy()
+        for project_id in self.projects:
+            counted_votes = self.counted_votes.get(project_id)
+            if not counted_votes:
+                if remove_projects_with_no_votes:
+                    logger.critical(
+                        'There is a project with no votes! Removing it! '
+                        f'File: {self.filename}, project ID: {project_id}'
+                    )
+                    updated_projects.pop(project_id)
+                else:
+                    # KEEP PROJECTS WITH NO VOTES
+                    updated_projects[project_id]["votes"] = 0
+            else:
+                updated_projects[project_id]["votes"] = counted_votes
+
+        self.projects = updated_projects.copy()
 
     def update_projects_scores(self):
         if self.check_scores:
@@ -108,17 +120,33 @@ class ModifyPBFiles:
 
     def do_some_modifications(self, idx):
         self.modified = True  # set it to True if you want to save new file
-        self.remove_projects_with_no_cost()
-        self.remove_projects_with_no_votes()
-        # self.update_number_of_votes()
-        self.update_number_of_projects()
+        # self.remove_projects_with_no_cost()
+        # self.remove_projects_with_no_votes()
         # self.update_projects_votes()
+        # self.update_number_of_votes()
+        # self.update_number_of_projects()
         # self.update_projects_scores()
         # self.replace_commas_in_floats()
         # self.replace_semicolons_in_votes()
         # self.add_selected_to_projects_section(idx)
         # self.calculate_selected_from_budget()
+        # self.change_voters_sex()
         self.projects = utils.sort_projects_by_results(self.projects)
+        self.change_year_into_dates()
+
+    def change_year_into_dates(self):
+        year = self.meta.pop('year')
+        self.meta["date_begin"] = year
+        self.meta["date_end"] = year
+
+    def change_voters_sex(self):
+        new_votes = {}
+        for voter, voter_dict in self.votes.items():
+            new_voter_dict = deepcopy(voter_dict)
+            if voter_dict["sex"] == "K":
+                new_voter_dict["sex"] = "F"
+            new_votes[voter] = new_voter_dict
+        self.votes = new_votes
 
     def remove_projects_with_no_votes(self):
         self.projects = {project_id: project_dict for project_id,

@@ -1,7 +1,7 @@
 import collections
 import os
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import helpers.utilities as utils
 
@@ -21,6 +21,7 @@ class GetVotesExcel(BaseConfig):
     district_name_mapping: bool = False
     subdistricts: bool = False
     only_valid_votes: bool = False
+    csv_settings: dict = field(default_factory=lambda: {})
 
     def __post_init__(self):
         self.initialize_mapping_dicts()
@@ -46,6 +47,8 @@ class GetVotesExcel(BaseConfig):
     def handle_csv(self, path_to_excel):
         if self.excel_filename[-4:] == ".csv":
             self.logger.info("Converting CSV into Excel file...")
+            delimiter = self.csv_settings.get("delimiter", ',')
+            encoding = self.csv_settings.get("encoding", 'utf-8')
             path, _, xlsx = path_to_excel.split(".")
             path_to_csv = f"{path}.csv"
             path_to_excel = f"{path}.{xlsx}"
@@ -56,17 +59,18 @@ class GetVotesExcel(BaseConfig):
                      please remove xlsx."""
                 )
             else:
-                utils.convert_csv_to_xl(path_to_csv)
+                utils.convert_csv_to_xl(
+                    path_to_csv, delimiter=delimiter, encoding=encoding)
                 self.logger.info("Converting finished.")
         return path_to_excel
 
     def open_excel_sheet(self):
         if self.data_dir:
-            path_to_excel = utils.get_path_to_excel_file_by_unit(
+            path_to_excel = utils.get_path_to_file_by_unit(
                 self.excel_filename, self.unit, self.data_dir
             )
         else:
-            path_to_excel = utils.get_path_to_excel_file_by_unit(
+            path_to_excel = utils.get_path_to_file_by_unit(
                 self.excel_filename, self.unit
             )
         path_to_excel = self.handle_csv(path_to_excel)
@@ -77,9 +81,10 @@ class GetVotesExcel(BaseConfig):
         col_names_indexes = utils.get_col_names_indexes(self.sheet)
         # REQUIRED COLUMNS
         self.col = {
-            "voter_id": col_names_indexes[self.columns_mapping["voter_id"]],
-            "district": col_names_indexes[self.columns_mapping["district"]],
+            "voter_id": col_names_indexes[self.columns_mapping["voter_id"]]
         }
+        if self.columns_mapping.get("district"):
+            self.col["district"] = col_names_indexes[self.columns_mapping["district"]]
         if not self.only_valid_votes:
             # there are sheets with valid votes only
             self.col["if_valid"] = col_names_indexes[self.columns_mapping["if_valid"]]
@@ -162,16 +167,33 @@ class GetVotesExcel(BaseConfig):
             return "LL"
         return district
 
+    def handle_lublin_district(self, vote, district):
+        neighborhood = district
+        vote = vote.replace(' ', '')
+        if vote[0].lower() == "o":
+            district = 'CITYWIDE'
+        elif vote[0].lower() == "d":
+            district = 'LOCAL'
+        else:
+            self.logger.error('Lublin, vote other than D or O!')
+        return district, vote, neighborhood
+
     def handle_multiple_rows_no_points(self, idx, row, voter_id):
         col_name = "subdistrict" if self.col.get("subdistrict") else "district"
         district = row[self.col[col_name]]
 
         vote = row[self.vote_field]
 
+        neighborhood = None
+
         # EXCEPTIONS / ERRORS IN FILES
 
         if self.instance == 2020 and self.unit == "Łódź" and vote == "P135KR":
             district = "BD"
+
+        if self.unit == "Lublin":
+            district, vote, neighborhood = self.handle_lublin_district(
+                vote, district)
 
         if self.district_name_mapping:
             if self.unit == "Poznań":
@@ -196,7 +218,7 @@ class GetVotesExcel(BaseConfig):
         except IndexError:
             next_voter = None
         if str(voter_id) != str(next_voter):
-            voter_item = self.create_voter_item(row, voter_id)
+            voter_item = self.create_voter_item(row, voter_id, neighborhood)
             for district, votes in self.voter_votes.items():
                 voter_item_cp = deepcopy(voter_item)
                 voter_item_cp.vote = ",".join(votes)
@@ -225,9 +247,7 @@ class GetVotesExcel(BaseConfig):
             item.add_voting_method(row[self.col["voting_method"]])
         return item
 
-    def create_voter_item(self, row, voter_id):
-        item = VoterItem(voter_id)
-
+    def get_voter_district(self, row):
         if self.col.get("subdistrict"):
             district = row[self.col["subdistrict"]]
         else:
@@ -235,10 +255,20 @@ class GetVotesExcel(BaseConfig):
         if self.district_name_mapping:
             if self.unit == "Poznań":
                 district = self.handle_poznan_district(district)
-            if self.unit == "Łódź" and self.instance >= 2022:
+            elif self.unit == "Łódź" and self.instance >= 2022:
                 district = self.handle_lodz_district(district)
             district = self.district_district_name_mapping[district]
-        item.add_neighborhood(district)
+        if district not in ('', '---'):
+            return district
+
+    def create_voter_item(self, row, voter_id, neighborhood=None):
+        item = VoterItem(voter_id)
+        if self.col.get("district"):
+            item.district = self.get_voter_district(row)
+            if neighborhood:
+                item.add_neighborhood(neighborhood)
+            else:
+                item.add_neighborhood(item.district)
         item = self.add_optional_columns_to_voter(item, row)
         return item
 
@@ -251,22 +281,25 @@ class GetVotesExcel(BaseConfig):
         unit_votes = row[self.col["unit_votes"]]
         if unit_votes and unit_votes not in utils.wrong_votes:
             voter_item.vote = self.clean_votes_field(unit_votes)
-            self.votes_data_per_district["OGOLNOMIEJSKI"].append(
+            # self.votes_data_per_district["OGOLNOMIEJSKI"].append(
+            #     vars(voter_item))
+            self.votes_data_per_district["CITYWIDE"].append(
                 vars(voter_item))
         for subdistrict, column_index in self.district_columns.items():
             district_votes = row[column_index]
+            neighborhood = voter_item.neighborhood or subdistrict
             if district_votes and district_votes not in utils.wrong_votes:
                 voter_item_cp = deepcopy(voter_item)
                 voter_item_cp.vote = self.clean_votes_field(district_votes)
                 if self.subdistricts:
-                    if not self.votes_data_per_district.get(voter_item.neighborhood):
+                    if not self.votes_data_per_district.get(neighborhood):
                         self.votes_data_per_district[
-                            voter_item.neighborhood
+                            neighborhood
                         ] = collections.defaultdict(list)
-                    self.votes_data_per_district[voter_item.neighborhood][
+                    self.votes_data_per_district[neighborhood][
                         subdistrict
                     ].append(vars(voter_item_cp))
                 else:
-                    self.votes_data_per_district[voter_item.neighborhood].append(
+                    self.votes_data_per_district[neighborhood].append(
                         vars(voter_item_cp)
                     )

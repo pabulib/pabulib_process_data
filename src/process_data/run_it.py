@@ -8,7 +8,7 @@ from process_data.get_votes_excel import GetVotesExcel
 unusual_units = ["mechanical_turk"]
 
 
-def run_it(year, unit, scrape_data=False, get_pdf_data=False):
+def run_it(year, unit, scrape_data=False, preprocessing=False):
 
     unit_package = utils.remove_accents_from_str(unit)
     packages = f'process_data.cities.{unit_package.lower()}'
@@ -17,6 +17,13 @@ def run_it(year, unit, scrape_data=False, get_pdf_data=False):
         f'{packages}.settings', fromlist=["all_data"]), "all_data")
 
     data = all_data[year]
+
+    if preprocessing:
+        Preprocess = getattr(__import__(f'{packages}.preprocess', fromlist=[
+            "Preprocess"]), "Preprocess")
+        pp = Preprocess(**data["base_data"], **data["get_votes"],
+                        **{"preprocess": data.get("preprocess")})
+        pp.start()
 
     if unit in unusual_units:
         ProcessData = getattr(__import__(f'{packages}.process_data', fromlist=[
@@ -48,7 +55,7 @@ def run_it(year, unit, scrape_data=False, get_pdf_data=False):
 
     # GET VOTES FROM EXCEL FILE
     # logger.info('Getting votes from excel file...')
-    gv = GetVotesExcel(**data["base_data"], **data["excel_data"])
+    gv = GetVotesExcel(**data["base_data"], **data["get_votes"])
     gv.get_votes()
 
     # CREATE PB FILES AND SAVE PROJECTS SECTIONS

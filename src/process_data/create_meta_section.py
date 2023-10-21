@@ -44,8 +44,8 @@ class CreateMetaSections(BaseConfig):
             if subdistrict == "large":
                 return self.budgets[district][0]
             elif subdistrict == "small":
-                return self.budgets[district][0]
-            elif subdistrict.lower() == "ogolnomiejski":
+                return self.budgets[district][1]
+            elif subdistrict.lower() in ("citywide", "ogolnomiejski"):
                 return self.budgets[district][0]
             else:
                 self.logger.critical(
@@ -68,7 +68,7 @@ class CreateMetaSections(BaseConfig):
             self.handle_file(district, district_upper, budget)
 
     def handle_file(self, district, district_upper, budget, subdistrict=None):
-        if district_upper.startswith("OGOLNO"):
+        if district_upper.startswith(("OGOLNO", "CITYWIDE")):
             path_to_file = utils.get_path_to_file(self.unit_file_name)
             district = "unit"
         else:
@@ -98,7 +98,9 @@ class CreateMetaSections(BaseConfig):
                 subdistrict = district
             if self.subdistricts_mapping:
                 district = self.subdistricts_mapping[district]
-            if self.subdistricts_mapping or subdistrict:
+            if temp_meta.get('district') and temp_meta['district'].get('description'):
+                description = temp_meta['district'].pop('description')
+            elif self.subdistricts_mapping or subdistrict:
                 description = (
                     f"Local PB in {self.unit.title()}, "
                     f"{district} | {subdistrict}"
