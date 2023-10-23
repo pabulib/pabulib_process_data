@@ -389,10 +389,8 @@ def create_web_driver(path_to_chromedriver="./chromedriver"):
 
 def load_pb_file(pb_file, encoding="utf-8-sig"):
     with open(pb_file, "r", newline="", encoding=encoding) as csvfile:
-        scores_in_votes = False
-        meta = {}
-        projects = {}
-        votes = {}
+        votes_in_projects, scores_in_projects = False, False
+        meta, projects, votes = {}, {}, {}
         section = ""
         header = []
         reader = csv.reader(csvfile, delimiter=";")
@@ -404,8 +402,10 @@ def load_pb_file(pb_file, encoding="utf-8-sig"):
                 elif section == "meta":
                     meta[row[0]] = row[1].strip()
                 elif section == "projects":
+                    if 'votes' in header:
+                        votes_in_projects = True
                     if "score" in header:
-                        scores_in_votes = True
+                        scores_in_projects = True
                     projects[row[0]] = {}
                     for it, key in enumerate(header[1:]):
                         projects[row[0]][key.strip()] = row[it + 1].strip()
@@ -415,7 +415,7 @@ def load_pb_file(pb_file, encoding="utf-8-sig"):
                     votes[row[0]] = {}
                     for it, key in enumerate(header[1:]):
                         votes[row[0]][key.strip()] = row[it + 1].strip()
-    return meta, projects, votes, scores_in_votes
+    return meta, projects, votes, votes_in_projects, scores_in_projects
 
 
 def atoi(text):

@@ -225,7 +225,8 @@ class ProcessData(BaseConfig):
         csv_file.writerow(fields)
 
     def add_projects_section(self, csv_file, points, save_votes=True):
-        fields = ["id", "name", "cost", "description", "category", "votes"]
+        fields = ["project_id", "name", "cost",
+                  "description", "category", "votes"]
         if not save_votes:
             fields.pop()
         if points:
@@ -246,11 +247,11 @@ class ProcessData(BaseConfig):
         points = [str(project) for project in votes['points']]
         points = ",".join(points)
 
-        for project_id, points in zip(votes['projects'], votes['points']):
+        for project_id, points_ in zip(votes['projects'], votes['points']):
             self.counted_votes["votes"][project_id] = self.counted_votes["votes"].get(
                 project_id, 0) + 1
-            self.counted_votes["points"][project_id] = self.counted_votes["votes"].get(
-                project_id, 0) + points
+            self.counted_votes["points"][project_id] = self.counted_votes["points"].get(
+                project_id, 0) + points_
         return projects, points
 
     def get_ordinal_votes(self, vote):
@@ -323,7 +324,6 @@ class ProcessData(BaseConfig):
         num_projects, num_votes = utils.count_projects_and_votes(path_to_file)
         temp_meta = deepcopy(self.metadata)
         description = temp_meta.pop("description")
-        budget = ''
 
         metadata = (
             "META\n"
@@ -335,12 +335,32 @@ class ProcessData(BaseConfig):
             f"num_projects;{num_projects}\n"
             f"num_votes;{num_votes}\n"
             f"vote_type;{election_type}\n"
-            f"budget;{budget}\n"
         )
         if election_type == "approval":
-            pass
+            if election.startswith('Knapsack'):
+                min_length = '1'
+                max_length = '11'
+            elif election.startswith('k_approval'):
+                min_length = '2'
+                max_length = '5'
+            elif election.startswith('Threshold'):
+                min_length = '1'
+                max_length = '14'
+
+            metadata += f"min_length;{min_length}\n"
+            metadata += f"max_length;{max_length}\n"
         elif election_type == "ordinal":
-            pass
+            if election.endswith(('_7', '_8')):
+                # 'Ranking_value_7', 'Ranking_value_8'
+                # 'Ranking_value_money_7', 'Ranking_value_money_8'
+                min_length = '20'
+                max_length = '20'
+            else:
+                min_length = '10'
+                max_length = '10'
+
+            metadata += f"min_length;{min_length}\n"
+            metadata += f"max_length;{max_length}\n"
         elif election_type == "cumulative":
             metadata += "max_sum_points;100\n"
             metadata += "min_sum_points;100\n"
@@ -363,7 +383,6 @@ class ProcessData(BaseConfig):
             if election_type == "cumulative":
                 # cumulative (points)
                 projects, points = self.get_cumulative_votes(votes)
-
                 vote_rows.append(voter_row + [projects, points])
 
             elif election_type == "ordinal":
@@ -384,16 +403,17 @@ class ProcessData(BaseConfig):
     def sort_projects(self, e_number, save_points):
         election_projects = self.election_project_mapping[int(e_number)]
         if save_points:
-            projects_dict = {self.counted_votes["points"]
-                             [project_id]: project_id for project_id in election_projects}
+            projects_list = [(self.counted_votes["points"]
+                             [project_id], project_id) for project_id in election_projects]
         else:
-            projects_dict = {self.counted_votes["votes"]
-                             [project_id]: project_id for project_id in election_projects}
-        self.projects_sorted = dict(
-            sorted(projects_dict.items(), reverse=True))
+            projects_list = [(self.counted_votes["votes"]
+                             [project_id], project_id) for project_id in election_projects]
+        self.projects_sorted = sorted(
+            projects_list, key=lambda x: x[1], reverse=True)
 
     def get_projects_rows(self, election_type, save_points):
-        for project_id in self.projects_sorted.values():
+        for project_data in self.projects_sorted:
+            project_id = project_data[1]
             name = self.all_projects[project_id]["name"]
             description = self.all_projects[project_id]["description"]
             cost = int(self.all_projects[project_id]["cost"])

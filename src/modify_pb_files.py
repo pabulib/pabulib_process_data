@@ -43,7 +43,9 @@ class ModifyPBFiles:
                 self.meta,
                 self.projects,
                 self.votes,
-                self.check_scores,
+                # TODO
+                self.check_votes,
+                self.check_scores
             ) = utils.load_pb_file(pb_file)
             self.do_some_modifications(idx)
             # IF YOU WANT TO SAVE ONLY MODIFIED FILES
@@ -61,8 +63,8 @@ class ModifyPBFiles:
     def update_projects_votes(self):
         remove_projects_with_no_votes = True
         self.counted_votes = utils.count_votes_per_project(self.votes)
-        updated_projects = self.projects.copy()
-        for project_id in self.projects:
+        project_list = [project[0] for project in self.projects.items()]
+        for project_id in project_list:
             counted_votes = self.counted_votes.get(project_id)
             if not counted_votes:
                 if remove_projects_with_no_votes:
@@ -70,14 +72,12 @@ class ModifyPBFiles:
                         'There is a project with no votes! Removing it! '
                         f'File: {self.filename}, project ID: {project_id}'
                     )
-                    updated_projects.pop(project_id)
+                    self.projects.pop(project_id)
                 else:
                     # KEEP PROJECTS WITH NO VOTES
-                    updated_projects[project_id]["votes"] = 0
+                    self.projects[project_id]["votes"] = 0
             else:
-                updated_projects[project_id]["votes"] = counted_votes
-
-        self.projects = updated_projects.copy()
+                self.projects[project_id]["votes"] = counted_votes
 
     def update_projects_scores(self):
         if self.check_scores:
@@ -122,7 +122,7 @@ class ModifyPBFiles:
         self.modified = True  # set it to True if you want to save new file
         # self.remove_projects_with_no_cost()
         # self.remove_projects_with_no_votes()
-        # self.update_projects_votes()
+        self.update_projects_votes()
         # self.update_number_of_votes()
         # self.update_number_of_projects()
         # self.update_projects_scores()

@@ -41,7 +41,6 @@ class CheckOutputFiles:
 
     def __post_init__(self):
         """Initialize class variables."""
-        self.check_scores = False
         self.path_to_all_files = self.set_path_to_files()
         self.counted_votes = defaultdict(int)
         self.counted_scores = defaultdict(int)
@@ -245,20 +244,17 @@ class CheckOutputFiles:
         self.counted_scores = utils.count_points_per_project(votes)
         for project_number, project_info in projects.items():
             counted_votes = self.counted_scores[project_number]
+
             if not int(project_info.get("score", 0) or 0) == int(counted_votes or 0):
                 self.log_different_votes(
                     project_number,
                     project_info.get("score", 0),
                     counted_votes,
-                    "score!",
+                    "score",
                 )
 
         for project_number, project_votes in self.counted_scores.items():
             if not projects.get(project_number):
-                self.log_different_votes(
-                    project_number, 0, project_votes, "score")
-
-            elif "votes" not in projects[project_number]:
                 self.log_different_votes(
                     project_number, 0, project_votes, "score")
 
@@ -329,19 +325,27 @@ class CheckOutputFiles:
 
         self.filename = os.path.basename(pb_file)
         logger.info(f"Checking file from output: {self.filename}")
-        meta, projects, votes, self.check_scores = utils.load_pb_file(pb_file)
+        (meta, projects, votes, self.check_votes, self.check_scores) =\
+            utils.load_pb_file(pb_file)
         self.check_if_commas_in_floats(meta, projects)
         self.check_budgets(meta, projects)
         self.check_number_of_votes(meta["num_votes"], votes)
         self.check_number_of_projects(meta["num_projects"], projects)
         self.check_vote_length(meta, votes)
-        self.check_optional(meta, projects, votes)
-
-    def check_optional(self, meta, projects, votes):
-        self.check_votes_in_projects_section(projects, votes)
+        self.check_votes_and_scores(projects, votes)
         self.check_greedy_winners(meta, projects)
-        if self.check_scores:
-            self.check_if_correct_scores_number(projects, votes)
+
+    def check_votes_and_scores(self, projects, votes):
+        if not any([self.check_votes, self.check_scores]):
+            logger.info("There are no votes counted in PROJECTS section!")
+            error_text = 'No votes counted in PROJECTS section'
+            self.summary[error_text] = self.summary.get(error_text, 0) + 1
+        else:
+            # TODO
+            # if self.check_votes:
+            #     self.check_if_correct_votes_number(projects, votes)
+            if self.check_scores:
+                self.check_if_correct_scores_number(projects, votes)
 
     def check_greedy_winners(self, meta, projects):
         selected_field = next(iter(projects.values())).get("selected")
@@ -350,15 +354,6 @@ class CheckOutputFiles:
         else:
             logger.info("There is no selected field!")
             error_text = 'No selected field in PROJECTS section'
-            self.summary[error_text] = self.summary.get(error_text, 0) + 1
-
-    def check_votes_in_projects_section(self, projects, votes):
-        votes_in_projects_section = next(iter(projects.values())).get("votes")
-        if votes_in_projects_section:
-            self.check_if_correct_votes_number(projects, votes)
-        else:
-            logger.info("There are no votes counted in PROJECTS section!")
-            error_text = 'No votes counted in PROJECTS section'
             self.summary[error_text] = self.summary.get(error_text, 0) + 1
 
     def print_summary(self):
@@ -383,7 +378,7 @@ class CheckOutputFiles:
     def check_if_greedy_winners(self, budget, projects):
         projects = utils.sort_projects_by_results(projects)
         results = 'votes'
-        if self.check_scores:
+        if self.check_points_in_votes:
             results = 'score'
         budget = float(budget.replace(",", "."))
         selected_projects = dict()
