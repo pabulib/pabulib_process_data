@@ -1,10 +1,8 @@
 # https://gazetawroclawska.pl/wyniki-glosowania-wbo-2022-te-projekty-zostana-zrealizowane-lista/ar/c1-16957413
 
 budgets = {
-    2022: {
-        "citywide": 20000000,
-        "local": 9700000
-    },
+    2023: {"citywide": 21000000, "local": 10000000},
+    2022: {"citywide": 20000000, "local": 9700000},
 }
 
 

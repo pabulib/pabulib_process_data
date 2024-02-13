@@ -8,14 +8,19 @@ It loads pb file (from output directory), makes some changes and (if wanted)
 saves new files to output/cleaned dir.
 """
 
-
 import csv
 import glob
+import math
 import os
 from copy import deepcopy
 from dataclasses import dataclass
 
 import helpers.utilities as utils
+from helpers.settings import (
+    meta_fields_order,
+    projects_fields_order,
+    votes_fields_order,
+)
 
 logger = utils.create_logger()
 
@@ -24,28 +29,28 @@ logger = utils.create_logger()
 class ModifyPBFiles:
     input_files_path: str = None
     output_files_path: str = None
+    counter = []
 
     def __post_init__(self):
         pabulib_dir = os.path.join(os.getcwd(), "src")
         if not self.input_files_path:
             self.input_files_path = os.path.join(pabulib_dir, "output", "*.pb")
         if not self.output_files_path:
-            self.output_files_path = os.path.join(
-                pabulib_dir, "output", "cleaned")
+            self.output_files_path = os.path.join(pabulib_dir, "output", "cleaned")
 
     def iterate_through_pb_files(self):
         files = glob.glob(self.input_files_path)
         utils.human_sorting(files)
         for idx, pb_file in enumerate(files):
             self.filename = os.path.basename(pb_file)
-            logger.info(f'Processing file: {self.filename}')
+            logger.info(f"Processing file: {self.filename}")
             (
                 self.meta,
                 self.projects,
                 self.votes,
                 # TODO
                 self.check_votes,
-                self.check_scores
+                self.check_scores,
             ) = utils.load_pb_file(pb_file)
             self.do_some_modifications(idx)
             # IF YOU WANT TO SAVE ONLY MODIFIED FILES
@@ -53,6 +58,9 @@ class ModifyPBFiles:
                 self.save_to_file()
             # self.save_to_file()
             self.modified = False
+        print("hakuna!", len(self.counter))
+        for desc, instance in self.counter:
+            print(desc, instance)
 
     def update_number_of_votes(self):
         self.meta["num_votes"] = len(self.votes)
@@ -69,8 +77,8 @@ class ModifyPBFiles:
             if not counted_votes:
                 if remove_projects_with_no_votes:
                     logger.critical(
-                        'There is a project with no votes! Removing it! '
-                        f'File: {self.filename}, project ID: {project_id}'
+                        "There is a project with no votes! Removing it! "
+                        f"File: {self.filename}, project ID: {project_id}"
                     )
                     self.projects.pop(project_id)
                 else:
@@ -119,10 +127,10 @@ class ModifyPBFiles:
         )
 
     def do_some_modifications(self, idx):
-        self.modified = True  # set it to True if you want to save new file
+        self.modified = False  # set it to True if you want to save new file
         # self.remove_projects_with_no_cost()
         # self.remove_projects_with_no_votes()
-        self.update_projects_votes()
+        # self.update_projects_votes()
         # self.update_number_of_votes()
         # self.update_number_of_projects()
         # self.update_projects_scores()
@@ -132,10 +140,93 @@ class ModifyPBFiles:
         # self.calculate_selected_from_budget()
         # self.change_voters_sex()
         self.projects = utils.sort_projects_by_results(self.projects)
-        self.change_year_into_dates()
+        # self.change_year_into_dates()
+        # self.add_fully_funded()
+        # self.add_currency()
+        # self.add_description()
+        self.change_type_into_choose_1()
+
+    def change_type_into_choose_1(self):
+        if self.meta["vote_type"] == "approval":
+            if self.meta.get("max_length"):
+                if int(self.meta["max_length"]) == 1:
+                    self.counter.append(
+                        [self.meta["description"], self.meta["instance"]]
+                    )
+                    self.meta["vote_type"] = "choose-1"
+                    self.modified = True
+
+    def update_meta(self):
+        if self.meta.get("comments"):
+            comment = self.meta.pop("comments")
+            self.meta["comment"] = comment
+
+    def sort_meta_fields(self):
+        # TODO nie ogarnie additional keys, tych co nie ma w mappingu
+        known_fileds = {
+            key: self.meta[key] for key in meta_fields_order if key in self.meta
+        }
+        additional_fields = {
+            key: self.meta[key] for key in self.meta if key not in meta_fields_order
+        }
+
+        self.meta = known_fileds | additional_fields
+
+    def get_all_fields(self):
+        meta_fileds = self.meta.keys()
+        projects_fileds = next(iter(self.projects.items()))[1].keys()
+        votes_fields = next(iter(self.votes.items()))[1].keys()
+        self.all_meta_fields.update(meta_fileds)
+        self.all_projects_fields.update(projects_fileds)
+        self.all_votes_fields.update(votes_fields)
+
+    def add_description(self):
+        if not self.meta.get("description"):
+            district = self.meta["district"]
+            subunit = self.meta["subunit"]
+            unit = self.meta["unit"]
+            if district == subunit:
+                description = f"District PB in Warsaw, {district}"
+            else:
+                description = f"Local PB in Warsaw, {district} | {subunit}"
+            # if district == subunit:
+            #     description = f'District PB in {unit}, {district}'
+            # else:
+            #     description = f'Local PB in {unit}, {district} | {subunit}'
+            self.meta["description"] = description
+            self.modified = True
+
+    def add_currency(self):
+        country = self.meta["country"]
+        if country == "Poland":
+            currency = "PLN"
+        elif country in ("Netherlands", "France"):
+            currency = "EUR"
+        elif country == "Artificial":
+            currency = "USD"
+        else:
+            raise RuntimeError(f"I dont know this country: {country}")
+        self.meta["currency"] = currency
+
+    def add_fully_funded(self):
+        budget_spent = 0
+        all_projects_cost = 0
+        budget_available = math.floor(float(self.meta["budget"].replace(",", ".")))
+        all_projects = list()
+        for _, project_data in self.projects.items():
+            selected_field = project_data.get("selected")
+            project_cost = int(project_data["cost"])
+            all_projects_cost += project_cost
+            if selected_field:
+                if int(selected_field) == 1:
+                    all_projects.append([_, project_cost, project_data["name"]])
+                    budget_spent += project_cost
+        if budget_available > all_projects_cost:
+            self.meta["fully_funded"] = 1
+            logger.info(f"Added fully funded tag to {self.filename}")
 
     def change_year_into_dates(self):
-        year = self.meta.pop('year')
+        year = self.meta.pop("year")
         self.meta["date_begin"] = year
         self.meta["date_end"] = year
 
@@ -149,12 +240,18 @@ class ModifyPBFiles:
         self.votes = new_votes
 
     def remove_projects_with_no_votes(self):
-        self.projects = {project_id: project_dict for project_id,
-                         project_dict in self.projects.items() if int(project_dict['votes'] or 0) != 0}
+        self.projects = {
+            project_id: project_dict
+            for project_id, project_dict in self.projects.items()
+            if int(project_dict["votes"] or 0) != 0
+        }
 
     def remove_projects_with_no_cost(self):
-        self.projects = {project_id: project_dict for project_id,
-                         project_dict in self.projects.items() if int(project_dict['cost'] or 0) != 0}
+        self.projects = {
+            project_id: project_dict
+            for project_id, project_dict in self.projects.items()
+            if int(project_dict["cost"] or 0) != 0
+        }
 
     def calculate_selected_from_budget(self):
         # be sure projects are sorted by score!
@@ -193,26 +290,65 @@ class ModifyPBFiles:
 
     def write_votes_section(self, writer):
         writer.writerow(["VOTES"])
-        votes_headers = ["voter_id"] + \
-            list(self.votes[next(iter(self.votes))].keys())
-        writer.writerow(votes_headers)
+        save_headers = True
         for voter_id, vote in self.votes.items():
-            writer.writerow([voter_id] + list(vote.values()))
+            sorted_fields = self.sort_votes_fields(vote)
+            if save_headers:
+                votes_headers = list(sorted_fields.keys())
+                # if 'categories' in votes_headers:
+                #     votes_headers = list(map(lambda x: x.replace(
+                #         'categories', 'category'), votes_headers))
+                writer.writerow(["voter_id"] + votes_headers)
+                save_headers = False
+            writer.writerow([voter_id] + list(sorted_fields.values()))
 
     def write_meta_section(self, writer):
+        self.update_meta()
+        self.sort_meta_fields()
+
         writer.writerow(["META"])
         writer.writerow(["key", "value"])
+
         for key, value in self.meta.items():
             writer.writerow([key, value])
 
+    def sort_projects_fields(self, project_info):
+        known_fields = {
+            key: project_info[key]
+            for key in projects_fields_order
+            if key in project_info
+        }
+        additional_fields = {
+            key: project_info[key]
+            for key in project_info
+            if key not in projects_fields_order
+        }
+        return known_fields | additional_fields
+
+    def sort_votes_fields(self, vote):
+        known_fields = {key: vote[key] for key in votes_fields_order if key in vote}
+        additional_fields = {
+            key: vote[key] for key in vote if key not in votes_fields_order
+        }
+        return known_fields | additional_fields
+
     def write_projects_section(self, writer):
         writer.writerow(["PROJECTS"])
-        projects_headers = ["project_id"] + list(
-            self.projects[next(iter(self.projects))].keys()
-        )
-        writer.writerow(projects_headers)
+        save_headers = True
         for project_id, project_info in self.projects.items():
-            writer.writerow([project_id] + list(project_info.values()))
+            sorted_fields = self.sort_projects_fields(project_info)
+            if save_headers:
+                project_headers = list(sorted_fields.keys())
+                if "categories" in project_headers:
+                    project_headers = list(
+                        map(
+                            lambda x: x.replace("categories", "category"),
+                            project_headers,
+                        )
+                    )
+                writer.writerow(["project_id"] + project_headers)
+                save_headers = False
+            writer.writerow([project_id] + list(sorted_fields.values()))
 
     def save_to_file(self):
         pb_file = os.path.join(self.output_files_path, self.filename)

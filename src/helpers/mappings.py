@@ -1,11 +1,9 @@
-voting_method_mapping = {
-    "elektronicznie": "internet",
-    "papierowo": "paper"
-}
+voting_method_mapping = {"elektronicznie": "internet", "papierowo": "paper"}
 
 selected_mapping = {
     "Wybrany w głosowaniu": 1,
-    "Niewybrany w głosowaniu": 0
+    "Niewybrany w głosowaniu": 0,
+    # "Oceniony negatywnie": 0,
 }
 
 category_mapping = {
@@ -14,11 +12,17 @@ category_mapping = {
     "komunikacja/drogi": "public transit and roads",
     "kultura": "culture",
     "ochrona środowiska": "environmental protection",
+    "zieleń i ochrona środowiska": "environmental protection",
     "pomoc społeczna": "welfare",
     "przestrzeń publiczna": "public space",
     "sport": "sport",
+    "sport i infrastruktura sportowa": "sport",
     "zdrowie": "health",
-    "zieleń miejska": "urban greenery"
+    "zieleń miejska": "urban greenery",
+    "bezpieczeństwo": "security",
+    "infrastruktura": "infrastructure",
+    "społeczeństwo": "society",
+    "infrastruktura rowerowa": "bicycle infrastructure",
 }
 
 target_mapping = {
@@ -33,17 +37,16 @@ target_mapping = {
 }
 
 wroclaw_mapping = {
-    'drogowe': "roads",
-    'nieinwestycyjne': "non-investment",
-    'inne': "other",
-    'podwórka': "garden squares",
-    'zieleń/rekreacja': "greenery/recreation",
-    'place zabaw': "playgrounds",
-    'inwestycyjny': "investment",
-    'piesze/rowerowe': "walking/cycling infrastructure",
-    'rewitalizacja': "redevelopment",
-    'sport': "sport",
-    'komunikacja zbiorowa': "public transit",
-    "edukacja": "education"
-
+    "drogowe": "roads",
+    "nieinwestycyjne": "non-investment",
+    "inne": "other",
+    "podwórka": "garden squares",
+    "zieleń/rekreacja": "greenery/recreation",
+    "place zabaw": "playgrounds",
+    "inwestycyjny": "investment",
+    "piesze/rowerowe": "walking/cycling infrastructure",
+    "rewitalizacja": "redevelopment",
+    "sport": "sport",
+    "komunikacja zbiorowa": "public transit",
+    "edukacja": "education",
 }

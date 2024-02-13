@@ -12,9 +12,7 @@ all_data = {
         },
         "get_votes": {
             "excel_filename": "Lublin2020.csv",
-            "csv_settings": {
-                "encoding": "ANSI"
-            },
+            "csv_settings": {"encoding": "ANSI"},
             "columns_mapping": {
                 "voter_id": "ID głosującego",
                 "sex": "Płeć słownie",
@@ -45,11 +43,9 @@ all_data = {
             "min_length": "1",
             "max_length": "2",
             "edition": "7",
-            "language": "polish",
             "unit": {},
-            "district": {
-                "description": "PB in Lublin, projects of local significance"
-            },
+            "district": {"description": "PB in Lublin, projects of local significance"},
+            "currency": "PLN",
         },
     },
 }

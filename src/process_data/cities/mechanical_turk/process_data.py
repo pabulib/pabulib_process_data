@@ -328,10 +328,10 @@ class ProcessData(BaseConfig):
         metadata = (
             "META\n"
             "key;value\n"
-            f"description;{description}\n"
+            f"description;{description} | {election}\n"
             f"country;{self.country}\n"
             f"unit;{self.unit}\n"
-            f"instance;{self.instance}\n"
+            f"instance;{election}\n"
             f"num_projects;{num_projects}\n"
             f"num_votes;{num_votes}\n"
             f"vote_type;{election_type}\n"
@@ -339,7 +339,10 @@ class ProcessData(BaseConfig):
         if election_type == "approval":
             if election.startswith('Knapsack'):
                 min_length = '1'
-                max_length = '11'
+                if election.endswith(('_3', '_6')):
+                    max_length = '10'
+                elif election.endswith(('_7', '_8')):
+                    max_length = '20'
             elif election.startswith('k_approval'):
                 min_length = '2'
                 max_length = '5'
@@ -364,11 +367,7 @@ class ProcessData(BaseConfig):
         elif election_type == "cumulative":
             metadata += "max_sum_points;100\n"
             metadata += "min_sum_points;100\n"
-            # max_sum_cost ?
 
-            # max_sum_cost ??
-            # "min_length": "1",
-            # "max_length": "3",
         for key, value in temp_meta.items():
             metadata += f"{key};{value}\n"
 

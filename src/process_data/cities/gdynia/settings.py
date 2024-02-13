@@ -39,7 +39,6 @@ all_data = {
             },
             "rows_iterator_handler": "one_voter_one_row_no_points",
             "valid_value": "",
-            "only_valid_votes": True,
         },
         "projects_data": {
             "unit_fields": ["project_id", "cost", "votes", "name", "selected"]
@@ -57,11 +56,11 @@ all_data = {
             "min_length": "1",
             "max_length": "3",
             "edition": "7",
-            "language": "polish",
             "unit": {},
             "district": {},
             "subdistricts": True,
-            "subdistrict_sizes": True
+            "subdistrict_sizes": True,
+            "currency": "PLN",
         },
     },
     2020: {
@@ -130,11 +129,11 @@ all_data = {
             "min_length": "1",
             "max_length": "3",
             "edition": "7",
-            "language": "polish",
             "unit": {},
             "district": {},
             "subdistricts": True,
-            "subdistrict_sizes": True
+            "subdistrict_sizes": True,
+            "currency": "PLN",
         },
     },
 }

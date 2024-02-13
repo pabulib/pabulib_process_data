@@ -110,7 +110,8 @@ def remove_whitespaces(text):
 
 
 def clean_name(text):
-    name = remove_quotes(text)
+    name = text.replace("&quot;", '"')
+    name = remove_quotes(name)
     name = remove_semicolon(name)
     name = remove_whitespaces(name)
     return name.strip()
@@ -125,11 +126,9 @@ def get_path_to_excel_file(excel_filename):
 
 
 def get_path_to_file_by_unit(excel_filename, unit, extra_dir="", ext="xlsx"):
-    path_to_excel_file = settings.get_path_to_excel_files(
-        unit, extra_dir=extra_dir)
+    path_to_excel_file = settings.get_path_to_excel_files(unit, extra_dir=extra_dir)
     excel_filename = f"{excel_filename}.{ext}"
-    path_to_file = os.path.join(
-        path_to_excel_file, excel_filename).replace("\\", "/")
+    path_to_file = os.path.join(path_to_excel_file, excel_filename).replace("\\", "/")
     return path_to_file
 
 
@@ -175,8 +174,7 @@ def get_cell_value_by_column(sheet, row, col_name):
 
 
 def create_or_append_to_file(file_name, first_line):
-    file_path = os.path.join(settings.output_path,
-                             file_name).replace("\\", "/")
+    file_path = os.path.join(settings.output_path, file_name).replace("\\", "/")
     file_ = open(file_path, "a+", encoding="utf-8")
     file_.write(first_line)
     return file_
@@ -195,8 +193,7 @@ def create_unit_file(unit_file_name):
 
 def get_file_path(unit_file_name, district_upper):
     file_name = f"{unit_file_name}_{district_upper}.pb"
-    file_path = os.path.join(settings.output_path,
-                             file_name).replace("\\", "/")
+    file_path = os.path.join(settings.output_path, file_name).replace("\\", "/")
     return file_path
 
 
@@ -256,8 +253,7 @@ def create_project_selected_mapping(file_name):
 
 
 def check_if_json_files_in_output(country, unit, year, logger):
-    output_json_files = settings.output_path.replace(
-        "\\", "/") + "/jsons/*.json"
+    output_json_files = settings.output_path.replace("\\", "/") + "/jsons/*.json"
     names = [os.path.basename(x) for x in glob.glob(output_json_files)]
     file_beginning = f"{country}_{unit}_{str(year)}"
     for json_file in names:
@@ -389,7 +385,6 @@ def create_web_driver(path_to_chromedriver="./chromedriver"):
 
 def load_pb_file(pb_file, encoding="utf-8-sig"):
     with open(pb_file, "r", newline="", encoding=encoding) as csvfile:
-        votes_in_projects, scores_in_projects = False, False
         meta, projects, votes = {}, {}, {}
         section = ""
         header = []
@@ -402,10 +397,8 @@ def load_pb_file(pb_file, encoding="utf-8-sig"):
                 elif section == "meta":
                     meta[row[0]] = row[1].strip()
                 elif section == "projects":
-                    if 'votes' in header:
-                        votes_in_projects = True
-                    if "score" in header:
-                        scores_in_projects = True
+                    votes_in_projects = True if "votes" in header else False
+                    scores_in_projects = True if "score" in header else False
                     projects[row[0]] = {}
                     for it, key in enumerate(header[1:]):
                         projects[row[0]][key.strip()] = row[it + 1].strip()
@@ -495,8 +488,7 @@ def convert_csv_to_xl(path_to_csv, delimiter=";", excel_name=None, encoding="utf
 def sort_projects_data_per_dictrict(projects_data, subdistricts=False):
     # if subdistricts, will work slightly different
     if subdistricts:
-        first_project_dict = next(
-            iter(next(iter(projects_data.values())).values()))[0]
+        first_project_dict = next(iter(next(iter(projects_data.values())).values()))[0]
     else:
         first_project_dict = next(iter(projects_data.values()))[0]
     if "score" in first_project_dict:
@@ -514,8 +506,7 @@ def sort_projects_data_per_dictrict(projects_data, subdistricts=False):
             for district, subdistrict in projects_data.items()
         }
     return {
-        district: sorted(
-            projects_list, key=lambda d: d[score_field], reverse=True)
+        district: sorted(projects_list, key=lambda d: d[score_field], reverse=True)
         for district, projects_list in projects_data.items()
     }
 
@@ -569,7 +560,7 @@ def largest_remainder_method(numbers):
 
 
 def get_str_with_sep_from(number):
-    return f'{number:,d}'.replace(',', ' ')
+    return f"{number:,d}".replace(",", " ")
 
 
 def sort_projects_by_results(projects):

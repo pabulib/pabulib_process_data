@@ -1,0 +1,146 @@
+import collections
+import itertools
+import json
+import re
+from dataclasses import dataclass
+
+import helpers.utilities as utils
+from helpers.mappings import category_mapping, target_mapping
+from process_data.base_config import BaseConfig
+from process_data.models import ProjectItem
+
+
+@dataclass
+class GetProjects(BaseConfig):
+    excel_filename: str
+    columns_mapping: dict
+    data_dir: str = None
+
+    def __post_init__(self):
+        self.selected_projects = False
+        self.initialize_mapping_dicts()
+        self.logger = utils.create_logger()
+        self.initialize_mapping_dicts()
+        return super().__post_init__()
+
+    def handle_columns_indexes(self):
+        self.col_names_indexes = utils.get_col_names_indexes(self.sheet)
+        # REQUIRED COLUMNS
+        self.col = {
+            "project_id": self.col_names_indexes[self.columns_mapping["project_id"]],
+            "name": self.col_names_indexes[self.columns_mapping["name"]],
+            "cost": self.col_names_indexes[self.columns_mapping["cost"]],
+            "votes": self.col_names_indexes[self.columns_mapping["votes"]],
+            # "selected": self.col_names_indexes[self.columns_mapping["selected"]],
+        }
+        # OPTIONAL COLUMNS
+        for col, value in self.columns_mapping.items():
+            if (col not in self.col) and (not isinstance(value, dict)):
+                self.col[col] = self.col_names_indexes[value]
+
+    def prepare_excel_sheet(self):
+        path_to_excel = utils.get_path_to_file_by_unit(
+            self.excel_filename, self.unit, extra_dir=self.data_dir
+        )
+        self.sheet = utils.open_excel_workbook(path_to_excel)
+
+    def map_categories(self, category_pl):
+        category_pl = category_pl.lower()
+        try:
+            category = category_mapping[category_pl]
+            return category
+        except KeyError:
+            raise RuntimeError(f"Cannot translate category: {category_pl}")
+
+    def iterate_through_projects(self):
+        for col_idx in range(1, self.sheet.nrows):
+            row_values = self.sheet.row_values(col_idx)
+            project_id = row_values[self.col["project_id"]]
+            votes = row_values[self.col["votes"]]
+            if project_id == "" or votes == "":
+                # Project not allowed to vote
+                continue
+            item = ProjectItem()
+            item.add_project_id(project_id)
+
+            if int(votes) == 0:
+                # check it and pass or continue
+                # raise RuntimeError(f"Project: {item.project_id} has 0 votes!")
+                continue
+
+            name = row_values[self.col["name"]]
+            item.add_name(name)
+
+            item.add_votes(votes)
+
+            if self.col.get("selected"):
+                selected = row_values[self.col["selected"]]
+                item.add_selected(selected)
+
+            district = row_values[self.col["district"]]
+            if district.lower().startswith("ogólnomi"):
+                district = "CITYWIDE"
+            item.neighborhood = district
+            if self.unit == "Kraków":
+                district = self.check_if_citywide_krakow(district, project_id)
+            item.district = district
+            if self.col.get("category"):
+                category_pl = row_values[self.col["category"]]
+                item.category = self.map_categories(category_pl)
+            elif self.unit == "Warszawa":
+                item.category = self.get_mappings_warszawa("categories", row_values)
+                item.target = self.get_mappings_warszawa("targets", row_values)
+            cost = row_values[self.col["cost"]]
+            item.add_cost(cost)
+            self.add_projects_to_mappings(item, district)
+
+    def add_projects_to_mappings(self, item, district):
+        self.projects_data_per_district[district].append(vars(item))
+        self.district_projects_mapping[district].append(item.project_id)
+        self.project_district_mapping[item.project_id] = district
+
+    def initialize_mapping_dicts(self):
+        self.projects_data_per_district = collections.defaultdict(list)
+        self.district_projects_mapping = collections.defaultdict(list)
+        self.project_district_mapping = dict()
+
+    def create_district_upper_mapping(self):
+        self.district_upper_district_mapping = {"CITYWIDE": "citywide"}
+        for district in self.district_projects_mapping.keys():
+            district_upper = utils.change_district_into_name(district)
+            self.district_upper_district_mapping[district_upper] = district
+
+    def check_if_citywide_krakow(self, district, project_id):
+        project_type = project_id.split("BO.")[1]
+        if project_type.startswith("OM"):
+            district = "CITYWIDE"
+        return district
+
+    def get_mappings_warszawa(self, mapping_type, row_values):
+        if mapping_type == "categories":
+            mapping = category_mapping
+        elif mapping_type == "targets":
+            mapping = target_mapping
+
+        mappings = []
+        for cat_pl, cat_eng in mapping.items():
+            col_index = self.col_names_indexes.get(cat_pl)
+            if col_index:
+                if row_values[col_index] == "TAK":
+                    mappings.append(cat_eng)
+
+        mappings = ",".join(mappings)
+        return mappings
+
+    def start(self):
+        self.prepare_excel_sheet()
+        self.handle_columns_indexes()
+        self.iterate_through_projects()
+        self.create_district_upper_mapping()
+        objects = {
+            "district_projects_mapping": self.district_projects_mapping,
+            "projects_data_per_district": self.projects_data_per_district,
+            "project_district_mapping": self.project_district_mapping,
+            "district_upper_district_mapping": self.district_upper_district_mapping,
+        }
+        self.save_mappings_as_jsons(objects)

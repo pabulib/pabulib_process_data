@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 from typing import Union
 
-import helpers.utilities as utils
 import helpers.mappings as mapps
+import helpers.utilities as utils
 
 
 @dataclass
 class ProjectItem:
-    project_id: Union[int, str]
+    project_id: Union[int, str] = None
     cost: int = None
     category: str = None
     name: str = None
@@ -20,19 +20,37 @@ class ProjectItem:
     latitude: str = None
     longitude: str = None
 
+    def add_project_id(self, project_id):
+        try:
+            self.project_id = int(project_id)
+        except ValueError:
+            self.project_id = project_id
+
     def add_district(self, district):
         self.district = district
         self.district_upper = utils.change_district_into_name(district)
 
     def add_votes(self, votes):
-        self.votes = int(votes.replace(' ', ''))
+        try:
+            self.votes = int(votes)
+        except ValueError:
+            self.votes = int(votes.replace(" ", ""))
 
     def add_category_from_list(self, category_list):
         self.category = ",".join(category_list)
 
     def add_cost(self, cost):
         self.cost = int(
-            round(float(cost.replace("zł", "").replace(" ", "").replace(",", ".").strip())))
+            round(
+                float(
+                    str(cost)
+                    .replace("zł", "")
+                    .replace(" ", "")
+                    .replace(",", ".")
+                    .strip()
+                )
+            )
+        )
 
     def add_selected(self, status):
         self.selected = mapps.selected_mapping[status]
@@ -62,23 +80,23 @@ class VoterItem:
             try:
                 self.age = int(age)
             except ValueError:
-                print(f'Cannot handle such age! {age}')
+                print(f"Cannot handle such age! {age}")
 
     def add_sex(self, sex):
         if sex:
-            if sex.lower().startswith('m'):
-                self.sex = 'M'
-            elif sex.lower().startswith(('k', 'f')):
-                self.sex = 'F'
+            if sex.lower().startswith("m"):
+                self.sex = "M"
+            elif sex.lower().startswith(("k", "f")):
+                self.sex = "F"
 
     def add_voting_method(self, method):
-        if method.lower() in ("elektronicznie", "internet", "internetowe", "i"):
+        if method.lower() in ("elektronicznie", "internet", "internetowe", "i", "e"):
             self.voting_method = "internet"
         elif method.lower() in ("papierowo", "papier", "papierowe", "p"):
             self.voting_method = "paper"
 
     def add_neighborhood(self, district):
-        if district not in ('', None, '---'):
+        if district not in ("", None, "---"):
             self.neighborhood = district
 
 

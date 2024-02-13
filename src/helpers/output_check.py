@@ -1,4 +1,5 @@
 import glob
+import math
 import os
 from collections import defaultdict
 from dataclasses import dataclass
@@ -73,7 +74,7 @@ class CheckOutputFiles:
             f"File {counted}: {file_votes} "
             f"vs counted_{counted}: {counted_votes}"
         )
-        error = f'different values in {counted}'
+        error = f"different values in {counted}"
         self.log_and_add_to_report(error, text)
 
     def log_exceeded_budget(self, budget: float, budget_spent: float) -> None:
@@ -84,17 +85,14 @@ class CheckOutputFiles:
             f"Budget: {budget}, "
             f"cost of projects: {budget_spent}"
         )
-        error = 'budget exceeded'
+        error = "budget exceeded"
         self.log_and_add_to_report(error, text)
 
     def log_wrong_greedy_winners(self, txt: str) -> None:
         """Create log text: cost of selected projects exceeded budget."""
 
-        text = (
-            f"Wrong selected projects if Greedy Winners rule! "
-            f"{txt}"
-        )
-        error = 'rule greedy winners not followed'
+        text = f"Wrong selected projects if Greedy Winners rule! " f"{txt}"
+        error = "rule greedy winners not followed"
         self.log_and_add_to_report(error, text)
 
     def log_greedy_difference(self, greedy: dict, selected: dict) -> None:
@@ -102,18 +100,18 @@ class CheckOutputFiles:
 
         text = ""
         if selected:
-            text += 'PROJECTS SELECTED IN FILE:\n'
+            text += "PROJECTS SELECTED IN FILE:\n"
 
             for project in selected.values():
-                text += f'{str(project)}\n'
+                text += f"{str(project)}\n"
 
         if greedy:
-            text += 'PROJECTS THAT SHOULD BE SELECTED IN GREEDY WINNERS:\n'
+            text += "PROJECTS THAT SHOULD BE SELECTED IN GREEDY WINNERS:\n"
 
             for project in greedy.values():
-                text += f'{str(project)}\n'
+                text += f"{str(project)}\n"
 
-        self.log_and_add_to_report(None, text)
+        logger.critical("\n" + text + f" File: {self.filename}")
 
     def log_all_projects_funded(self, budget: float, all_projects_cost: float) -> None:
         """Create log text: cost of selected projects exceeded budget."""
@@ -137,7 +135,7 @@ class CheckOutputFiles:
             f"cost of project: {project_data['cost']}"
         )
 
-        error = 'single project exceeded whole budget'
+        error = "single project exceeded whole budget"
         self.log_and_add_to_report(error, text)
 
     def log_project_no_cost(self, project_data: dict) -> None:
@@ -149,7 +147,7 @@ class CheckOutputFiles:
             f"project: {project_data['name']} "
         )
 
-        error = 'project with no cost'
+        error = "project with no cost"
         self.log_and_add_to_report(error, text)
 
     def log_exceeded_vote_length(
@@ -164,11 +162,10 @@ class CheckOutputFiles:
             f"number of voter votes: {voter_votes}"
         )
 
-        error = 'vote length exceeded'
+        error = "vote length exceeded"
         self.log_and_add_to_report(error, text)
 
-    def log_duplicated_votes(
-            self, voter_id: str, votes: List[int]) -> None:
+    def log_duplicated_votes(self, voter_id: str, votes: List[int]) -> None:
         """Create log text: voter has duplicated votes."""
 
         text = (
@@ -178,7 +175,7 @@ class CheckOutputFiles:
             f"should be: {set(votes)}"
         )
 
-        error = 'vote with duplicated projects'
+        error = "vote with duplicated projects"
         self.log_and_add_to_report(error, text)
 
     def log_too_short_vote_length(
@@ -192,7 +189,7 @@ class CheckOutputFiles:
             f"min vote length: {min_length}, "
             f"number of voter votes: {voter_votes}"
         )
-        error = 'vote length too short'
+        error = "vote length too short"
         self.log_and_add_to_report(error, text)
 
     def log_project_with_no_votes(self, project_number):
@@ -203,7 +200,7 @@ class CheckOutputFiles:
             "It's possible, that this project was not approved for voting! "
             f"Project number: {project_number}"
         )
-        error = 'project with no votes'
+        error = "project with no votes"
         self.log_and_add_to_report(error, text)
 
     def check_if_correct_votes_number(self, projects: dict, votes: dict) -> None:
@@ -255,8 +252,7 @@ class CheckOutputFiles:
 
         for project_number, project_votes in self.counted_scores.items():
             if not projects.get(project_number):
-                self.log_different_votes(
-                    project_number, 0, project_votes, "score")
+                self.log_different_votes(project_number, 0, project_votes, "score")
 
     def remove_last_empty_line(self, filename: str) -> None:
         """If last line of file is empty, remove it."""
@@ -282,7 +278,7 @@ class CheckOutputFiles:
                 In meta: {meta_votes}
                 vs counted in file (number of rows in VOTES section):
                 {str(len(votes))}"""
-            error = 'different number of votes'
+            error = "different number of votes"
             self.log_and_add_to_report(error, text)
 
     def check_number_of_projects(self, meta_projects: str, projects: dict) -> None:
@@ -295,7 +291,7 @@ class CheckOutputFiles:
                 f"vs counted in file (number of rows in PROJECTS section): "
                 f"{str(len(projects))}"
             )
-            error = 'different number of projects'
+            error = "different number of projects"
             self.log_and_add_to_report(error, text)
 
     def log_comma_in_float(self, text: str) -> None:
@@ -325,8 +321,9 @@ class CheckOutputFiles:
 
         self.filename = os.path.basename(pb_file)
         logger.info(f"Checking file from output: {self.filename}")
-        (meta, projects, votes, self.check_votes, self.check_scores) =\
+        (meta, projects, votes, self.check_votes, self.check_scores) = (
             utils.load_pb_file(pb_file)
+        )
         self.check_if_commas_in_floats(meta, projects)
         self.check_budgets(meta, projects)
         self.check_number_of_votes(meta["num_votes"], votes)
@@ -334,16 +331,24 @@ class CheckOutputFiles:
         self.check_vote_length(meta, votes)
         self.check_votes_and_scores(projects, votes)
         self.check_greedy_winners(meta, projects)
+        name_elements = [
+            meta.get("country"),
+            meta.get("unit"),
+            meta.get("instance"),
+            meta.get("subunit"),
+        ]
+        webpage_name = " ".join(el for el in name_elements if el)
+        logger.info(f"PB name would be created on webpage: `{webpage_name}`")
 
     def check_votes_and_scores(self, projects, votes):
         if not any([self.check_votes, self.check_scores]):
             logger.info("There are no votes counted in PROJECTS section!")
-            error_text = 'No votes counted in PROJECTS section'
+            error_text = "No votes counted in PROJECTS section"
             self.summary[error_text] = self.summary.get(error_text, 0) + 1
         else:
             # TODO
-            # if self.check_votes:
-            #     self.check_if_correct_votes_number(projects, votes)
+            if self.check_votes:
+                self.check_if_correct_votes_number(projects, votes)
             if self.check_scores:
                 self.check_if_correct_scores_number(projects, votes)
 
@@ -353,12 +358,13 @@ class CheckOutputFiles:
             self.check_if_greedy_winners(meta["budget"], projects)
         else:
             logger.info("There is no selected field!")
-            error_text = 'No selected field in PROJECTS section'
+            error_text = "No selected field in PROJECTS section"
             self.summary[error_text] = self.summary.get(error_text, 0) + 1
 
     def print_summary(self):
-        summary_sorted = dict(sorted(self.summary.items(),
-                                     key=lambda x: x[1], reverse=True))
+        summary_sorted = dict(
+            sorted(self.summary.items(), key=lambda x: x[1], reverse=True)
+        )
 
         summary_text = (
             "\n**********************************************\n"
@@ -368,8 +374,7 @@ class CheckOutputFiles:
 
         for error_text, value in summary_sorted.items():
             value = f"{value:04}"
-            value = value.replace('0', ' ', len(
-                value) - len(value.lstrip('0')))
+            value = value.replace("0", " ", len(value) - len(value.lstrip("0")))
             summary_text += f"\n{value} || {error_text}"
 
         summary_text += "\n**********************************************"
@@ -377,9 +382,9 @@ class CheckOutputFiles:
 
     def check_if_greedy_winners(self, budget, projects):
         projects = utils.sort_projects_by_results(projects)
-        results = 'votes'
-        if self.check_points_in_votes:
-            results = 'score'
+        results = "votes"
+        if self.check_scores:
+            results = "score"
         budget = float(budget.replace(",", "."))
         selected_projects = dict()
         greedy_winners = dict()
@@ -396,12 +401,12 @@ class CheckOutputFiles:
         selected_set = set(selected_projects.keys())
         should_be_selected = gw_set.difference(selected_set)
         if should_be_selected:
-            text = f'Projects not selected but should be: {should_be_selected}'
+            text = f"Projects not selected but should be: {should_be_selected}"
             self.log_wrong_greedy_winners(text)
 
         shouldnt_be_selected = selected_set.difference(gw_set)
         if shouldnt_be_selected:
-            text = f'Projects selected but should not: {shouldnt_be_selected}'
+            text = f"Projects selected but should not: {shouldnt_be_selected}"
             self.log_wrong_greedy_winners(text)
 
         if should_be_selected or should_be_selected:
@@ -453,21 +458,17 @@ class CheckOutputFiles:
                     self.log_duplicated_votes(voter, votes)
                 if max_length:
                     if len(votes) > int(max_length):
-                        self.log_exceeded_vote_length(
-                            voter, max_length, len(votes)
-                        )
+                        self.log_exceeded_vote_length(voter, max_length, len(votes))
                 if min_length:
                     if len(votes) < int(min_length):
-                        self.log_too_short_vote_length(
-                            voter, min_length, len(votes)
-                        )
+                        self.log_too_short_vote_length(voter, min_length, len(votes))
 
     def check_budgets(self, meta: dict, projects: dict) -> None:
         """Check if budget exceeded or if too expensive project."""
 
         budget_spent = 0
         all_projects_cost = 0
-        budget_available = int(meta["budget"].replace(",", "."))
+        budget_available = math.floor(float(meta["budget"].replace(",", ".")))
         all_projects = list()
         for _, project_data in projects.items():
             selected_field = project_data.get("selected")
@@ -475,14 +476,12 @@ class CheckOutputFiles:
             all_projects_cost += project_cost
             if selected_field:
                 if int(selected_field) == 1:
-                    all_projects.append(
-                        [_, project_cost, project_data["name"]])
+                    all_projects.append([_, project_cost, project_data["name"]])
                     budget_spent += project_cost
             if project_cost == 0:
                 self.log_project_no_cost(project_data)
             elif project_cost > budget_available:
-                self.log_project_exceeded_budget(
-                    project_data, budget_available)
+                self.log_project_exceeded_budget(project_data, budget_available)
         if budget_spent > budget_available:
             self.log_exceeded_budget(budget_available, budget_spent)
             for project in all_projects:

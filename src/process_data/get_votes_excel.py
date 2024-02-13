@@ -3,8 +3,9 @@ import os
 from copy import deepcopy
 from dataclasses import dataclass, field
 
-import helpers.utilities as utils
+from natsort import natsorted
 
+import helpers.utilities as utils
 from process_data.base_config import BaseConfig
 from process_data.models import VoterItem
 
@@ -13,8 +14,8 @@ from process_data.models import VoterItem
 class GetVotesExcel(BaseConfig):
     excel_filename: str
     columns_mapping: dict
-    valid_value: str
     rows_iterator_handler: str
+    valid_value: str = ""
     first_row: int = 1
     data_dir: str = None
     voter_id_integer: bool = True
@@ -26,7 +27,14 @@ class GetVotesExcel(BaseConfig):
     def __post_init__(self):
         self.initialize_mapping_dicts()
         self.set_up_rows_iterator_handler()
+        self.initialize_unit_reqs()
         return super().__post_init__()
+
+    def initialize_unit_reqs(self):
+        if self.unit in ("Kraków", "Warszawa"):
+            self.project_district_mapping = self.get_json_file(
+                "project_district_mapping"
+            )
 
     def initialize_mapping_dicts(self):
         self.votes_data_per_district = collections.defaultdict(list)
@@ -38,17 +46,22 @@ class GetVotesExcel(BaseConfig):
     def set_up_rows_iterator_handler(self):
         handlers_mapping = {
             "one_voter_one_row_no_points": self.handle_one_row_no_points,
-            "one_voter_multiple_rows_no_points": self.handle_multiple_rows_no_points,
+            "one_voter_multiple_rows_no_points": self.handle_multiple_rows,
+            "one_voter_multiple_rows_with_points": self.handle_multiple_rows,
         }
         self.handler = handlers_mapping[self.rows_iterator_handler]
-        if self.rows_iterator_handler == "one_voter_multiple_rows_no_points":
+        if self.handler == self.handle_multiple_rows:
             self.voter_votes = collections.defaultdict(list)
+            if self.rows_iterator_handler == "one_voter_multiple_rows_no_points":
+                self.no_points = True
+            else:
+                self.no_points = False
 
     def handle_csv(self, path_to_excel):
         if self.excel_filename[-4:] == ".csv":
             self.logger.info("Converting CSV into Excel file...")
-            delimiter = self.csv_settings.get("delimiter", ',')
-            encoding = self.csv_settings.get("encoding", 'utf-8')
+            delimiter = self.csv_settings.get("delimiter", ",")
+            encoding = self.csv_settings.get("encoding", "utf-8")
             path, _, xlsx = path_to_excel.split(".")
             path_to_csv = f"{path}.csv"
             path_to_excel = f"{path}.{xlsx}"
@@ -60,7 +73,8 @@ class GetVotesExcel(BaseConfig):
                 )
             else:
                 utils.convert_csv_to_xl(
-                    path_to_csv, delimiter=delimiter, encoding=encoding)
+                    path_to_csv, delimiter=delimiter, encoding=encoding
+                )
                 self.logger.info("Converting finished.")
         return path_to_excel
 
@@ -80,9 +94,7 @@ class GetVotesExcel(BaseConfig):
     def handle_columns_indexes(self):
         col_names_indexes = utils.get_col_names_indexes(self.sheet)
         # REQUIRED COLUMNS
-        self.col = {
-            "voter_id": col_names_indexes[self.columns_mapping["voter_id"]]
-        }
+        self.col = {"voter_id": col_names_indexes[self.columns_mapping["voter_id"]]}
         if self.columns_mapping.get("district"):
             self.col["district"] = col_names_indexes[self.columns_mapping["district"]]
         if not self.only_valid_votes:
@@ -92,6 +104,8 @@ class GetVotesExcel(BaseConfig):
         for col, value in self.columns_mapping.items():
             if (col not in self.col) and (not isinstance(value, dict)):
                 self.col[col] = col_names_indexes[value]
+        if self.handler == self.handle_multiple_rows and not self.no_points:
+            self.points_field = col_names_indexes[self.columns_mapping["points"]]
         self.set_bools_for_optional_columns()
         self.handle_row_iterator_columns(col_names_indexes)
         self.handle_subdistrict(col_names_indexes)
@@ -118,13 +132,13 @@ class GetVotesExcel(BaseConfig):
             }
             # for subdistrict, district_votes in self.district_columns:
             # district_votes = row[self.col["district_votes"]]
-        elif self.rows_iterator_handler == "one_voter_multiple_rows_no_points":
+        elif self.handler == self.handle_multiple_rows:
             self.vote_field = col_names_indexes[self.columns_mapping["vote_column"]]
 
     def sort_rows_by_voter_id(self):
-        self.data = [self.sheet.row_values(i) for i in range(self.sheet.nrows)]
-        self.data = self.data[self.first_row:]
-        self.data.sort(key=lambda x: x[self.col["voter_id"]])
+        data = [self.sheet.row_values(i) for i in range(self.sheet.nrows)]
+        data = data[self.first_row :]
+        self.data = natsorted(data, key=lambda x: x[self.col["voter_id"]])
 
     def get_votes(self):
         self.open_excel_sheet()
@@ -150,8 +164,7 @@ class GetVotesExcel(BaseConfig):
                 row_values = [str(value) for value in row_values]
                 row_txt = "".join(row_values)
                 if row_txt in all_rows:
-                    raise RuntimeError(
-                        f"There is a duplicated row! {row_values}")
+                    raise RuntimeError(f"There is a duplicated row! {row_values}")
                 all_rows.add(row_txt)
 
     def handle_poznan_district(self, district):
@@ -169,22 +182,26 @@ class GetVotesExcel(BaseConfig):
 
     def handle_lublin_district(self, vote, district):
         neighborhood = district
-        vote = vote.replace(' ', '')
+        vote = vote.replace(" ", "")
         if vote[0].lower() == "o":
-            district = 'CITYWIDE'
+            district = "CITYWIDE"
         elif vote[0].lower() == "d":
-            district = 'LOCAL'
+            district = "LOCAL"
         else:
-            self.logger.error('Lublin, vote other than D or O!')
+            self.logger.error("Lublin, vote other than D or O!")
         return district, vote, neighborhood
 
-    def handle_multiple_rows_no_points(self, idx, row, voter_id):
+    def handle_multiple_rows(self, idx, row, voter_id):
         col_name = "subdistrict" if self.col.get("subdistrict") else "district"
-        district = row[self.col[col_name]]
 
         vote = row[self.vote_field]
 
         neighborhood = None
+
+        if self.unit == "Kraków":
+            district = self.project_district_mapping[vote]
+        else:
+            district = row[self.col[col_name]]
 
         # EXCEPTIONS / ERRORS IN FILES
 
@@ -192,8 +209,7 @@ class GetVotesExcel(BaseConfig):
             district = "BD"
 
         if self.unit == "Lublin":
-            district, vote, neighborhood = self.handle_lublin_district(
-                vote, district)
+            district, vote, neighborhood = self.handle_lublin_district(vote, district)
 
         if self.district_name_mapping:
             if self.unit == "Poznań":
@@ -201,9 +217,12 @@ class GetVotesExcel(BaseConfig):
             if self.unit == "Łódź" and self.instance >= 2022:
                 district = self.handle_lodz_district(district)
             district = self.district_district_name_mapping[district]
-        district_upper = utils.change_district_into_name(district)
 
-        self.voter_votes[district_upper].append(vote)
+        if self.no_points:
+            self.voter_votes[district].append(vote)
+        else:
+            points = int(row[self.points_field])
+            self.voter_votes[district].append([vote, points])
 
         try:
             valid = False
@@ -219,12 +238,39 @@ class GetVotesExcel(BaseConfig):
             next_voter = None
         if str(voter_id) != str(next_voter):
             voter_item = self.create_voter_item(row, voter_id, neighborhood)
-            for district, votes in self.voter_votes.items():
-                voter_item_cp = deepcopy(voter_item)
-                voter_item_cp.vote = ",".join(votes)
-                self.votes_data_per_district[district].append(
-                    vars(voter_item_cp))
-            self.voter_votes = collections.defaultdict(list)
+            if self.no_points:
+                self.handle_multiple_rows_no_points(voter_item)
+            else:
+                self.handle_multiple_rows_with_points(voter_item)
+
+    def get_neighborhood_from_districts_list(self):
+        districts = list(self.voter_votes.keys())
+        if len(districts) == 1 and "CITYWIDE" not in districts:
+            return districts[0]
+        if len(districts) == 2 and "CITYWIDE" in districts:
+            districts.remove("CITYWIDE")
+            return districts[0]
+
+    def handle_multiple_rows_with_points(self, voter_item):
+        voter_item.neighborhood = self.get_neighborhood_from_districts_list()
+        for district, votes in self.voter_votes.items():
+            district_upper = utils.change_district_into_name(district)
+            sorted_votes = sorted(votes, key=lambda x: x[1], reverse=True)
+            voter_item_cp = deepcopy(voter_item)
+            votes = [el[0] for el in sorted_votes]
+            points = [str(el[1]) for el in sorted_votes]
+            voter_item_cp.vote = ",".join(votes)
+            voter_item_cp.points = ",".join(points)
+            self.votes_data_per_district[district_upper].append(vars(voter_item_cp))
+        self.voter_votes = collections.defaultdict(list)
+
+    def handle_multiple_rows_no_points(self, voter_item):
+        for district, votes in self.voter_votes.items():
+            district_upper = utils.change_district_into_name(district)
+            voter_item_cp = deepcopy(voter_item)
+            voter_item_cp.vote = ",".join(votes)
+            self.votes_data_per_district[district_upper].append(vars(voter_item_cp))
+        self.voter_votes = collections.defaultdict(list)
 
     def iterate_through_rows(self):
         for idx, row_data in enumerate(self.data):
@@ -235,6 +281,7 @@ class GetVotesExcel(BaseConfig):
                 if not voter_id:
                     return
                 self.handler(idx, row_data, voter_id)
+            # TODO if does not log, why?
             if idx + 1 % 10000 == 0:
                 self.logger.info(f"{idx + 1} lines of votes processed")
 
@@ -247,7 +294,7 @@ class GetVotesExcel(BaseConfig):
             item.add_voting_method(row[self.col["voting_method"]])
         return item
 
-    def get_voter_district(self, row):
+    def get_voter_district(self, row, voter_id):
         if self.col.get("subdistrict"):
             district = row[self.col["subdistrict"]]
         else:
@@ -258,13 +305,35 @@ class GetVotesExcel(BaseConfig):
             elif self.unit == "Łódź" and self.instance >= 2022:
                 district = self.handle_lodz_district(district)
             district = self.district_district_name_mapping[district]
-        if district not in ('', '---'):
+        if self.unit == "Warszawa":
+            # TODO
+            district_votes = row[self.district_columns["local"]]
+            if district_votes:
+                if isinstance(district_votes, float):
+                    project_id = str(int(district_votes))
+                else:
+                    districts = set()
+                    districts_dict = dict()
+                    for project_id in district_votes.split(","):
+                        district = self.project_district_mapping[project_id]
+                        districts_dict[district] = districts_dict.get(district, 0) + 1
+                        districts.add(district)
+                    if len(districts) > 1:
+                        self.logger.warning(
+                            f"Voter: {voter_id} has more than one district! "
+                            f"Vote: {district_votes} districts: {districts} "
+                            f"Counter: {districts_dict}"
+                        )
+                # else:
+                #     project_id = district_votes.split(",")[0]
+                # district = self.project_district_mapping[project_id]
+        if district not in ("", "---"):
             return district
 
     def create_voter_item(self, row, voter_id, neighborhood=None):
         item = VoterItem(voter_id)
         if self.col.get("district"):
-            item.district = self.get_voter_district(row)
+            item.district = self.get_voter_district(row, voter_id)
             if neighborhood:
                 item.add_neighborhood(neighborhood)
             else:
@@ -273,6 +342,8 @@ class GetVotesExcel(BaseConfig):
         return item
 
     def clean_votes_field(self, votes):
+        if isinstance(votes, float):
+            return int(votes)
         votes = votes.replace(" ", "")
         return votes
 
@@ -281,10 +352,7 @@ class GetVotesExcel(BaseConfig):
         unit_votes = row[self.col["unit_votes"]]
         if unit_votes and unit_votes not in utils.wrong_votes:
             voter_item.vote = self.clean_votes_field(unit_votes)
-            # self.votes_data_per_district["OGOLNOMIEJSKI"].append(
-            #     vars(voter_item))
-            self.votes_data_per_district["CITYWIDE"].append(
-                vars(voter_item))
+            self.votes_data_per_district["CITYWIDE"].append(vars(voter_item))
         for subdistrict, column_index in self.district_columns.items():
             district_votes = row[column_index]
             neighborhood = voter_item.neighborhood or subdistrict
@@ -293,12 +361,12 @@ class GetVotesExcel(BaseConfig):
                 voter_item_cp.vote = self.clean_votes_field(district_votes)
                 if self.subdistricts:
                     if not self.votes_data_per_district.get(neighborhood):
-                        self.votes_data_per_district[
-                            neighborhood
-                        ] = collections.defaultdict(list)
-                    self.votes_data_per_district[neighborhood][
-                        subdistrict
-                    ].append(vars(voter_item_cp))
+                        self.votes_data_per_district[neighborhood] = (
+                            collections.defaultdict(list)
+                        )
+                    self.votes_data_per_district[neighborhood][subdistrict].append(
+                        vars(voter_item_cp)
+                    )
                 else:
                     self.votes_data_per_district[neighborhood].append(
                         vars(voter_item_cp)
