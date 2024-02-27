@@ -27,9 +27,9 @@ budgets = {
 
 # sum check
 
-# suma = 0
 # year = 2024
 
+# suma = 0
 # for year, budgets in budgets.items():
 #     for budget in budgets.values():
 #         suma += budget

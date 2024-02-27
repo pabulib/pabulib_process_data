@@ -346,7 +346,6 @@ class CheckOutputFiles:
             error_text = "No votes counted in PROJECTS section"
             self.summary[error_text] = self.summary.get(error_text, 0) + 1
         else:
-            # TODO
             if self.check_votes:
                 self.check_if_correct_votes_number(projects, votes)
             if self.check_scores:

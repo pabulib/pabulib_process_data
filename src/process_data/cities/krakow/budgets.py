@@ -3,35 +3,34 @@
 budgets = {
     2023: {
         "CITYWIDE": 7600000,
-        "NOWA_HUTA": 2272198.71,
-        "BIEZANOW-PROKOCIM": 1848660.19,
-        "MISTRZEJOWICE": 1515945.17,
-        "PODGORZE_DUCHACKIE": 1658372.38,
-        "CZYZYNY": 1548961.48,
-        "PODGORZE": 2255001.86,
-        "DEBNIKI": 2415205.89,
-        "WZGORZA_KRZESLAWICKIE": 1629958.66,
-        "BRONOWICE": 1673229.08,
-        "PRADNIK_CZERWONY": 1545319.32,
-        "KROWODRZA": 1608953.04,
-        "PRADNIK_BIALY": 1967873.34,
-        "LAGIEWNIKI-BOREK_FALECKI": 1448162.91,
-        "GRZEGORZKI": 1346300.79,
-        "BIENCZYCE": 1214309.46,
-        "STARE_MIASTO": 1260803.50,
-        "SWOSZOWICE": 1269486.01,
-        "ZWIERZYNIEC": 1921258.19,
+        "NOWA_HUTA": 2458488.22,
+        "BIEZANOW-PROKOCIM": 1910663.83,
+        "MISTRZEJOWICE": 1501571.88,
+        "PODGORZE_DUCHACKIE": 1643824.66,
+        "CZYZYNY": 1404775.68,
+        "PODGORZE": 2155866,
+        "DEBNIKI": 2372571.24,
+        "WZGORZA_KRZESLAWICKIE": 1681173.70,
+        "BRONOWICE": 1647263.73,
+        "PRADNIK_CZERWONY": 1555905.71,
+        "KROWODRZA": 1532717.63,
+        "PRADNIK_BIALY": 2011938.01,
+        "LAGIEWNIKI-BOREK_FALECKI": 1437562.51,
+        "GRZEGORZKI": 1310641.10,
+        "BIENCZYCE": 1331751.11,
+        "STARE_MIASTO": 1261899.87,
+        "SWOSZOWICE": 1459730.46,
+        "ZWIERZYNIEC": 1721654.65,
     }
 }
 
 
 # sum check
 
-# suma = 0
+# year = 2023
 
-# for district, budgets in budgets['2020'].items():
-#     for budget in budgets:
-#         # print(budget)
-#         suma += budget
+# suma = 0
+# for district, budget in budgets[year].items():
+#     suma += budget
 
 # print(suma)

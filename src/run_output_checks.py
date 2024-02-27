@@ -26,17 +26,13 @@ from helpers.output_check import CheckOutputFiles  # noqa: F401
 
 params = {
     # all files in output path
-    "files_in_output_dir": "*",
-
+    # "files_in_output_dir": "*",
     # just selected files
-    # "files_in_output_dir": "Poland_Katowice_2021_*",
-
+    "files_in_output_dir": "Poland_Warszawa_*",
     # just files in output/cleaned dir
     # "files_in_output_dir": "/cleaned/*",
-
     # provide your own absolute path (remember about `*` to match all files)
     # "files_in_absolute_dir": "/*",
-
     # save output to txt file
     "create_txt_report": False,
 }

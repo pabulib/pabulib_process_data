@@ -5,7 +5,7 @@ import helpers.utilities as utils
 from process_data.base_config import BaseConfig
 
 
-@dataclass
+@dataclass(kw_only=True)
 class CreateVotesSections(BaseConfig):
     unit_fields: list
     districts_fields: list = None
@@ -29,19 +29,23 @@ class CreateVotesSections(BaseConfig):
     def create_votes_sections(self):
         self.logger.info("Creating VOTES sections")
         for district, votes in self.votes_data_per_district.items():
+
             if self.subdistricts:
-                if district.upper().startswith(("OGOLNOMIEJSK", "CITYWIDE")):
+                # TODO sort votes in subdistricts
+                # votes = sorted(votes, key=lambda d: d["voter_id"])
+
+                if isinstance(votes, list):
                     self.unpack_district_votes(district, votes)
-                else:
+                elif isinstance(votes, dict):
                     for subdistrict, votes in votes.items():
                         self.unpack_district_votes(district, votes, subdistrict)
             else:
+                votes = sorted(votes, key=lambda d: d["voter_id"])
                 self.unpack_district_votes(district, votes)
         self.logger.info("VOTES sections created")
 
     def unpack_district_votes(self, district, votes, subdistrict=None):
-        # if "OGOLNOMIEJSKI" in district.upper():
-        if "CITYWIDE" in district.upper():
+        if district.upper().startswith("CITYWIDE"):
             fields = self.unit_fields
             path_to_file = utils.get_path_to_file(self.unit_file_name)
         else:

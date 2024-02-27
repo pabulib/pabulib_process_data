@@ -10,19 +10,20 @@ from process_data.base_config import BaseConfig
 from process_data.models import VoterItem
 
 
-@dataclass
+@dataclass(kw_only=True)
 class GetVotesExcel(BaseConfig):
     excel_filename: str
     columns_mapping: dict
     rows_iterator_handler: str
+    excel_ext: str = "xlsx"
     valid_value: str = ""
     first_row: int = 1
     data_dir: str = None
     voter_id_integer: bool = True
     district_name_mapping: bool = False
-    subdistricts: bool = False
     only_valid_votes: bool = False
     csv_settings: dict = field(default_factory=lambda: {})
+    load_subdistricts_mapping: bool = False
 
     def __post_init__(self):
         self.initialize_mapping_dicts()
@@ -31,9 +32,10 @@ class GetVotesExcel(BaseConfig):
         return super().__post_init__()
 
     def initialize_unit_reqs(self):
-        if self.unit in ("Kraków", "Warszawa"):
-            self.project_district_mapping = self.get_json_file(
-                "project_district_mapping"
+        self.project_district_mapping = self.get_json_file("project_district_mapping")
+        if self.subdistricts and self.load_subdistricts_mapping:
+            self.project_subdistrict_mapping = self.get_json_file(
+                "project_subdistrict_mapping"
             )
 
     def initialize_mapping_dicts(self):
@@ -48,6 +50,7 @@ class GetVotesExcel(BaseConfig):
             "one_voter_one_row_no_points": self.handle_one_row_no_points,
             "one_voter_multiple_rows_no_points": self.handle_multiple_rows,
             "one_voter_multiple_rows_with_points": self.handle_multiple_rows,
+            "no_points_votes_not_separated": self.handle_no_points_separate_votes,
         }
         self.handler = handlers_mapping[self.rows_iterator_handler]
         if self.handler == self.handle_multiple_rows:
@@ -79,14 +82,9 @@ class GetVotesExcel(BaseConfig):
         return path_to_excel
 
     def open_excel_sheet(self):
-        if self.data_dir:
-            path_to_excel = utils.get_path_to_file_by_unit(
-                self.excel_filename, self.unit, self.data_dir
-            )
-        else:
-            path_to_excel = utils.get_path_to_file_by_unit(
-                self.excel_filename, self.unit
-            )
+        path_to_excel = utils.get_path_to_file_by_unit(
+            self.excel_filename, self.unit, extra_dir=self.data_dir, ext=self.excel_ext
+        )
         path_to_excel = self.handle_csv(path_to_excel)
         self.sheet = utils.open_excel_workbook(path_to_excel)
         self.handle_columns_indexes()
@@ -347,12 +345,34 @@ class GetVotesExcel(BaseConfig):
         votes = votes.replace(" ", "")
         return votes
 
+    def hanlde_project_285_bug_wroclaw_2023(self, voter_item):
+        """Due to a system error, project 285 was mistakenly categorized
+        as a citywide before being accurately reclassified as a local one.
+        However, during this time, it had gathered 141 votes,
+        making it appear as though some voters had cast two votes
+        for local projects. We separated them by adding the prefix 99999
+        to the voter_id, to be consistent with city results and
+        to avoid having incorrect (i.e., too long) votes.
+        """
+        voter_item_cp = deepcopy(voter_item)
+        voter_item_cp.voter_id = int(f"99999{voter_item.voter_id}")
+        voter_item_cp.vote = 285
+        self.votes_data_per_district["local"].append(vars(voter_item_cp))
+
     def handle_one_row_no_points(self, _, row, voter_id):
         voter_item = self.create_voter_item(row, voter_id)
         unit_votes = row[self.col["unit_votes"]]
         if unit_votes and unit_votes not in utils.wrong_votes:
-            voter_item.vote = self.clean_votes_field(unit_votes)
-            self.votes_data_per_district["CITYWIDE"].append(vars(voter_item))
+            # THERE IS A BUG IN WROCŁAW 2023 (votes for two local projects)
+            if (
+                self.unit == "Wrocław"
+                and self.instance == 2023
+                and int(unit_votes) == 285
+            ):
+                self.hanlde_project_285_bug_wroclaw_2023(voter_item)
+            else:
+                voter_item.vote = self.clean_votes_field(unit_votes)
+                self.votes_data_per_district["CITYWIDE"].append(vars(voter_item))
         for subdistrict, column_index in self.district_columns.items():
             district_votes = row[column_index]
             neighborhood = voter_item.neighborhood or subdistrict
@@ -371,3 +391,33 @@ class GetVotesExcel(BaseConfig):
                     self.votes_data_per_district[neighborhood].append(
                         vars(voter_item_cp)
                     )
+
+    def handle_no_points_separate_votes(self, _, row, voter_id):
+        voter_item = self.create_voter_item(row, voter_id)
+        vote = row[self.col["vote_column"]]
+        for project_id in vote.split(","):
+            if self.col.get("distirct"):
+                # TODO get district from row
+                pass
+            else:
+                # get district from mapping JSON
+                district = self.project_district_mapping[project_id]
+            voter_item_cp = deepcopy(voter_item)
+            # it works only if vote only for one project_id per (sub)district
+            # if not, combine votes per (sub)district is needed
+            voter_item_cp.vote = project_id
+            if self.subdistricts:
+                if self.col.get("subdistrict"):
+                    # TODO get subdistrict from row
+                    pass
+                else:
+                    subdistrict = self.project_subdistrict_mapping[project_id]
+                if not self.votes_data_per_district.get(district):
+                    self.votes_data_per_district[district] = collections.defaultdict(
+                        list
+                    )
+                self.votes_data_per_district[district][subdistrict].append(
+                    vars(voter_item_cp)
+                )
+            else:
+                self.votes_data_per_district[district].append(vars(voter_item_cp))

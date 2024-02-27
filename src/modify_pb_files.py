@@ -88,6 +88,7 @@ class ModifyPBFiles:
                 self.projects[project_id]["votes"] = counted_votes
 
     def update_projects_scores(self):
+        self.check_scores = True
         if self.check_scores:
             self.counted_scores = utils.count_points_per_project(self.votes)
             for project_id, score in self.counted_scores.items():
@@ -127,13 +128,13 @@ class ModifyPBFiles:
         )
 
     def do_some_modifications(self, idx):
-        self.modified = False  # set it to True if you want to save new file
+        self.modified = True  # set it to True if you want to save new file
         # self.remove_projects_with_no_cost()
         # self.remove_projects_with_no_votes()
         # self.update_projects_votes()
         # self.update_number_of_votes()
         # self.update_number_of_projects()
-        # self.update_projects_scores()
+        self.update_projects_scores()
         # self.replace_commas_in_floats()
         # self.replace_semicolons_in_votes()
         # self.add_selected_to_projects_section(idx)

@@ -5,11 +5,10 @@ import helpers.utilities as utils
 from process_data.base_config import BaseConfig
 
 
-@dataclass
+@dataclass(kw_only=True)
 class CreateMetaSections(BaseConfig):
-    budgets: dict()
-    metadata: dict()
-    subdistricts: bool = False
+    budgets: dict
+    metadata: dict
 
     def __post_init__(self):
         self.set_up_iterator()
@@ -44,7 +43,7 @@ class CreateMetaSections(BaseConfig):
                 return self.budgets[district][0]
             elif subdistrict == "small":
                 return self.budgets[district][1]
-            elif subdistrict.lower() in ("citywide", "ogolnomiejski"):
+            elif subdistrict.lower() in ("citywide"):
                 return self.budgets[district][0]
             else:
                 self.logger.critical(f"Gdynia: Not known subdistrict: {subdistrict}!")
@@ -69,7 +68,7 @@ class CreateMetaSections(BaseConfig):
             self.handle_file(district, district_upper, budget)
 
     def handle_file(self, district, district_upper, budget, subdistrict=None):
-        if district_upper.startswith(("OGOLNO", "CITYWIDE")):
+        if district_upper.startswith("CITYWIDE"):
             path_to_file = utils.get_path_to_file(self.unit_file_name)
             district = "unit"
         else:

@@ -1,7 +1,4 @@
 import collections
-import itertools
-import json
-import re
 from dataclasses import dataclass
 
 import helpers.utilities as utils
@@ -10,11 +7,12 @@ from process_data.base_config import BaseConfig
 from process_data.models import ProjectItem
 
 
-@dataclass
+@dataclass(kw_only=True)
 class GetProjects(BaseConfig):
     excel_filename: str
     columns_mapping: dict
     data_dir: str = None
+    excel_ext: str = "xlsx"
 
     def __post_init__(self):
         self.selected_projects = False
@@ -40,7 +38,7 @@ class GetProjects(BaseConfig):
 
     def prepare_excel_sheet(self):
         path_to_excel = utils.get_path_to_file_by_unit(
-            self.excel_filename, self.unit, extra_dir=self.data_dir
+            self.excel_filename, self.unit, extra_dir=self.data_dir, ext=self.excel_ext
         )
         self.sheet = utils.open_excel_workbook(path_to_excel)
 
@@ -72,6 +70,8 @@ class GetProjects(BaseConfig):
             item.add_name(name)
 
             item.add_votes(votes)
+            if self.col.get("score"):
+                item.add_score(row_values[self.col["score"]])
 
             if self.col.get("selected"):
                 selected = row_values[self.col["selected"]]
@@ -80,6 +80,8 @@ class GetProjects(BaseConfig):
             district = row_values[self.col["district"]]
             if district.lower().startswith("ogólnomi"):
                 district = "CITYWIDE"
+                if self.unit == "Poznań":
+                    district = "_CITYWIDE"
             item.neighborhood = district
             if self.unit == "Kraków":
                 district = self.check_if_citywide_krakow(district, project_id)
@@ -92,17 +94,37 @@ class GetProjects(BaseConfig):
                 item.target = self.get_mappings_warszawa("targets", row_values)
             cost = row_values[self.col["cost"]]
             item.add_cost(cost)
-            self.add_projects_to_mappings(item, district)
+            if self.subdistricts:
+                item.add_subdistrict(row_values[self.col["subdistrict"]])
+            self.add_projects_to_mappings(item)
 
-    def add_projects_to_mappings(self, item, district):
-        self.projects_data_per_district[district].append(vars(item))
-        self.district_projects_mapping[district].append(item.project_id)
+    def add_projects_to_mappings(self, item):
+        district = item.district
+        if self.subdistricts:
+            subdistrict = item.subdistrict
+            if not self.projects_data_per_district.get(district):
+                self.projects_data_per_district[district] = collections.defaultdict(
+                    list
+                )
+            self.projects_data_per_district[district][subdistrict].append(vars(item))
+            if not self.district_projects_mapping.get(district):
+                self.district_projects_mapping[district] = collections.defaultdict(list)
+            self.district_projects_mapping[district][subdistrict].append(
+                item.project_id
+            )
+            self.project_subdistrict_mapping[item.project_id] = subdistrict
+        else:
+            self.projects_data_per_district[district].append(vars(item))
+            self.district_projects_mapping[district].append(item.project_id)
+
         self.project_district_mapping[item.project_id] = district
 
     def initialize_mapping_dicts(self):
         self.projects_data_per_district = collections.defaultdict(list)
         self.district_projects_mapping = collections.defaultdict(list)
         self.project_district_mapping = dict()
+        if self.subdistricts:
+            self.project_subdistrict_mapping = dict()
 
     def create_district_upper_mapping(self):
         self.district_upper_district_mapping = {"CITYWIDE": "citywide"}
@@ -143,4 +165,6 @@ class GetProjects(BaseConfig):
             "project_district_mapping": self.project_district_mapping,
             "district_upper_district_mapping": self.district_upper_district_mapping,
         }
+        if self.subdistricts:
+            objects["project_subdistrict_mapping"] = self.project_subdistrict_mapping
         self.save_mappings_as_jsons(objects)

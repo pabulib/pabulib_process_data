@@ -11,12 +11,11 @@ import requests
 import unidecode
 import xlrd
 from bs4 import BeautifulSoup as bs
+from helpers import settings
 from loguru import logger
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from xlsxwriter.workbook import Workbook
-
-from helpers import settings
 
 wrong_votes = (r"\N", "NULL", "---", "0", 0)
 
@@ -577,3 +576,8 @@ def sort_projects_by_results(projects):
         )
     )
     return projects
+
+
+def clean_project_id(project_id: str) -> str:
+    project_id = project_id.replace('‐', '-')
+    return project_id

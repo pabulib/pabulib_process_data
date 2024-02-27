@@ -62,6 +62,7 @@ all_data = {
             "currency": "PLN",
             "unit": {"max_length": "10"},
             "district": {"max_length": "15"},
+            "comment": "The metadata regarding the age of voters shows very low values (starting from zero), indicating that one doesn't need to be an adult to vote: If a voter is under 13, they can vote with the consent of a parent or guardian. Hence, for example, age 0 likely corresponds to cases where parents/guardians are voting on behalf of their children.",
         },
     }
 }

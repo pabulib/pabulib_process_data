@@ -13,6 +13,7 @@ class ProjectItem:
     name: str = None
     target: str = None
     votes: int = None
+    points: int = None
     selected: int = None
     district: str = None
     district_upper: str = None
@@ -24,7 +25,7 @@ class ProjectItem:
         try:
             self.project_id = int(project_id)
         except ValueError:
-            self.project_id = project_id
+            self.project_id = utils.clean_project_id(project_id)
 
     def add_district(self, district):
         self.district = district
@@ -35,6 +36,12 @@ class ProjectItem:
             self.votes = int(votes)
         except ValueError:
             self.votes = int(votes.replace(" ", ""))
+
+    def add_score(self, score):
+        try:
+            self.score = int(score)
+        except ValueError:
+            self.score = int(score.replace(" ", ""))
 
     def add_category_from_list(self, category_list):
         self.category = ",".join(category_list)
@@ -53,13 +60,24 @@ class ProjectItem:
         )
 
     def add_selected(self, status):
-        self.selected = mapps.selected_mapping[status]
+        try:
+            self.selected = int(status)
+        except ValueError:
+            self.selected = mapps.selected_mapping[status]
 
     def add_target(self, target_list):
         self.target = ",".join(target_list)
 
     def add_name(self, name):
         self.name = utils.clean_name(name)
+
+    def add_subdistrict(self, subdistrict):
+        if subdistrict.lower() in ("mały"):
+            self.subdistrict = "small"
+        elif subdistrict.lower() in ("duży"):
+            self.subdistrict = "large"
+        else:
+            self.subdistrict = subdistrict
 
 
 @dataclass
