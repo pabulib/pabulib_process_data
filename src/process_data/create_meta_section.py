@@ -88,8 +88,8 @@ class CreateMetaSections(BaseConfig):
             description = f"Municipal PB in {self.unit.title()}"
             subunit = ""
             district_txt = ""
-            dict_to_update = temp_meta.pop("unit")
-            temp_meta.pop("district")
+            dict_to_update = temp_meta.pop("unit", None)
+            temp_meta.pop("district", None)
 
         else:
             if not subdistrict:
@@ -108,10 +108,11 @@ class CreateMetaSections(BaseConfig):
 
             subunit = self.create_subunit_value(temp_meta, district, subdistrict)
 
-            dict_to_update = temp_meta.pop("district")
-            temp_meta.pop("unit")
+            dict_to_update = temp_meta.pop("district", None)
+            temp_meta.pop("unit", None)
 
-        temp_meta.update(dict_to_update)
+        if dict_to_update:
+            temp_meta.update(dict_to_update)
         num_projects, num_votes = utils.count_projects_and_votes(path_to_file)
 
         metadata = (

@@ -2,16 +2,12 @@ from helpers.output_check import CheckOutputFiles  # noqa: F401
 from helpers.utilities import create_logger
 from process_data.run_it import run_it
 
-settings = {
-    "year": 2024,
-    "scrape_data": True,
-    # "preprocessing": False
-}
+settings = {"year": 2023, "scrape_data": True}
 
 logger = create_logger()
 
-city = "Warszawa"
-# city = "Łódź"
+# city = "Warszawa"
+city = "Łódź"
 # city = "Poznań"
 # city = "Gdynia"
 # city = "mechanical_turk"

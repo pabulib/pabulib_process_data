@@ -23,6 +23,14 @@ category_mapping = {
     "infrastruktura": "infrastructure",
     "społeczeństwo": "society",
     "infrastruktura rowerowa": "bicycle infrastructure",
+    "tereny zielone i ochrona środowiska": "environmental protection",
+    "infrastruktura komunalna i bezpieczeństwo": "municipal infrastructure and security",
+    "infrastruktura drogowa i komunikacja": "public transit and roads",
+    "sport i rekreacja": "sport and recreation",
+    "kultura i dziedzictwo": "culture",
+    "zdrowie i pomoc społeczna": "health and welfare",
+    "inne": None,
+    "edukacja, dzieci i młodzież": "education, children and youth",
 }
 
 target_mapping = {

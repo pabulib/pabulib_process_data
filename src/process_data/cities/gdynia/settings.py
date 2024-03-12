@@ -6,6 +6,10 @@ all_data = {
             "instance": 2021,
             "subdistricts": True,
         },
+        "preprocess": {
+            "excel_filename": "bo_2021_glosowanie",
+            "data_dir": "2021",
+        },
         "get_projects": {
             "data_dir": "2021",
             # "projects_docx": "wyniki-glosowania_wszystkie-projekty_na-strone.pdf",

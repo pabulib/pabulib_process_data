@@ -11,7 +11,6 @@ class GetProjects(BaseConfig):
     district_projects: bool = True
 
     def __post_init__(self):
-        self.logger = utils.create_logger()
         self.initialize_mapping_dicts()
         return super().__post_init__()
 
@@ -29,7 +28,7 @@ class GetProjects(BaseConfig):
         name = None
         item.add_name(name)
         district = None
-        self.logger.info(f'Processing Project: {project_id}')
+        self.logger.info(f"Processing Project: {project_id}")
         item.add_district(district.strip())
         item.project_url = None
         cost = None
@@ -43,8 +42,8 @@ class GetProjects(BaseConfig):
     def start(self):
         self.iterate_through_projects()
         objects = {
-            'district_projects_mapping': self.district_projects_mapping,
-            'projects_data_per_district': self.projects_data_per_district,
-            'project_district_mapping': self.project_district_mapping,
+            "district_projects_mapping": self.district_projects_mapping,
+            "projects_data_per_district": self.projects_data_per_district,
+            "project_district_mapping": self.project_district_mapping,
         }
         self.save_mappings_as_jsons(objects)

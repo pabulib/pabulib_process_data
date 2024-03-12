@@ -189,6 +189,15 @@ class GetVotesExcel(BaseConfig):
             self.logger.error("Lublin, vote other than D or O!")
         return district, vote, neighborhood
 
+    def get_lodz_district_subdistrict(self, row):
+        district = row[self.col["district"]]
+        subdistrict = row[self.col["subdistrict"]]
+        district = self.district_district_name_mapping["districts"][district]
+        if district == "CITYWIDE":
+            return "CITYWIDE", "CITYWIDE"
+        subdistrict = self.district_district_name_mapping["subdistricts"][subdistrict]
+        return district, subdistrict
+
     def handle_multiple_rows(self, idx, row, voter_id):
         col_name = "subdistrict" if self.col.get("subdistrict") else "district"
 
@@ -212,13 +221,23 @@ class GetVotesExcel(BaseConfig):
         if self.district_name_mapping:
             if self.unit == "Poznań":
                 district = self.handle_poznan_district(district)
-            if self.unit == "Łódź" and self.instance >= 2022:
+            elif self.unit == "Łódź" and self.instance >= 2022:
                 district = self.handle_lodz_district(district)
-            district = self.district_district_name_mapping[district]
+            if self.unit == "Łódź":
+                district, subdistrict = self.get_lodz_district_subdistrict(row)
+
+            else:
+                district = self.district_district_name_mapping[district]
 
         if self.no_points:
-            self.voter_votes[district].append(vote)
+            if self.subdistricts:
+                if not self.voter_votes.get(district):
+                    self.voter_votes[district] = collections.defaultdict(list)
+                self.voter_votes[district][subdistrict].append(vote)
+            else:
+                self.voter_votes[district].append(vote)
         else:
+            # TODO handle subdistricts
             points = int(row[self.points_field])
             self.voter_votes[district].append([vote, points])
 
@@ -250,6 +269,7 @@ class GetVotesExcel(BaseConfig):
             return districts[0]
 
     def handle_multiple_rows_with_points(self, voter_item):
+        # TODO handle subdistricts
         voter_item.neighborhood = self.get_neighborhood_from_districts_list()
         for district, votes in self.voter_votes.items():
             district_upper = utils.change_district_into_name(district)
@@ -263,11 +283,30 @@ class GetVotesExcel(BaseConfig):
         self.voter_votes = collections.defaultdict(list)
 
     def handle_multiple_rows_no_points(self, voter_item):
-        for district, votes in self.voter_votes.items():
-            district_upper = utils.change_district_into_name(district)
-            voter_item_cp = deepcopy(voter_item)
-            voter_item_cp.vote = ",".join(votes)
-            self.votes_data_per_district[district_upper].append(vars(voter_item_cp))
+        # TODO handle neighbourhood
+        if self.subdistricts:
+            for district, district_data in self.voter_votes.items():
+                for subdistrict, votes in district_data.items():
+                    if district == "":
+                        district = "CITYWIDE"
+                        subdistrict = "CITYWIDE"
+                    district_upper = utils.change_district_into_name(district)
+                    subdistrict_upper = utils.change_district_into_name(subdistrict)
+                    voter_item_cp = deepcopy(voter_item)
+                    voter_item_cp.vote = ",".join(votes)
+                    if not self.votes_data_per_district.get(district_upper):
+                        self.votes_data_per_district[district_upper] = (
+                            collections.defaultdict(list)
+                        )
+                    self.votes_data_per_district[district_upper][
+                        subdistrict_upper
+                    ].append(vars(voter_item_cp))
+        else:
+            for district, votes in self.voter_votes.items():
+                district_upper = utils.change_district_into_name(district)
+                voter_item_cp = deepcopy(voter_item)
+                voter_item_cp.vote = ",".join(votes)
+                self.votes_data_per_district[district_upper].append(vars(voter_item_cp))
         self.voter_votes = collections.defaultdict(list)
 
     def iterate_through_rows(self):
@@ -300,9 +339,12 @@ class GetVotesExcel(BaseConfig):
         if self.district_name_mapping:
             if self.unit == "Poznań":
                 district = self.handle_poznan_district(district)
-            elif self.unit == "Łódź" and self.instance >= 2022:
-                district = self.handle_lodz_district(district)
-            district = self.district_district_name_mapping[district]
+            # elif self.unit == "Łódź" and self.instance >= 2022:
+            #     district = self.handle_lodz_district(district)
+            if self.unit == "Łódź":
+                district, _ = self.get_lodz_district_subdistrict(row)
+            else:
+                district = self.district_district_name_mapping[district]
         if self.unit == "Warszawa":
             # TODO
             district_votes = row[self.district_columns["local"]]
@@ -408,8 +450,7 @@ class GetVotesExcel(BaseConfig):
             voter_item_cp.vote = project_id
             if self.subdistricts:
                 if self.col.get("subdistrict"):
-                    # TODO get subdistrict from row
-                    pass
+                    subdistrict = row[self.col["subdistrict"]]
                 else:
                     subdistrict = self.project_subdistrict_mapping[project_id]
                 if not self.votes_data_per_district.get(district):

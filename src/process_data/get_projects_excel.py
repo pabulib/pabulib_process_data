@@ -17,8 +17,6 @@ class GetProjects(BaseConfig):
     def __post_init__(self):
         self.selected_projects = False
         self.initialize_mapping_dicts()
-        self.logger = utils.create_logger()
-        self.initialize_mapping_dicts()
         return super().__post_init__()
 
     def handle_columns_indexes(self):
