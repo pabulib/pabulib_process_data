@@ -352,23 +352,48 @@ class GetVotesExcel(BaseConfig):
                 if isinstance(district_votes, float):
                     project_id = str(int(district_votes))
                 else:
-                    districts = set()
-                    districts_dict = dict()
-                    for project_id in district_votes.split(","):
-                        district = self.project_district_mapping[project_id]
-                        districts_dict[district] = districts_dict.get(district, 0) + 1
-                        districts.add(district)
-                    if len(districts) > 1:
-                        self.logger.warning(
-                            f"Voter: {voter_id} has more than one district! "
-                            f"Vote: {district_votes} districts: {districts} "
-                            f"Counter: {districts_dict}"
-                        )
-                # else:
-                #     project_id = district_votes.split(",")[0]
-                # district = self.project_district_mapping[project_id]
+                    project_id = district_votes.split(",")[0]
+                district = self.project_district_mapping[project_id]
         if district not in ("", "---"):
             return district
+
+    def handle_warszawa_2024_votes(self, row, voter_id, voter_item_cp):
+        """System voting error in Warszawa 2024 instance:
+        12 votes for projects from two different districts,
+        which was forbidden. Need to split it as two independent votes."""
+        district_votes = row[self.district_columns["local"]]
+        if district_votes:
+            districts = set()
+            if isinstance(district_votes, float):
+                # if there is one project, excel makes float out of it
+                project_id = str(int(district_votes))
+                districts.add(self.project_district_mapping[project_id])
+            else:
+                districts_dict = dict()
+                districts_split = collections.defaultdict(list)
+                for project_id in district_votes.split(","):
+                    district = self.project_district_mapping[project_id]
+                    districts_dict[district] = districts_dict.get(district, 0) + 1
+                    districts.add(district)
+                    districts_split[district].append(project_id)
+            if len(districts) > 1:
+                # WRONG VOTE
+                self.logger.warning(
+                    f"Voter: {voter_id} has more than one district! "
+                    f"Vote: {district_votes} districts: {districts} "
+                    f"Counter: {districts_dict} "
+                    f"districts_split: {districts_split} "
+                )
+                for district, vote in districts_split.items():
+                    new_voter_item = deepcopy(voter_item_cp)
+                    new_voter_item.voter_id = int(f"999999{new_voter_item.voter_id}")
+                    vote = ",".join(vote)
+                    new_voter_item.vote = self.clean_votes_field(vote)
+                    self.votes_data_per_district[district].append(vars(new_voter_item))
+            else:
+                # VALID VOTE
+                district = next(iter(districts))
+                self.votes_data_per_district[district].append(vars(voter_item_cp))
 
     def create_voter_item(self, row, voter_id, neighborhood=None):
         item = VoterItem(voter_id)
@@ -430,9 +455,13 @@ class GetVotesExcel(BaseConfig):
                         vars(voter_item_cp)
                     )
                 else:
-                    self.votes_data_per_district[neighborhood].append(
-                        vars(voter_item_cp)
-                    )
+                    if self.unit == "Warszawa" and self.instance == 2024:
+                        # Warszawa 2024 bug
+                        self.handle_warszawa_2024_votes(row, voter_id, voter_item_cp)
+                    else:
+                        self.votes_data_per_district[neighborhood].append(
+                            vars(voter_item_cp)
+                        )
 
     def handle_no_points_separate_votes(self, _, row, voter_id):
         voter_item = self.create_voter_item(row, voter_id)

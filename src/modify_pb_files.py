@@ -8,6 +8,7 @@ It loads pb file (from output directory), makes some changes and (if wanted)
 saves new files to output/cleaned dir.
 """
 
+import collections
 import csv
 import glob
 import math
@@ -29,7 +30,6 @@ logger = utils.create_logger()
 class ModifyPBFiles:
     input_files_path: str = None
     output_files_path: str = None
-    counter = []
 
     def __post_init__(self):
         pabulib_dir = os.path.join(os.getcwd(), "src")
@@ -58,9 +58,6 @@ class ModifyPBFiles:
                 self.save_to_file()
             # self.save_to_file()
             self.modified = False
-        print("hakuna!", len(self.counter))
-        for desc, instance in self.counter:
-            print(desc, instance)
 
     def update_number_of_votes(self):
         self.meta["num_votes"] = len(self.votes)
@@ -128,24 +125,31 @@ class ModifyPBFiles:
         )
 
     def do_some_modifications(self, idx):
-        self.modified = True  # set it to True if you want to save new file
+        self.modified = False  # set it to True if you want to save new file
         # self.remove_projects_with_no_cost()
         # self.remove_projects_with_no_votes()
         # self.update_projects_votes()
         # self.update_number_of_votes()
         # self.update_number_of_projects()
-        self.update_projects_scores()
+        # self.update_projects_scores()
         # self.replace_commas_in_floats()
         # self.replace_semicolons_in_votes()
         # self.add_selected_to_projects_section(idx)
         # self.calculate_selected_from_budget()
         # self.change_voters_sex()
-        self.projects = utils.sort_projects_by_results(self.projects)
+        # self.projects = utils.sort_projects_by_results(self.projects)
         # self.change_year_into_dates()
         # self.add_fully_funded()
         # self.add_currency()
         # self.add_description()
-        self.change_type_into_choose_1()
+        # self.change_type_into_choose_1()
+        self.get_all_used_comments()
+
+    def get_all_used_comments(self):
+        if self.meta.get("comment"):
+            # check if split needed
+            comment = self.meta["comment"]
+            self.comments[comment].append(self.filename)
 
     def change_type_into_choose_1(self):
         if self.meta["vote_type"] == "approval":
@@ -359,6 +363,22 @@ class ModifyPBFiles:
             self.write_projects_section(writer)
             self.write_votes_section(writer)
 
+    def run_pre_iteration(self):
+        self.comments = collections.defaultdict(list)
+        self.counter = []
+
+    def run_post_iteration(self):
+        # print("hakuna!", len(self.counter))
+        # for desc, instance in self.counter:
+        #     print(desc, instance)
+        for comment, files in self.comments.items():
+            print(comment, files, sep="\n")
+
+    def start(self):
+        self.run_pre_iteration()
+        self.iterate_through_pb_files()
+        self.run_post_iteration()
+
 
 mpbf = ModifyPBFiles()
-mpbf.iterate_through_pb_files()
+mpbf.start()

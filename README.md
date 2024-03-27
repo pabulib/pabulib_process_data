@@ -27,7 +27,7 @@ pip install -r requirements.txt
 ```
 1. add data to data/<city> directory
 2. add all needed scritps to process_data/cities/<city>
-    get_projects.py, budgets.py and settings.py are obligatory
+    settings.py and budgets.py are obligatory
 3. run the process:
     start_process.py
 ```

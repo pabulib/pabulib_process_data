@@ -53,10 +53,10 @@ all_data = {
                 "description": "PB in Wrocław, projects of local significance"
             },
             "comment": (
-                "Due to a system error, project 285 was mistakenly categorized"
+                "Due to a system error, project 285 was mistakenly categorized "
                 "as a citywide before being accurately reclassified as a local"
                 " one. However, during this time, it had gathered 141 votes, "
-                "making it appear as though some voters had cast two votes"
+                "making it appear as though some voters had cast two votes "
                 "for local projects. We separated them by adding the prefix"
                 " 99999 to the voter_id, to be consistent with city results "
                 "and to avoid having incorrect (i.e., too long) votes."
