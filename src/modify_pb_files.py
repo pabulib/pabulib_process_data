@@ -13,6 +13,7 @@ import csv
 import glob
 import math
 import os
+import re
 from copy import deepcopy
 from dataclasses import dataclass
 
@@ -147,9 +148,22 @@ class ModifyPBFiles:
 
     def get_all_used_comments(self):
         if self.meta.get("comment"):
-            # check if split needed
             comment = self.meta["comment"]
-            self.comments[comment].append(self.filename)
+            # self.edit_comment(comment)
+            # comments are enumerated with `#n:` where n means comment number
+            split_pattern = r"#\d+:\s(.*?)"
+            comments = re.split(split_pattern, comment)
+            comments = [comment.strip() for comment in comments if comment]
+            for comment in comments:
+                if comment:
+                    self.comments[comment].append(self.filename)
+
+    def edit_comment(self, comment):
+        if comment == "#1: Actual comment.":
+            comment = "#1: New comment."
+
+        self.meta["comment"] = comment
+        self.modified = True
 
     def change_type_into_choose_1(self):
         if self.meta["vote_type"] == "approval":

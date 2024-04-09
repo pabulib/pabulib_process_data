@@ -52,15 +52,17 @@ all_data = {
             "district": {
                 "description": "PB in Wrocław, projects of local significance"
             },
-            "comment": (
-                "Due to a system error, project 285 was mistakenly categorized "
-                "as a citywide before being accurately reclassified as a local"
-                " one. However, during this time, it had gathered 141 votes, "
-                "making it appear as though some voters had cast two votes "
-                "for local projects. We separated them by adding the prefix"
-                " 99999 to the voter_id, to be consistent with city results "
-                "and to avoid having incorrect (i.e., too long) votes."
-            ),
+            "comment": [
+                (
+                    "Due to a system error, project 285 was mistakenly categorized "
+                    "as a citywide before being accurately reclassified as a local"
+                    " one. However, during this time, it had gathered 141 votes, "
+                    "making it appear as though some voters had cast two votes "
+                    "for local projects. We separated them by adding the prefix"
+                    " 99999 to the voter_id, to be consistent with city results "
+                    "and to avoid having incorrect (i.e., too long) votes."
+                )
+            ],
         },
     },
     2022: {
@@ -113,14 +115,16 @@ all_data = {
             "max_length": "1",
             "edition": "10",
             "currency": "PLN",
-            "comment": (
-                "Due to an error in the voting system, there were 4 voters "
-                "with two local votes instead of one citywide and one local."
-                " The city counted them, so for the consistency of the "
-                "results, we moved these four votes from the citywide to the"
-                " local (added at the end with the prefix 11) and counted "
-                "them as proper votes."
-            ),
+            "comment": [
+                (
+                    "Due to an error in the voting system, there were 4 voters "
+                    "with two local votes instead of one citywide and one local."
+                    " The city counted them, so for the consistency of the "
+                    "results, we moved these four votes from the citywide to the"
+                    " local (added at the end with the prefix 11) and counted "
+                    "them as proper votes."
+                )
+            ],
             "unit": {},
             "district": {
                 "description": "PB in Wrocław, projects of local significance"

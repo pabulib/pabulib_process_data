@@ -129,5 +129,8 @@ class CreateMetaSections(BaseConfig):
             f"budget;{budget}\n"
         )
         for key, value in temp_meta.items():
+            if key == "comment":
+                comments = [f"#{idx}: {com}" for idx, com in enumerate(value, 1)]
+                value = " ".join(comments)
             metadata += f"{key};{value}\n"
         return metadata
