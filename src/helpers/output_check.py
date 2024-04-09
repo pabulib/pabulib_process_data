@@ -331,13 +331,12 @@ class CheckOutputFiles:
         self.check_vote_length(meta, votes)
         self.check_votes_and_scores(projects, votes)
         self.check_greedy_winners(meta, projects)
-        name_elements = [
-            meta.get("country"),
-            meta.get("unit"),
-            meta.get("instance"),
-            meta.get("subunit"),
-        ]
-        webpage_name = " ".join(el for el in name_elements if el)
+        country = meta["country"]
+        unit = meta["unit"]
+        instance = meta["instance"]
+        webpage_name = f"{country} {unit} {instance}"
+        if meta.get("subunit"):
+            webpage_name += f" {meta['subunit']}"
         logger.info(f"PB name would be created on webpage: `{webpage_name}`")
 
     def check_votes_and_scores(self, projects, votes):

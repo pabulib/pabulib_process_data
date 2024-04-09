@@ -92,18 +92,20 @@ class CreateMetaSections(BaseConfig):
             temp_meta.pop("district", None)
 
         else:
-            if not subdistrict:
-                subdistrict = district
             if self.subdistricts_mapping:
                 district = self.subdistricts_mapping[district]
+            if self.unit.title() == "Warszawa":
+                unit = "Warsaw"
+            else:
+                unit = self.unit.title()
             if temp_meta.get("district") and temp_meta["district"].get("description"):
                 description = temp_meta["district"].pop("description")
             elif self.subdistricts_mapping or subdistrict:
-                description = (
-                    f"Local PB in {self.unit.title()}, " f"{district} | {subdistrict}"
-                )
+                description = f"Local PB in {unit}, " f"{district} | {subdistrict}"
             else:
-                description = f"District PB in {self.unit.title()}, {district}"
+                description = f"District PB in {unit}, {district}"
+            if not subdistrict:
+                subdistrict = district
             district_txt = f"district;{district}\n"
 
             subunit = self.create_subunit_value(temp_meta, district, subdistrict)

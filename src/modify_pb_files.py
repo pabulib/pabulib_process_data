@@ -129,10 +129,10 @@ class ModifyPBFiles:
         self.modified = False  # set it to True if you want to save new file
         # self.remove_projects_with_no_cost()
         # self.remove_projects_with_no_votes()
-        # self.update_projects_votes()
+        self.update_projects_votes()
         # self.update_number_of_votes()
         # self.update_number_of_projects()
-        # self.update_projects_scores()
+        self.update_projects_scores()
         # self.replace_commas_in_floats()
         # self.replace_semicolons_in_votes()
         # self.add_selected_to_projects_section(idx)
@@ -144,7 +144,34 @@ class ModifyPBFiles:
         # self.add_currency()
         # self.add_description()
         # self.change_type_into_choose_1()
-        self.get_all_used_comments()
+        # self.get_all_used_comments()
+        # self.change_description()
+        # self.modify_zurich_files()
+        self.modify_mechanical_turk_files()
+
+    def modify_mechanical_turk_files(self):
+        self.meta["language"] = "en"
+        self.meta["country"] = "Worldwide"
+        self.meta["experimental"] = "true"
+        self.modified = True
+
+    def modify_zurich_files(self):
+        for date in ["date_begin", "date_end"]:
+            file_date = self.meta[date]
+            y, m, d = file_date.split("-")
+            self.meta[date] = f"{d}.{m}.{y}"
+        self.modified = True
+        self.meta["acknowledgments"] = self.meta.pop("comment")
+        self.meta["instance"] = self.filename.split("_")[-1].split(".")[0]
+        self.meta["experimental"] = "true"
+
+    def change_description(self):
+        district = self.meta["subunit"]
+        unit = self.meta["unit"]
+        if unit == "Warszawa":
+            unit = "Warsaw"
+        self.meta["description"] = f"District PB in {unit}, {district}"
+        self.modified = True
 
     def get_all_used_comments(self):
         if self.meta.get("comment"):
