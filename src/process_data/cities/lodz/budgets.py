@@ -49,7 +49,7 @@ budgets = {
             "WIDZEW-WSCHÓD": 897000,
             "ZARZEW": 664000,
         },
-        "CITYWIDE": {"CITYWIDE": 7000000},
+        "CITYWIDE": {"CITYWIDE": 7600000},
     },
 }
 

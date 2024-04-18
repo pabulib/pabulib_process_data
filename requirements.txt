@@ -15,6 +15,7 @@ loguru==0.7.0
 lxml==4.9.2
 numpy==1.25.0
 opencv-python==4.8.0.74
+openpyxl==3.1.2
 outcome==1.2.0
 pandas==2.0.3
 pdf2docx==0.5.6

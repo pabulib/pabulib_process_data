@@ -129,10 +129,10 @@ class ModifyPBFiles:
         self.modified = False  # set it to True if you want to save new file
         # self.remove_projects_with_no_cost()
         # self.remove_projects_with_no_votes()
-        self.update_projects_votes()
+        # self.update_projects_votes()
         # self.update_number_of_votes()
         # self.update_number_of_projects()
-        self.update_projects_scores()
+        # self.update_projects_scores()
         # self.replace_commas_in_floats()
         # self.replace_semicolons_in_votes()
         # self.add_selected_to_projects_section(idx)
@@ -144,10 +144,10 @@ class ModifyPBFiles:
         # self.add_currency()
         # self.add_description()
         # self.change_type_into_choose_1()
-        # self.get_all_used_comments()
+        self.get_all_used_comments()
         # self.change_description()
         # self.modify_zurich_files()
-        self.modify_mechanical_turk_files()
+        # self.modify_mechanical_turk_files()
 
     def modify_mechanical_turk_files(self):
         self.meta["language"] = "en"
@@ -188,6 +188,8 @@ class ModifyPBFiles:
     def edit_comment(self, comment):
         if comment == "#1: Actual comment.":
             comment = "#1: New comment."
+        # elif not comment.startswith("#1: "):
+        #     comment = f"#1: {comment}"
 
         self.meta["comment"] = comment
         self.modified = True

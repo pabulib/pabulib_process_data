@@ -60,13 +60,20 @@ all_data = {
             "language": "polish",
             "edition": "10",
             "currency": "PLN",
-            "unit": {"max_length": "10"},
-            "district": {"max_length": "15"},
-            "comment": [
-                "The metadata regarding the age of voters shows very low values (starting from zero), indicating that one doesn't need to be an adult to vote: If a voter is under 13, they can vote with the consent of a parent or guardian. Hence, for example, age 0 likely corresponds to cases where parents/guardians are voting on behalf of their children.",
-                "Due to a voting system glitch, twelve voters mistakenly cast ballots for projects in two different districts, violating regulations. To align with city-wide results, we tagged these voters with the prefix 999999 and separated their ballots into two distinct votes. The final election outcome was not affected.",  # should be applied only for districts where it happend
-                # "It happens that two (or more) projects are mutually exclusive, meaning they are intended to be implemented in the very same location. Therefore, the results presented in the ‘selected’ column may differ from those obtained by simply applying the greedy rule." comment applies only to city-wide projects
-            ],
+            "unit": {
+                "max_length": "10",
+                "comment": [
+                    "The metadata regarding the age of voters shows very low values (starting from zero), indicating that one doesn't need to be an adult to vote: If a voter is under 13, they can vote with the consent of a parent or guardian. Hence, for example, age 0 likely corresponds to cases where parents/guardians are voting on behalf of their children.",
+                    "It happens that two (or more) projects are mutually exclusive, meaning they are intended to be implemented in the very same location. Therefore, the results presented in the ‘selected’ column may differ from those obtained by simply applying the greedy rule.",
+                ],
+            },
+            "district": {
+                "max_length": "15",
+                "comment": [
+                    "The metadata regarding the age of voters shows very low values (starting from zero), indicating that one doesn't need to be an adult to vote: If a voter is under 13, they can vote with the consent of a parent or guardian. Hence, for example, age 0 likely corresponds to cases where parents/guardians are voting on behalf of their children.",
+                    "Due to a voting system glitch, twelve voters mistakenly cast ballots for projects in two different districts, violating regulations. To align with city-wide results, we tagged these voters with the prefix 999999 and separated their ballots into two distinct votes. The final election outcome was not affected.",  # should be applied only for districts where it happend
+                ],
+            },
         },
     }
 }

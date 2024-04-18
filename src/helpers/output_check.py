@@ -91,11 +91,20 @@ class CheckOutputFiles:
     def log_wrong_greedy_winners(self, txt: str) -> None:
         """Create log text: cost of selected projects exceeded budget."""
 
-        text = f"Wrong selected projects if Greedy Winners rule! " f"{txt}"
-        error = "rule greedy winners not followed"
+        text = f"Wrong selected projects if Greedy rule applied! " f"{txt}"
+        error = "greedy rule not followed"
         self.log_and_add_to_report(error, text)
 
-    def log_greedy_difference(self, greedy: dict, selected: dict) -> None:
+    def log_wrong_poznan_winners(self, txt: str) -> None:
+        """Create log text: cost of selected projects exceeded budget."""
+
+        text = f"Wrong selected projects if Poznań rule applied! " f"{txt}"
+        error = "poznan rule not followed"
+        self.log_and_add_to_report(error, text)
+
+    def log_greedy_difference(
+        self, greedy: dict, selected: dict, rule="GREEDY"
+    ) -> None:
         """Create log text: cost of selected projects exceeded budget."""
 
         text = ""
@@ -106,7 +115,7 @@ class CheckOutputFiles:
                 text += f"{str(project)}\n"
 
         if greedy:
-            text += "PROJECTS THAT SHOULD BE SELECTED IN GREEDY WINNERS:\n"
+            text += f"PROJECTS THAT SHOULD BE SELECTED IN {rule} RULE:\n"
 
             for project in greedy.values():
                 text += f"{str(project)}\n"
@@ -330,7 +339,7 @@ class CheckOutputFiles:
         self.check_number_of_projects(meta["num_projects"], projects)
         self.check_vote_length(meta, votes)
         self.check_votes_and_scores(projects, votes)
-        self.check_greedy_winners(meta, projects)
+        self.verify_selected(meta, projects)
         country = meta["country"]
         unit = meta["unit"]
         instance = meta["instance"]
@@ -350,10 +359,18 @@ class CheckOutputFiles:
             if self.check_scores:
                 self.check_if_correct_scores_number(projects, votes)
 
-    def check_greedy_winners(self, meta, projects):
+    def verify_selected(self, meta, projects):
         selected_field = next(iter(projects.values())).get("selected")
         if selected_field:
-            self.check_if_greedy_winners(meta["budget"], projects)
+            projects = utils.sort_projects_by_results(projects)
+            results = "votes"
+            if self.check_scores:
+                results = "score"
+            budget = float(meta["budget"].replace(",", "."))
+            if meta["unit"] == "Poznań":
+                self.verify_poznan_selected(budget, projects, results)
+            else:
+                self.verify_greedy_selected(budget, projects, results)
         else:
             logger.info("There is no selected field!")
             error_text = "No selected field in PROJECTS section"
@@ -378,12 +395,43 @@ class CheckOutputFiles:
         summary_text += "\n**********************************************"
         logger.critical(summary_text)
 
-    def check_if_greedy_winners(self, budget, projects):
-        projects = utils.sort_projects_by_results(projects)
-        results = "votes"
-        if self.check_scores:
-            results = "score"
-        budget = float(budget.replace(",", "."))
+    def verify_poznan_selected(self, budget, projects, results):
+        file_selected = dict()
+        rule_selected = dict()
+        get_rule_projects = True
+        for project_id, project_dict in projects.items():
+            project_cost = float(project_dict["cost"])
+            cost_printable = utils.make_cost_printable(project_cost)
+            row = [project_id, project_dict[results], cost_printable]
+            if int(project_dict["selected"]) in (1, 2):
+                # 2 for projects from 80% rule
+                file_selected[project_id] = row
+            if get_rule_projects:
+                if budget >= project_cost:
+                    rule_selected[project_id] = row
+                    budget -= project_cost
+                else:
+                    if budget >= project_cost * 0.8:
+                        # if there is no more budget but project costs
+                        # 80% of left budget it would be funded
+                        rule_selected[project_id] = row
+                    get_rule_projects = False
+        rule_selected_set = set(rule_selected.keys())
+        file_selected_set = set(file_selected.keys())
+        should_be_selected = rule_selected_set.difference(file_selected_set)
+        if should_be_selected:
+            text = f"Projects not selected but should be: {should_be_selected}"
+            self.log_wrong_poznan_winners(text)
+
+        shouldnt_be_selected = file_selected_set.difference(rule_selected_set)
+        if shouldnt_be_selected:
+            text = f"Projects selected but should not: {shouldnt_be_selected}"
+            self.log_wrong_poznan_winners(text)
+
+        if should_be_selected or should_be_selected:
+            self.log_greedy_difference(rule_selected, file_selected, "POZNAŃ")
+
+    def verify_greedy_selected(self, budget, projects, results):
         selected_projects = dict()
         greedy_winners = dict()
         for project_id, project_dict in projects.items():
