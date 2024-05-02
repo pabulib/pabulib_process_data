@@ -363,11 +363,11 @@ def create_logger(logger_level=None):
         "<green>{time:HH:mm:ss}</green> "
         "| Pabulib "
         "| <level>{level: <8}</level> "
+        "- <level>{message}</level>"
         #    "| {file} " # filaname from which log is diplayed.
-        "| <cyan>{name}</cyan>"
+        "\n| <cyan>{name}</cyan>"
         ":<cyan>{function}</cyan>:"
         "<cyan>{line}</cyan> "
-        "- <level>{message}</level>"
     )
     config = {
         "handlers": [
