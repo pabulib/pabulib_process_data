@@ -5,7 +5,7 @@ from process_data.create_votes_section import CreateVotesSections
 from process_data.get_projects_excel import GetProjects
 from process_data.get_votes_excel import GetVotesExcel
 
-unusual_units = ["mechanical_turk"]
+unusual_units = ["mechanical_turk", "stanford"]
 
 
 def run_it(year, unit, scrape_data=False):

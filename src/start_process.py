@@ -7,10 +7,11 @@ settings = {"year": 2023, "scrape_data": True}
 logger = create_logger()
 
 # city = "Warszawa"
-city = "Łódź"
+# city = "Łódź"
 # city = "Poznań"
 # city = "Gdynia"
 # city = "mechanical_turk"
+city = "stanford"
 # city = "Lublin"
 # city = "Wrocław"
 # city = "Kraków"
