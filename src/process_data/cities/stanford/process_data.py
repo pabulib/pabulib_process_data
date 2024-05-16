@@ -60,6 +60,7 @@ class ProcessData(BaseConfig):
                     vote[row["election_id"]] = collections.defaultdict(list)
                 vote[row["election_id"]][row["voter_id"]].append(row["project_id"])
             all_votes[vote_name] = vote
+
         return all_votes
 
     def load_projects_per_election(self):
@@ -110,6 +111,30 @@ class ProcessData(BaseConfig):
             projects = self.projects_per_election[election_id]
             all_projects = self.create_project_items(projects)
             for vote_name, vote_data in self.all_votes.items():
+                if vote_name == "vote_approval":
+                    # handle approvals, so only selected projects, without any particular order
+                    pass
+                elif vote_name == "vote_infer_knapsack_partial":
+                    # ordinal, so only correct order ("rank" field, max length 5, check min length)
+                    # the remaining budget is assigned to the next project in line
+                    # – allocated is the budget that under this method would be allocated to the project by the voter.
+                    pass
+                elif vote_name == "vote_infer_knapsack_skip":
+                     # ordinal, so only correct order ("rank" field, max length 5, check min length)
+                     # the remaining budget is assigned to the next ranked project that can be fully funded
+                     # – allocated is the budget that under this method would be allocated to the project by the voter.
+                     pass
+                elif vote_name == "vote_knapsacks_clean":
+                    # same as approvals? 
+                    # handle approvals, so only selected projects, without any particular order
+                    pass
+                elif vote_name == "vote_rankings_clean":
+                    # ordinal, so only correct order ("rank" field, max length 5, check min length)
+                    pass
+                elif vote_name == "vote_tokens_clean":
+                    # cumulative, so votes and score (34,35,12;5,3,2), where tokens are points
+                    # get tokens
+                    pass
                 if vote_data.get(election_id):
                     print(vote_name)
                     all_voters = []
@@ -122,18 +147,11 @@ class ProcessData(BaseConfig):
                             )
                         voter_item = VoterItem(voter_id)
                         voter_item.vote = ",".join(votes)
-                        if vote_name == "vote_approvals":
-                            # "vote_infer_knapsack_partial"
-                            # "vote_infer_knapsack_skip"
-                            # "vote_knapsacks_clean"
-                            # "vote_rankings_clean"
-                            # "vote_tokens_clean"
+                        vote_type = election_data["phase_0"]
+                        if vote_type == "approval":
                             all_voters.append(voter_item)
-                        # elif vote_name == ""
-                    # print(all_voters)
-                    # create file
-                    # file_name = f"{self.country}_{self.unit}_{self.instance}_{vote_name}"
-                    file_name = f"{self.unit}_{vote_name}"
+                    vote_name = election_data["name"]
+                    file_name = f"{self.unit}_{vote_name.replace(" ", "_")}"
                     file_, csv_file = utils.create_csv_file(file_name)
 
                     # order projects by score / votes
@@ -166,22 +184,38 @@ class ProcessData(BaseConfig):
     def add_metadata(self, file_name, election_data, vote_name):
         print(election_data)
         path_to_file = utils.get_path_to_file(file_name)
-        num_projects_counted, num_votes = utils.count_projects_and_votes(path_to_file)
+        
+        num_projects_counted, num_votes_counted = utils.count_projects_and_votes(path_to_file)
         num_projects = election_data["total_n_projects"]
-
+        num_votes = election_data["voters_total"]
         if int(num_projects) != int(num_projects_counted):
             raise RuntimeError(
                 f"Number of projects from file and data does not match!\n"
-                f" Counted: {num_projects_counted} vs from data {num_projects}"
+                f"Counted: {num_projects_counted} vs from data {num_projects}"
             )
+        if int(num_votes) != int(num_votes_counted):
+            self.logger.info(
+                f"Number of votes from file and data does not match!\n"
+                f"Counted: {num_votes_counted} vs from data {num_votes}"
+            )
+            # raise RuntimeError(
+            #     f"Number of votes from file and data does not match!\n"
+            #     f"Counted: {num_votes_counted} vs from data {num_votes}"
+            # )
 
         max_length = election_data.get("max_n_projects") or election_data.get(
             "setting_off_approval_k_projects"
         )
+        if max_length:
+            max_length = int(float(max_length.replace(",", ".")))
         budget = int(float(election_data["budget"].replace(",", ".")))
         description = election_data["name"]
         is_real_election = election_data["real_election"]
-        voters_total = election_data["voters_total"]
+        # TODO what to do with not real elections (atm only real ones)
+        if not is_real_election:
+            raise RuntimeError("It's not a real election, not implemented what to do")
+
+        vote_type = election_data["phase_0"]
 
         temp_meta = deepcopy(self.metadata)
 
@@ -194,16 +228,20 @@ class ProcessData(BaseConfig):
             f"instance;{self.instance}\n"
             f"num_projects;{num_projects}\n"
             f"num_votes;{num_votes}\n"
-            f"vote_type;{vote_name}\n"
+            f"vote_type;{vote_type}\n"
+            f"max_length;{max_length}\n" # only for approval
+            f"rule;???\n"
+            f"date_begin;??.??.????\n"
+            f"date_end;??.??.????\n"
             f"budget;{budget}\n"
+            f"language;???\n"
+            f"edition;???\n"
         )
 
         for key, value in temp_meta.items():
             metadata += f"{key};{value}\n"
 
-        # num_projects, num_votes = utils.count_projects_and_votes(path_to_file)
         utils.prepend_line_at_the_beggining_of_file(metadata, path_to_file)
-        raise RuntimeError
 
     def add_projects_section(self, csv_file):
         fields = ["project_id", "cost", "category", "latitude", "longitude"]
