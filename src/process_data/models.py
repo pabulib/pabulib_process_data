@@ -13,7 +13,7 @@ class ProjectItem:
     name: str = None
     target: str = None
     votes: int = None
-    points: int = None
+    score: int = None
     selected: int = None
     district: str = None
     district_upper: str = None
@@ -87,7 +87,7 @@ class VoterItem:
     sex: str = None
     voting_method: str = None
     vote: str = None
-    # points: str = None
+    points: str = None
     neighborhood: str = None
 
     def add_vote(self, vote):

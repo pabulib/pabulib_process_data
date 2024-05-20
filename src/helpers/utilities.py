@@ -401,7 +401,7 @@ def load_pb_file(pb_file, encoding="utf-8-sig"):
                 elif section == "projects":
                     votes_in_projects = True if "votes" in header else False
                     scores_in_projects = True if "score" in header else False
-                    projects[row[0]] = {}
+                    projects[row[0]] = {"id": row[0]}
                     for it, key in enumerate(header[1:]):
                         projects[row[0]][key.strip()] = row[it + 1].strip()
                 elif section == "votes":

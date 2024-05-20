@@ -132,7 +132,8 @@ class CheckOutputFiles:
             "cost of all projects: "
             f"{utils.get_str_with_sep_from(all_projects_cost)}"
         )
-        self.log_and_add_to_report(text)
+        error = "all projects funded"
+        self.log_and_add_to_report(error, text)
 
     def log_project_exceeded_budget(self, project_data: dict, budget: float) -> None:
         """Create log text: single project exceeded whole budget."""
@@ -149,11 +150,10 @@ class CheckOutputFiles:
 
     def log_project_no_cost(self, project_data: dict) -> None:
         """Create log text: single project exceeded whole budget."""
-
         text = (
             f"There is project with no cost! "
             f"It's possible that it was not approved for voting! "
-            f"project: {project_data['name']} "
+            f"project: {project_data.get('name') or project_data['id']} "
         )
 
         error = "project with no cost"
