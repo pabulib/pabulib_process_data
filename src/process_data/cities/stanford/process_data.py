@@ -1,9 +1,10 @@
 import ast
 import collections
 import csv
-import os
 from copy import deepcopy
 from dataclasses import dataclass
+
+from natsort import natsorted
 
 import helpers.utilities as utils
 from helpers import settings
@@ -137,19 +138,25 @@ class ProcessData(BaseConfig):
 
             # TODO to confirm: of 1 is the best rank:
             # if self.vote_type == "ordinal":
-            #     votes = sorted(zipped, key=lambda x: x[1])
+            #     votes = natsorted(zipped, key=lambda x: x[1])
             # else:
-            votes = sorted(zipped, key=lambda x: x[1], reverse=True)
+            votes = natsorted(zipped, key=lambda x: x[1], reverse=True)
             points = [vote[1] for vote in votes]
             votes = [vote[0] for vote in votes]
             if self.vote_type == "cumulative":
                 # not needed in ordinal as it's a ranking
-                voter_item.points = ",".join(points)  # not needed as it's ranking
+                voter_item.points = ",".join(points)
             for vote, point in zip(votes, points):
+                # if int(self.election_id) == 119:
+                #     print(vote, point)
                 self.all_projects_votes["votes"][vote] = self.all_projects_votes["votes"].get(vote, 0) + 1
                 self.all_projects_votes["score"][vote] = self.all_projects_votes["score"].get(vote, 0) + int(point)
-    
+
+            # if int(self.election_id) == 119:
+            #     print(self.all_projects_votes["score"].get('1225'))
+        
         voter_item.vote = ",".join(votes)
+
         return voter_item
 
     def create_all_voters_dict(self, vote_data):
@@ -220,6 +227,9 @@ class ProcessData(BaseConfig):
             for vote_name, vote_data in self.all_votes.items():
                 self.all_projects_votes = {"votes": {}, "score": {}}
                 if not vote_data.get(str(election_id)):
+                    continue
+                if vote_name in ("vote_infer_knapsack_partial", "vote_infer_knapsack_skip"):
+                    # dont process derived data
                     continue
                 self.get_vote_type(vote_name)
 
@@ -350,15 +360,18 @@ class ProcessData(BaseConfig):
         if self.vote_type in ("approval", "ordinal"):
             if self.vote_type == "approval":
                 length_field = "setting_off_approval_k_projects"
-                if vote_name in ("vote_infer_knapsack_partial", "vote_infer_knapsack_skip", "vote_infer_knapsack_clean"):
-                    # metadata += f"min_sum_cost;???\n"
-                    metadata += f"max_sum_cost;???\n"
+
             elif self.vote_type == "ordinal":
                 length_field = "setting_off_ranking_k_projects"
-            max_length = election_data.get("max_n_projects") or election_data.get(length_field)
-            if max_length:
-                max_length = int(float(max_length.replace(",", ".")))
-                metadata += f"max_length;{max_length}\n"
+            if vote_name in ("vote_infer_knapsack_partial", "vote_infer_knapsack_skip", "vote_knapsacks_clean"):
+                # metadata += f"min_sum_cost;???\n"
+                metadata += f"max_sum_cost;???\n"
+            else:
+                max_length = election_data.get("max_n_projects") or election_data.get(length_field)
+                if max_length:
+                    max_length = int(float(max_length.replace(",", ".")))
+                    # metadata += f"max_length;{max_length}\n"
+                    #TODO something wrong with these values
         elif self.vote_type == "cumulative":
             # metadata += f"min_sum_points;???\n"
             metadata += f"max_sum_points;???\n"
