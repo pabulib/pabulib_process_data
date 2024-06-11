@@ -86,11 +86,19 @@ class ModifyPBFiles:
                 self.projects[project_id]["votes"] = counted_votes
 
     def update_projects_scores(self):
-        self.check_scores = True
-        if self.check_scores:
-            self.counted_scores = utils.count_points_per_project(self.votes)
-            for project_id, score in self.counted_scores.items():
-                self.projects[project_id]["score"] = score
+        if self.meta["vote_type"] in ("cumulative", "ordinal"):
+            (_, project_data), *_ = self.projects.items()
+            if not project_data.get("score"):
+                self.counted_scores = utils.count_points_per_project(self.votes)
+                for project_id, score in self.counted_scores.items():
+                    self.projects[project_id]["score"] = score
+                self.modified = True
+
+        # self.check_scores = True
+        # if self.check_scores:
+        #     self.counted_scores = utils.count_points_per_project(self.votes)
+        #     for project_id, score in self.counted_scores.items():
+        #         self.projects[project_id]["score"] = score
 
     def replace_commas_in_floats(self):
         if "," in self.meta["budget"]:
@@ -144,10 +152,25 @@ class ModifyPBFiles:
         # self.add_currency()
         # self.add_description()
         # self.change_type_into_choose_1()
-        self.get_all_used_comments()
+        # self.get_all_used_comments()
         # self.change_description()
         # self.modify_zurich_files()
         # self.modify_mechanical_turk_files()
+        # self.remove_scores_from_approvals()
+        # self.standarize_category_column_in_projects()
+
+    def standarize_category_column_in_projects(self):
+        (_, project_data), *_ = self.projects.items()
+        if project_data.get("categories"):
+            self.modified = True
+
+    def remove_scores_from_approvals(self):
+        if self.meta["vote_type"] == "approval":
+            (_, project_data), *_ = self.projects.items()
+            if project_data.get("score"):
+                for project_id, project_data in self.projects.items():
+                    del project_data["score"]
+                self.modified = True
 
     def modify_mechanical_turk_files(self):
         self.meta["language"] = "en"
