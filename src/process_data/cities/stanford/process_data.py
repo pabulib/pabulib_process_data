@@ -146,15 +146,26 @@ class ProcessData(BaseConfig):
             if self.vote_type == "cumulative":
                 # not needed in ordinal as it's a ranking
                 voter_item.points = ",".join(points)
+            elif self.vote_type == "ordinal":
+                if len(points) != len(set(points)):
+                    text = (
+                        f"Election ID: {self.election_id}, vote name: "
+                        f"{self.vote_name} voter ID:  {voter_id} has two same"
+                        f" rankings!!\n votes: {votes}, rankings: {points}"
+                    )
+                    # raise RuntimeError(text)
+                    self.logger.info(text)
+                    return
             for vote, point in zip(votes, points):
-                # if int(self.election_id) == 119:
-                #     print(vote, point)
+                # if int(self.election_id) == 16:
+                #     if int(vote) == 237:
+                #         print(vote, point)
                 self.all_projects_votes["votes"][vote] = self.all_projects_votes["votes"].get(vote, 0) + 1
                 self.all_projects_votes["score"][vote] = self.all_projects_votes["score"].get(vote, 0) + int(point)
 
-            # if int(self.election_id) == 119:
-            #     print(self.all_projects_votes["score"].get('1225'))
-        
+            # if int(self.election_id) == 16:
+            #     print(self.all_projects_votes["score"].get('237'))
+
         voter_item.vote = ",".join(votes)
 
         return voter_item
@@ -163,9 +174,10 @@ class ProcessData(BaseConfig):
         all_voters = []
         for voter_id, votes in vote_data[self.election_id].items():
             voter_item = self.handle_voter_vote(voter_id, votes)
-            all_voters.append(voter_item)
+            if voter_item:
+                all_voters.append(voter_item)
         return all_voters
-    
+
     def sort_projects_by_results(projects, score_field="votes"):
         projects = dict(
             sorted(
@@ -175,8 +187,8 @@ class ProcessData(BaseConfig):
             )
         )
         return projects
-    
-    def add_project_votes(self, all_projects, score, vote_name):
+
+    def add_project_votes(self, all_projects, score):
         for project in all_projects:
             try:
                 project.votes = self.all_projects_votes["votes"][project.project_id]
@@ -189,35 +201,39 @@ class ProcessData(BaseConfig):
             if score:
                 project.score = self.all_projects_votes["score"][project.project_id]
         return all_projects
-    
-    def get_vote_type(self, vote_name):
-        if vote_name == "vote_approvals":
+
+    def get_vote_type(self):
+        if self.vote_name == "vote_approvals":
             self.vote_type = "approval"
             # handle approvals, so only selected projects, without any particular order
-        elif vote_name == "vote_infer_knapsack_partial":
+        elif self.vote_name == "vote_infer_knapsack_partial":
             self.vote_type = "approval"
             # approval, with max budget
             # the remaining budget is assigned to the next project in line
             # – allocated is the budget that under this method would be allocated to the project by the voter.
-        elif vote_name == "vote_infer_knapsack_skip":
+        elif self.vote_name == "vote_infer_knapsack_skip":
             self.vote_type = "approval"
             # approval, with max budget
             # the remaining budget is assigned to the next ranked project that can be fully funded
             # – allocated is the budget that under this method would be allocated to the project by the voter.
-        elif vote_name == "vote_knapsacks_clean":
+        elif self.vote_name == "vote_knapsacks_clean":
             self.vote_type = "approval"
             # approval, with max budget
             # handle approvals, so only selected projects, without any particular order
-        elif vote_name == "vote_rankings_clean":
+        elif self.vote_name == "vote_rankings_clean":
             self.vote_type = "ordinal"
             # ordinal, so only correct order ("rank" field, max length 5, check min length)
-        elif vote_name == "vote_tokens_clean":
+        elif self.vote_name == "vote_tokens_clean":
+            # raise RuntimeError(f"Not wanted file: {self.instance}")
             self.vote_type = "cumulative"
             # cumulative, so votes and score (34,35,12;5,3,2), where tokens are points
             # get tokens
-        
+        else:
+            raise RuntimeError(f"Not recognized vote type! {self.vote_type}")
+        self.all_vote_types[self.vote_name] = self.all_vote_types.get(self.vote_name, 0) + 1
 
     def iterate_through_elections(self):
+        self.all_vote_types = {}
         for election_id, election_data in self.elections_dict.items():
             # vote_type = election_data["phase_0"] # not needed as we have it from file name
             self.election_id = election_id
@@ -225,25 +241,26 @@ class ProcessData(BaseConfig):
             projects = self.projects_per_election[election_id]
             all_projects = self.create_project_items(projects)
             for vote_name, vote_data in self.all_votes.items():
+                self.vote_name = vote_name
                 self.all_projects_votes = {"votes": {}, "score": {}}
                 if not vote_data.get(str(election_id)):
                     continue
                 if vote_name in ("vote_infer_knapsack_partial", "vote_infer_knapsack_skip"):
                     # dont process derived data
                     continue
-                self.get_vote_type(vote_name)
+                self.get_vote_type()
 
                 all_voters = self.create_all_voters_dict(vote_data)
 
                 self.instance = election_data["name"]
-
-                file_name = f"{self.country}_{self.unit}_{self.instance.replace(" ", "_")}_{vote_name}"
+                name = f"{self.instance.replace(" ", "_").replace(":", "")}_{vote_name}"
+                file_name = f"{self.country}_{self.unit}_{name}"
                 file_, csv_file = utils.create_csv_file(file_name)
 
                 # create projects section
                 score = True if self.vote_type in ("cumulative", "ordinal") else None
 
-                all_projects = self.add_project_votes(all_projects, score, vote_name)
+                all_projects = self.add_project_votes(all_projects, score)
 
                 # sort by votes or score
                 if score:
@@ -268,7 +285,7 @@ class ProcessData(BaseConfig):
                     csv_file.writerow(row)
 
                 # create votes section
-                
+
                 points = True if self.vote_type == "cumulative" else None
                 self.add_votes_section(csv_file, points)
                 for voter in all_voters:
@@ -279,9 +296,10 @@ class ProcessData(BaseConfig):
 
                 file_.close()
 
-                self.add_metadata(file_name, election_data, vote_name)
+                self.add_metadata(file_name, election_data)
+        # raise RuntimeError(f"Vote types counted: {self.all_vote_types}")
 
-    def add_metadata(self, file_name, election_data, vote_name):
+    def add_metadata(self, file_name, election_data):
         # print(election_data)
         path_to_file = utils.get_path_to_file(file_name)
 
@@ -289,14 +307,14 @@ class ProcessData(BaseConfig):
             path_to_file
         )
         num_projects = election_data["total_n_projects"]
-        
+
         if int(num_projects) != int(num_projects_counted):
             raise RuntimeError(
                 f"Number of projects from file and data does not match!\n"
                 f"Counted: {num_projects_counted} vs from data {num_projects}\n"
-                f"Vote instance: {self.instance}, vote name: {vote_name}"
+                f"Vote instance: {self.instance}, vote name: {self.vote_name}"
             )
-        
+
         # if vote_name == "vote_approvals":
         #     num_votes_field = "exit_off_approval"
         # elif vote_name == "vote_infer_knapsack_partial":
@@ -321,11 +339,10 @@ class ProcessData(BaseConfig):
             # self.logger.info(
             #     f"Number of votes from file and data does not match!\n"
             #     f"Counted: {num_votes_counted} vs from data {num_votes}\n"
-            #     f"Vote instance: {self.instance}, vote name: {vote_name}"
+            #     f"Vote instance: {self.instance}, vote name: {self.vote_name}"
             # )
             pass
 
-        
         budget = int(float(election_data["budget"].replace(",", ".")))
         description = election_data["name"]
         is_real_election = election_data["real_election"]
@@ -342,7 +359,7 @@ class ProcessData(BaseConfig):
             f"country;{self.country}\n"
             f"unit;{self.unit}\n"
             f"instance;{self.instance}\n"
-            f"subunit;{vote_name}\n"
+            f"subunit;{self.vote_name}\n"
             f"num_projects;{num_projects}\n"
             f"num_votes;{num_votes_counted}\n"
             f"vote_type;{self.vote_type}\n"
@@ -356,22 +373,21 @@ class ProcessData(BaseConfig):
         for key, value in temp_meta.items():
             metadata += f"{key};{value}\n"
 
-
         if self.vote_type in ("approval", "ordinal"):
             if self.vote_type == "approval":
                 length_field = "setting_off_approval_k_projects"
 
             elif self.vote_type == "ordinal":
                 length_field = "setting_off_ranking_k_projects"
-            if vote_name in ("vote_infer_knapsack_partial", "vote_infer_knapsack_skip", "vote_knapsacks_clean"):
+            if self.vote_name in ("vote_infer_knapsack_partial", "vote_infer_knapsack_skip", "vote_knapsacks_clean"):
                 # metadata += f"min_sum_cost;???\n"
                 metadata += f"max_sum_cost;???\n"
             else:
                 max_length = election_data.get("max_n_projects") or election_data.get(length_field)
                 if max_length:
                     max_length = int(float(max_length.replace(",", ".")))
-                    # metadata += f"max_length;{max_length}\n"
-                    #TODO something wrong with these values
+                    metadata += f"max_length;{max_length}\n"
+                    # TODO something wrong with these values
         elif self.vote_type == "cumulative":
             # metadata += f"min_sum_points;???\n"
             metadata += f"max_sum_points;???\n"
