@@ -13,6 +13,7 @@ class GetProjects(BaseConfig):
     columns_mapping: dict
     data_dir: str = None
     excel_ext: str = "xlsx"
+    only_score_column: bool = False
 
     def __post_init__(self):
         self.selected_projects = False
@@ -67,7 +68,11 @@ class GetProjects(BaseConfig):
             name = row_values[self.col["name"]]
             item.add_name(name)
 
-            item.add_votes(votes)
+            if self.only_score_column:
+                item.add_score(votes)
+
+            else:
+                item.add_votes(votes)
             if self.col.get("score"):
                 item.add_score(row_values[self.col["score"]])
 

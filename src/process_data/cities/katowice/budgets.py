@@ -1,0 +1,65 @@
+budgets = {
+    2024: {
+        # https://bo.katowice.eu/add/file/1400270834.pdf
+        "CITYWIDE": 3005370,
+        "SRODMIESCIE": 1033564,
+        "ZALESKA_HALDA-BRYNOW_CZESC_ZACHODNIA": 742564,
+        "ZAWODZIE": 620288,
+        "OSIEDLE_PADEREWSKIEGO-MUCHOWIEC": 614761,
+        "BRYNOW_CZESC_WSCHODNIA-OSIEDLE_ZGRZEBNIOKA": 766039,
+        "LIGOTA-PANEWNIKI": 1127507,
+        "ZALEZE": 540489,
+        "OSIEDLE_WITOSA": 639443,
+        "OSIEDLE_TYSIACLECIA": 889181,
+        "DAB": 479863,
+        "WELNOWIEC-JOZEFOWIEC": 703279,
+        "KOSZUTKA": 562267,
+        "BOGUCICE": 661709,
+        "DABROWKA_MALA": 437009,
+        "SZOPIENICE-BUROWIEC": 688135,
+        "JANOW-NIKISZOWIEC": 548053,
+        "GISZOWIEC": 722007,
+        "MURCKI": 444207,
+        "PIOTROWICE-OCHOJEC": 950986,
+        "ZARZECZE": 367337,
+        "KOSTUCHNA": 637401,
+        "PODLESIE": 508029,
+    },
+    2023: {
+        # https://bo.katowice.eu/add/file/1400270834.pdf
+        "CITYWIDE": 3004498,
+        "SRODMIESCIE": 884230,
+        "ZALESKA_HALDA-BRYNOW_CZESC_ZACHODNIA": 595437,
+        "ZAWODZIE": 505327,
+        "OSIEDLE_PADEREWSKIEGO-MUCHOWIEC": 548236,
+        "BRYNOW_CZESC_WSCHODNIA-OSIEDLE_ZGRZEBNIOKA": 396865,
+        "LIGOTA-PANEWNIKI": 980136,
+        "ZALEZE": 448687,
+        "OSIEDLE_WITOSA": 550773,
+        "OSIEDLE_TYSIACLECIA": 764777,
+        "DAB": 434136,
+        "WELNOWIEC-JOZEFOWIEC": 610021,
+        "KOSZUTKA": 479949,
+        "BOGUCICE": 573577,
+        "DABROWKA_MALA": 510077,
+        "SZOPIENICE-BUROWIEC": 618451,
+        "JANOW-NIKISZOWIEC": 633859,
+        "GISZOWIEC": 621203,
+        "MURCKI": 377664,
+        "PIOTROWICE-OCHOJEC": 816115,
+        "ZARZECZE": 311851,
+        "KOSTUCHNA": 562593,
+        "PODLESIE": 408882,
+    },
+}
+
+
+# sum check
+
+year = 2024
+
+suma = 0
+for district, budget in budgets[year].items():
+    suma += budget
+
+print(suma)

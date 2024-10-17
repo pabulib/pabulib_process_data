@@ -159,6 +159,17 @@ class CheckOutputFiles:
         error = "project with no cost"
         self.log_and_add_to_report(error, text)
 
+    def log_unused_budget(self, project_data: dict, budget_remaining) -> None:
+        """Create log text: There is unused budget."""
+        text = (
+            f"There is unused budget! "
+            f"Project can be funded but it's not selected! "
+            f"project: {project_data.get('name') or project_data['id']} "
+        )
+
+        error = "unused budget"
+        self.log_and_add_to_report(error, text)
+
     def log_exceeded_vote_length(
         self, voter_id: str, max_length: int, voter_votes: int
     ) -> None:
@@ -325,6 +336,16 @@ class CheckOutputFiles:
                 if "," in cost:
                     self.log_comma_in_float(f"in project: {project_number}")
 
+    def check_if_empty_lines(self, pb_file):
+        with open(pb_file, "r") as file:
+            # Loop through each line with an index
+            for line_number, line in enumerate(file, start=1):
+                # Check if the line is empty (strip removes any whitespace)
+                if line.strip() == "":
+                    error = "empty line"
+                    text = f"Empty line found at line {line_number} !"
+                    self.log_and_add_to_report(error, text)
+
     def run_checks(self, pb_file: str) -> None:
         """Run all checks on a given .pb file."""
 
@@ -333,6 +354,7 @@ class CheckOutputFiles:
         (meta, projects, votes, self.check_votes, self.check_scores) = (
             utils.load_pb_file(pb_file)
         )
+        self.check_if_empty_lines(pb_file)
         self.check_if_commas_in_floats(meta, projects)
         self.check_budgets(meta, projects)
         self.check_number_of_votes(meta["num_votes"], votes)
@@ -367,10 +389,16 @@ class CheckOutputFiles:
             if self.check_scores:
                 results = "score"
             budget = float(meta["budget"].replace(",", "."))
+            rule = meta["rule"]
             if meta["unit"] == "Poznań":
                 self.verify_poznan_selected(budget, projects, results)
-            else:
+            elif rule == "greedy":
                 self.verify_greedy_selected(budget, projects, results)
+            else:
+                # TODO add checker for other rules!
+                logger.info(
+                    f"Rule different than `greedy`. Not implemented checker for rule {rule}"
+                )
         else:
             logger.info("There is no selected field!")
             error_text = "No selected field in PROJECTS section"
@@ -534,3 +562,13 @@ class CheckOutputFiles:
                 print(project)
         if budget_available > all_projects_cost:
             self.log_all_projects_funded(budget_available, all_projects_cost)
+
+        # check if unused budget
+        budget_remaining = budget_available - budget_spent
+        for _, project_data in projects.items():
+            selected_field = project_data.get("selected")
+            if selected_field:
+                if int(selected_field) == 0:
+                    project_cost = int(project_data["cost"])
+                    if project_cost < budget_remaining:
+                        self.log_unused_budget(project_data, budget_remaining)

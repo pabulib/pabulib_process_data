@@ -134,10 +134,10 @@ class ModifyPBFiles:
         )
 
     def do_some_modifications(self, idx):
-        self.modified = False  # set it to True if you want to save new file
+        self.modified = True  # set it to True if you want to save new file
         # self.remove_projects_with_no_cost()
         # self.remove_projects_with_no_votes()
-        # self.update_projects_votes()
+        self.update_projects_votes()
         # self.update_number_of_votes()
         # self.update_number_of_projects()
         # self.update_projects_scores()
@@ -158,6 +158,20 @@ class ModifyPBFiles:
         # self.modify_mechanical_turk_files()
         # self.remove_scores_from_approvals()
         # self.standarize_category_column_in_projects()
+        # self.check_dates()
+
+    def check_dates(self):
+        date_begin = self.meta["date_begin"]
+        date_end = self.meta["date_end"]
+
+        pattern = re.compile(r"\d{1,2}.\d{1,2}.\d{4}")
+
+        for date in [date_begin, date_end]:
+            if pattern.match(date):
+                return
+            if "." not in str(date) and len(str(date)) == 4:
+                return
+            raise RuntimeError(f"date `{date}` do not match the pattern")
 
     def standarize_category_column_in_projects(self):
         (_, project_data), *_ = self.projects.items()
@@ -408,6 +422,7 @@ class ModifyPBFiles:
         save_headers = True
         for project_id, project_info in self.projects.items():
             sorted_fields = self.sort_projects_fields(project_info)
+            del sorted_fields["id"]
             if save_headers:
                 project_headers = list(sorted_fields.keys())
                 if "categories" in project_headers:

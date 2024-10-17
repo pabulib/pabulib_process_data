@@ -165,7 +165,10 @@ def get_col_names_indexes(sheet, headers_row=0):
     """Get column names in given excel file."""
     col_names_indexes = {}
     for col_index in range(sheet.ncols):
-        col_names_indexes[sheet.cell_value(headers_row, col_index)] = col_index
+        column_name = (
+            sheet.cell_value(headers_row, col_index).replace("\n", " ").strip()
+        )
+        col_names_indexes[column_name] = col_index
     return col_names_indexes
 
 
@@ -493,11 +496,12 @@ def sort_projects_data_per_dictrict(projects_data, subdistricts=False):
         first_project_dict = next(iter(next(iter(projects_data.values())).values()))[0]
     else:
         first_project_dict = next(iter(projects_data.values()))[0]
-    if "score" in first_project_dict:
+    if first_project_dict.get("score"):
         score_field = "score"
     else:
         score_field = "votes"
     if subdistricts:
+        print(projects_data)
         return {
             district: {
                 subdistrict: sorted(

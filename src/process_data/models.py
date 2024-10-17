@@ -63,7 +63,7 @@ class ProjectItem:
         try:
             self.selected = int(status)
         except ValueError:
-            self.selected = mapps.selected_mapping[status]
+            self.selected = mapps.selected_mapping[status.lower()]
 
     def add_target(self, target_list):
         self.target = ",".join(target_list)

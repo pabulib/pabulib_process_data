@@ -1,8 +1,10 @@
 voting_method_mapping = {"elektronicznie": "internet", "papierowo": "paper"}
 
 selected_mapping = {
-    "Wybrany w głosowaniu": 1,
-    "Niewybrany w głosowaniu": 0,
+    "wybrany w głosowaniu": 1,
+    "niewybrany w głosowaniu": 0,
+    "wybrane": 1,
+    "niewybrane": 0,
     # "Oceniony negatywnie": 0,
 }
 
@@ -31,6 +33,7 @@ category_mapping = {
     "zdrowie i pomoc społeczna": "health and welfare",
     "inne": None,
     "edukacja, dzieci i młodzież": "education, children and youth",
+    "drogi/komunikacja": "public transit and roads",
 }
 
 target_mapping = {

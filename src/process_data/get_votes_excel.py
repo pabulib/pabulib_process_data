@@ -209,6 +209,8 @@ class GetVotesExcel(BaseConfig):
             district = self.project_district_mapping[vote]
         else:
             district = row[self.col[col_name]]
+            if district == "":
+                district = "CITYWIDE"
 
         # EXCEPTIONS / ERRORS IN FILES
 
@@ -266,6 +268,9 @@ class GetVotesExcel(BaseConfig):
             return districts[0]
         if len(districts) == 2 and "CITYWIDE" in districts:
             districts.remove("CITYWIDE")
+            return districts[0]
+        if len(districts) == 2 and "" in districts:
+            districts.remove("")
             return districts[0]
 
     def handle_multiple_rows_with_points(self, voter_item):

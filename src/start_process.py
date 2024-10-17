@@ -11,10 +11,11 @@ logger = create_logger()
 # city = "Poznań"
 # city = "Gdynia"
 # city = "mechanical_turk"
-city = "stanford"
+# city = "stanford"
 # city = "Lublin"
 # city = "Wrocław"
 # city = "Kraków"
+city = "Katowice"
 
 settings["unit"] = city
 
