@@ -5,6 +5,8 @@ selected_mapping = {
     "niewybrany w głosowaniu": 0,
     "wybrane": 1,
     "niewybrane": 0,
+    "brak uzyskania progu minimalnego poparcia": 2,
+    "": 0,
     # "Oceniony negatywnie": 0,
 }
 

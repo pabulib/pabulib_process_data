@@ -51,15 +51,41 @@ budgets = {
         "KOSTUCHNA": 562593,
         "PODLESIE": 408882,
     },
+    2022: {
+        # https://archiwumbo.katowice.eu/PlikiDoPobrania/Documents/Raport%20z%20przebiegu%20procedury%20IX%20edycji%20Bud%C5%BCetu%20Obywatelskiego.pdf
+        "CITYWIDE": 3002498,
+        "SRODMIESCIE": 879992,
+        "ZALESKA_HALDA-BRYNOW_CZESC_ZACHODNIA": 585354,
+        "ZAWODZIE": 524774,
+        "OSIEDLE_PADEREWSKIEGO-MUCHOWIEC": 561554,
+        "BRYNOW_CZESC_WSCHODNIA-OSIEDLE_ZGRZEBNIOKA": 399911,
+        "LIGOTA-PANEWNIKI": 1020144,
+        "ZALEZE": 467680,
+        "OSIEDLE_WITOSA": 569670,
+        "OSIEDLE_TYSIACLECIA": 820647,
+        "DAB": 447336,
+        "WELNOWIEC-JOZEFOWIEC": 588062,
+        "KOSZUTKA": 517061,
+        "BOGUCICE": 584894,
+        "DABROWKA_MALA": 354900,
+        "SZOPIENICE-BUROWIEC": 578676,
+        "JANOW-NIKISZOWIEC": 482162,
+        "GISZOWIEC": 647587,
+        "MURCKI": 362311,
+        "PIOTROWICE-OCHOJEC": 815366,
+        "ZARZECZE": 302960,
+        "KOSTUCHNA": 551239,
+        "PODLESIE": 437522,
+    },
 }
 
 
 # sum check
 
-year = 2024
+# year = 2022
 
-suma = 0
-for district, budget in budgets[year].items():
-    suma += budget
+# suma = 0
+# for district, budget in budgets[year].items():
+#     suma += budget
 
-print(suma)
+# print(suma)

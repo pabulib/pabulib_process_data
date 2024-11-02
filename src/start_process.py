@@ -2,7 +2,7 @@ from helpers.output_check import CheckOutputFiles  # noqa: F401
 from helpers.utilities import create_logger
 from process_data.run_it import run_it
 
-settings = {"year": 2023, "scrape_data": True}
+settings = {"year": 2024}
 
 logger = create_logger()
 
@@ -15,7 +15,8 @@ logger = create_logger()
 # city = "Lublin"
 # city = "Wrocław"
 # city = "Kraków"
-city = "Katowice"
+# city = "Katowice"
+city = "Częstochowa"
 
 settings["unit"] = city
 

@@ -8,7 +8,7 @@ from process_data.get_votes_excel import GetVotesExcel
 unusual_units = ["mechanical_turk", "stanford"]
 
 
-def run_it(year, unit, scrape_data=False):
+def run_it(year, unit):
 
     unit_package = utils.remove_accents_from_str(unit)
     packages = f"process_data.cities.{unit_package.lower()}"
@@ -46,28 +46,17 @@ def run_it(year, unit, scrape_data=False):
 
     logger = utils.create_logger()
 
-    # SCRAPE PROJECTS FROM WEBPAGE
-    if scrape_data:
-        json_files = utils.check_if_json_files_in_output("Poland", unit, year, logger)
-        # REMOVED AS POSSIBLE JSON FILES FROM PREPROCESSING
-        # if json_files:
-        #     logger.info(
-        #         f"{unit}, year: {year}, skipping scraping because"
-        #         " of JSON files in output directory"
-        #     )
-        # else:
-        logger.info(f"{unit}, year: {year}, scraping web data...")
-        try:
-            gp = getattr(
-                __import__(f"{packages}.get_projects", fromlist=["GetProjects"]),
-                "GetProjects",
-            )
-        except ModuleNotFoundError:
-            gp = GetProjects
-        sp = gp(**data["base_data"], **data["get_projects"])
-        sp.start()
-    else:
-        logger.info(f"{unit}, year: {year}, scraping web data skipped!")
+    # GET PROJECTS
+    logger.info(f"{unit}, year: {year}, getting projects...")
+    try:
+        gp = getattr(
+            __import__(f"{packages}.get_projects", fromlist=["GetProjects"]),
+            "GetProjects",
+        )
+    except ModuleNotFoundError:
+        gp = GetProjects
+    sp = gp(**data["base_data"], **data["get_projects"])
+    sp.start()
 
     # GET VOTES FROM EXCEL FILE
     # logger.info('Getting votes from excel file...')

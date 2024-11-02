@@ -134,10 +134,10 @@ class ModifyPBFiles:
         )
 
     def do_some_modifications(self, idx):
-        self.modified = True  # set it to True if you want to save new file
+        self.modified = False  # set it to True if you want to save new file
         # self.remove_projects_with_no_cost()
         # self.remove_projects_with_no_votes()
-        self.update_projects_votes()
+        # self.update_projects_votes()
         # self.update_number_of_votes()
         # self.update_number_of_projects()
         # self.update_projects_scores()
@@ -159,6 +159,20 @@ class ModifyPBFiles:
         # self.remove_scores_from_approvals()
         # self.standarize_category_column_in_projects()
         # self.check_dates()
+        self.change_true_flags_to_1()
+
+    def change_true_flags_to_1(self):
+        fully_funded = self.meta.get("fully_funded")
+        if fully_funded:
+            if fully_funded == "true":
+                self.meta["fully_funded"] = "1"
+                self.modified = True
+
+        experimental = self.meta.get("experimental")
+        if experimental:
+            if experimental == "true":
+                self.meta["experimental"] = "1"
+                self.modified = True
 
     def check_dates(self):
         date_begin = self.meta["date_begin"]
@@ -189,7 +203,7 @@ class ModifyPBFiles:
     def modify_mechanical_turk_files(self):
         self.meta["language"] = "en"
         self.meta["country"] = "Worldwide"
-        self.meta["experimental"] = "true"
+        self.meta["experimental"] = "1"
         self.modified = True
 
     def modify_zurich_files(self):
@@ -200,7 +214,7 @@ class ModifyPBFiles:
         self.modified = True
         self.meta["acknowledgments"] = self.meta.pop("comment")
         self.meta["instance"] = self.filename.split("_")[-1].split(".")[0]
-        self.meta["experimental"] = "true"
+        self.meta["experimental"] = "1"
 
     def change_description(self):
         district = self.meta["subunit"]

@@ -209,7 +209,7 @@ class GetVotesExcel(BaseConfig):
             district = self.project_district_mapping[vote]
         else:
             district = row[self.col[col_name]]
-            if district == "":
+            if district == "" or district.lower().startswith("ogólno"):
                 district = "CITYWIDE"
 
         # EXCEPTIONS / ERRORS IN FILES

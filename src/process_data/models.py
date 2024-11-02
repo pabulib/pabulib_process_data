@@ -47,17 +47,25 @@ class ProjectItem:
         self.category = ",".join(category_list)
 
     def add_cost(self, cost):
-        self.cost = int(
-            round(
-                float(
-                    str(cost)
-                    .replace("zł", "")
-                    .replace(" ", "")
-                    .replace(",", ".")
-                    .strip()
+        if cost == "":
+            print(
+                f"Project without cost!!! `{self.name}`, project ID: {self.project_id}"
+            )
+            # raise RuntimeError
+            self.cost = "0"
+        else:
+            self.cost = int(
+                round(
+                    float(
+                        str(cost)
+                        .replace("zł", "")
+                        .replace(" ", "")
+                        .replace(",", ".")
+                        .replace("\xa0", "")
+                        .strip()
+                    )
                 )
             )
-        )
 
     def add_selected(self, status):
         try:
@@ -108,7 +116,14 @@ class VoterItem:
                 self.sex = "F"
 
     def add_voting_method(self, method):
-        if method.lower() in ("elektronicznie", "internet", "internetowe", "i", "e"):
+        if method.lower() in (
+            "elektronicznie",
+            "internet",
+            "internetowe",
+            "i",
+            "e",
+            "elektroniczny",
+        ):
             self.voting_method = "internet"
         elif method.lower() in ("papierowo", "papier", "papierowe", "p"):
             self.voting_method = "paper"
