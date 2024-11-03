@@ -1,13 +1,9 @@
-import csv
-import io
-
 from dotenv import load_dotenv
-
-load_dotenv()
-
 from google.cloud import storage
 
 from helpers.utilities import load_pb_file_from_gcs
+
+load_dotenv()
 
 
 def main():
