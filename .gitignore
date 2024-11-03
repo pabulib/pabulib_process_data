@@ -1,8 +1,12 @@
+# GCS service account key
+pabulib-uj-e37db68d820b.json
+
 # Python trash
 __pycache__/
 
 # Venvs
 venv/
+gsutils_venv/
 
 # VS Code
 .idea/

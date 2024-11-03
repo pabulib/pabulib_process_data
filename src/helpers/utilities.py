@@ -1,5 +1,6 @@
 import csv
 import glob
+import io
 import json
 import os
 import re
@@ -388,32 +389,41 @@ def create_web_driver(path_to_chromedriver="./chromedriver"):
     return driver
 
 
+def load_pb_file_from_gcs(file_content):
+    csvfile = io.StringIO(file_content)
+    return parse_pb_content(csvfile)
+
+
+def parse_pb_content(csvfile):
+    meta, projects, votes = {}, {}, {}
+    section = ""
+    header = []
+    reader = csv.reader(csvfile, delimiter=";")
+    for row in reader:
+        if row:
+            if str(row[0]).strip().lower() in ["meta", "projects", "votes"]:
+                section = str(row[0]).strip().lower()
+                header = next(reader)
+            elif section == "meta":
+                meta[row[0]] = row[1].strip()
+            elif section == "projects":
+                votes_in_projects = True if "votes" in header else False
+                scores_in_projects = True if "score" in header else False
+                projects[row[0]] = {"id": row[0]}
+                for it, key in enumerate(header[1:]):
+                    projects[row[0]][key.strip()] = row[it + 1].strip()
+            elif section == "votes":
+                if votes.get(row[0]):
+                    raise RuntimeError(f"Duplicated Voter ID!! {row[0]}")
+                votes[row[0]] = {}
+                for it, key in enumerate(header[1:]):
+                    votes[row[0]][key.strip()] = row[it + 1].strip()
+    return meta, projects, votes, votes_in_projects, scores_in_projects
+
+
 def load_pb_file(pb_file, encoding="utf-8-sig"):
     with open(pb_file, "r", newline="", encoding=encoding) as csvfile:
-        meta, projects, votes = {}, {}, {}
-        section = ""
-        header = []
-        reader = csv.reader(csvfile, delimiter=";")
-        for row in reader:
-            if row:
-                if str(row[0]).strip().lower() in ["meta", "projects", "votes"]:
-                    section = str(row[0]).strip().lower()
-                    header = next(reader)
-                elif section == "meta":
-                    meta[row[0]] = row[1].strip()
-                elif section == "projects":
-                    votes_in_projects = True if "votes" in header else False
-                    scores_in_projects = True if "score" in header else False
-                    projects[row[0]] = {"id": row[0]}
-                    for it, key in enumerate(header[1:]):
-                        projects[row[0]][key.strip()] = row[it + 1].strip()
-                elif section == "votes":
-                    if votes.get(row[0]):
-                        raise RuntimeError(f"Duplicated Voter ID!! {row[0]}")
-                    votes[row[0]] = {}
-                    for it, key in enumerate(header[1:]):
-                        votes[row[0]][key.strip()] = row[it + 1].strip()
-    return meta, projects, votes, votes_in_projects, scores_in_projects
+        return parse_pb_content(csvfile)
 
 
 def atoi(text):
