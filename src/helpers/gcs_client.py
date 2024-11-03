@@ -11,7 +11,7 @@ load_dotenv()
 
 @dataclass
 class BucketClient:
-    bucket_name = "pabulib_files"
+    bucket_name: str = "pabulib_files"
 
     def __post_init__(self):
         self.storage_client = storage.Client()
@@ -26,11 +26,11 @@ class BucketClient:
         for blob in blobs:
             print(blob.name)
 
-    def download_pb_file(self, file_name):
+    def download_pb_file(self, file_name, encoding="utf-8-sig"):
         # Get PB content
 
         blob = self.bucket.blob(file_name)
-        file_content = blob.download_as_text(encoding="utf-8-sig")
+        file_content = blob.download_as_text(encoding=encoding)
 
         # Parse the custom pabulib format
         meta, projects, votes, votes_in_projects, scores_in_projects = (

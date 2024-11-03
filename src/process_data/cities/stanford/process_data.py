@@ -1,6 +1,7 @@
 import ast
 import collections
 import csv
+import re
 from copy import deepcopy
 from dataclasses import dataclass
 
@@ -10,6 +11,8 @@ import helpers.utilities as utils
 from helpers import settings
 from process_data.base_config import BaseConfig
 from process_data.models import ProjectItem, VoterItem
+
+unknown_value = "unknown"
 
 
 @dataclass
@@ -130,7 +133,9 @@ class ProcessData(BaseConfig):
         voter_item = VoterItem(voter_id)
         if self.vote_type in ("approval"):
             for vote in votes:
-                self.all_projects_votes["votes"][vote] = self.all_projects_votes["votes"].get(vote, 0) + 1
+                self.all_projects_votes["votes"][vote] = (
+                    self.all_projects_votes["votes"].get(vote, 0) + 1
+                )
         elif self.vote_type in ("cumulative", "ordinal"):
             points = [vote[1] for vote in votes]
             votes = [vote[0] for vote in votes]
@@ -160,8 +165,12 @@ class ProcessData(BaseConfig):
                 # if int(self.election_id) == 16:
                 #     if int(vote) == 237:
                 #         print(vote, point)
-                self.all_projects_votes["votes"][vote] = self.all_projects_votes["votes"].get(vote, 0) + 1
-                self.all_projects_votes["score"][vote] = self.all_projects_votes["score"].get(vote, 0) + int(point)
+                self.all_projects_votes["votes"][vote] = (
+                    self.all_projects_votes["votes"].get(vote, 0) + 1
+                )
+                self.all_projects_votes["score"][vote] = self.all_projects_votes[
+                    "score"
+                ].get(vote, 0) + int(point)
 
             # if int(self.election_id) == 16:
             #     print(self.all_projects_votes["score"].get('237'))
@@ -230,11 +239,23 @@ class ProcessData(BaseConfig):
             # get tokens
         else:
             raise RuntimeError(f"Not recognized vote type! {self.vote_type}")
-        self.all_vote_types[self.vote_name] = self.all_vote_types.get(self.vote_name, 0) + 1
+        self.all_vote_types[self.vote_name] = (
+            self.all_vote_types.get(self.vote_name, 0) + 1
+        )
 
     def iterate_through_elections(self):
+        year_pattern = r"\b20\d{2}\b"
+
         self.all_vote_types = {}
         for election_id, election_data in self.elections_dict.items():
+            match = re.search(year_pattern, election_data["name"])
+            if match:
+                year = match.group()
+            else:
+                # 03/11/2024: ATM we dont want instances without date recoginzed.
+                # Later on we should get it from meta (not extracted from name)
+                continue
+
             # vote_type = election_data["phase_0"] # not needed as we have it from file name
             self.election_id = election_id
             self.voters = self.voters_per_election[election_id]
@@ -245,7 +266,10 @@ class ProcessData(BaseConfig):
                 self.all_projects_votes = {"votes": {}, "score": {}}
                 if not vote_data.get(str(election_id)):
                     continue
-                if vote_name in ("vote_infer_knapsack_partial", "vote_infer_knapsack_skip"):
+                if vote_name in (
+                    "vote_infer_knapsack_partial",
+                    "vote_infer_knapsack_skip",
+                ):
                     # dont process derived data
                     continue
                 self.get_vote_type()
@@ -271,11 +295,7 @@ class ProcessData(BaseConfig):
                 self.add_projects_section(csv_file, score)
 
                 for project in all_projects:
-                    row = [
-                        project.project_id,
-                        project.cost,
-                        project.votes
-                    ]
+                    row = [project.project_id, project.cost, project.votes]
                     if score:
                         row.append(project.score)
                     if election_id in self.elections_with_categories:
@@ -296,10 +316,10 @@ class ProcessData(BaseConfig):
 
                 file_.close()
 
-                self.add_metadata(file_name, election_data)
+                self.add_metadata(file_name, election_data, year)
         # raise RuntimeError(f"Vote types counted: {self.all_vote_types}")
 
-    def add_metadata(self, file_name, election_data):
+    def add_metadata(self, file_name, election_data, year):
         # print(election_data)
         path_to_file = utils.get_path_to_file(file_name)
 
@@ -363,11 +383,11 @@ class ProcessData(BaseConfig):
             f"num_projects;{num_projects}\n"
             f"num_votes;{num_votes_counted}\n"
             f"vote_type;{self.vote_type}\n"
-            f"rule;???\n"
-            f"date_begin;??.??.????\n"
-            f"date_end;??.??.????\n"
+            f"rule;{unknown_value}\n"
+            f"date_begin;{year}\n"
+            f"date_end;{year}\n"
             f"budget;{budget}\n"
-            f"language;???\n"
+            # f"language;{unknown_value}\n" # from settings
         )
 
         for key, value in temp_meta.items():
@@ -379,18 +399,29 @@ class ProcessData(BaseConfig):
 
             elif self.vote_type == "ordinal":
                 length_field = "setting_off_ranking_k_projects"
-            if self.vote_name in ("vote_infer_knapsack_partial", "vote_infer_knapsack_skip", "vote_knapsacks_clean"):
-                # metadata += f"min_sum_cost;???\n"
-                metadata += f"max_sum_cost;???\n"
+            if self.vote_name in (
+                "vote_infer_knapsack_partial",
+                "vote_infer_knapsack_skip",
+                "vote_knapsacks_clean",
+            ):
+                # metadata += f"min_sum_cost;{unknown_value}\n"
+                # metadata += f"max_sum_cost;{unknown_value}\n"
+                # 03/11/2024 Should be provided from meta
+                pass
             else:
-                max_length = election_data.get("max_n_projects") or election_data.get(length_field)
+                max_length = election_data.get("max_n_projects") or election_data.get(
+                    length_field
+                )
                 if max_length:
                     max_length = int(float(max_length.replace(",", ".")))
-                    metadata += f"max_length;{max_length}\n"
+                    # metadata += f"max_length;{max_length}\n"
                     # TODO something wrong with these values
+                    # 03/11/2024 skip them ATM, but should be investigated
         elif self.vote_type == "cumulative":
-            # metadata += f"min_sum_points;???\n"
-            metadata += f"max_sum_points;???\n"
+            # metadata += f"min_sum_points;{unknown_value}\n"
+            # metadata += f"max_sum_points;{unknown_value}\n"
+            # 03/11/2024 Should be provided from meta
+            pass
 
         utils.prepend_line_at_the_beggining_of_file(metadata, path_to_file)
 

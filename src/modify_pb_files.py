@@ -42,6 +42,7 @@ class ModifyPBFiles:
     def iterate_through_pb_files(self):
         files = glob.glob(self.input_files_path)
         utils.human_sorting(files)
+        self.global_data = []
         for idx, pb_file in enumerate(files):
             self.filename = os.path.basename(pb_file)
             logger.info(f"Processing file: {self.filename}")
@@ -59,6 +60,8 @@ class ModifyPBFiles:
                 self.save_to_file()
             # self.save_to_file()
             self.modified = False
+        for data in self.global_data:
+            print(data)
 
     def update_number_of_votes(self):
         self.meta["num_votes"] = len(self.votes)
@@ -159,7 +162,13 @@ class ModifyPBFiles:
         # self.remove_scores_from_approvals()
         # self.standarize_category_column_in_projects()
         # self.check_dates()
-        self.change_true_flags_to_1()
+        # self.change_true_flags_to_1()
+        self.modify_stanford_files()
+
+    def modify_stanford_files(self):
+        vote_type = self.meta["vote_type"]
+        if vote_type != "approval":
+            self.global_data.append(self.meta["description"])
 
     def change_true_flags_to_1(self):
         fully_funded = self.meta.get("fully_funded")
