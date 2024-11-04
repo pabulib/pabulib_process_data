@@ -3,10 +3,12 @@ resource "google_service_account" "service_account" {
   display_name = var.display_name
 }
 
+# Assign the specified role to the service account for each bucket in bucket_names
 resource "google_storage_bucket_iam_member" "bucket_access" {
-  bucket = var.bucket_name
-  role   = "roles/storage.objectAdmin"
-  member = "serviceAccount:${google_service_account.service_account.email}"
+  for_each = toset(var.bucket_names)
+  bucket   = each.value
+  role     = var.role
+  member   = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 # Create a service account key
@@ -19,5 +21,5 @@ resource "google_service_account_key" "service_account_key" {
 # Save the key to a JSON file in a secure location
 resource "local_file" "service_account_key_file" {
   content  = "${base64decode(google_service_account_key.service_account_key.private_key)}"
-  filename = "${path.root}/service_account_key.json"  # Adjust this path as needed
+  filename = "${path.root}/${var.account_id}_key.json"
 }

@@ -8,7 +8,12 @@ variable "display_name" {
   type        = string
 }
 
-variable "bucket_name" {
-  description = "Name of the storage bucket to grant access to"
+variable "bucket_names" {
+  description = "List of storage buckets to grant access to"
+  type        = list(string)
+}
+
+variable "role" {
+  description = "IAM role to assign to the service account for the specified buckets"
   type        = string
 }

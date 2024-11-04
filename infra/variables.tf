@@ -10,10 +10,16 @@ variable "region" {
   default     = "europe-central2"
 }
 
-variable "bucket_name" {
-  description = "Name of the storage bucket"
+variable "pb_bucket_name" {
+  description = "Name of the bucket for all .pb files"
   type        = string
   default     = "pabulib_files"
+}
+
+variable "web_bucket_name" {
+  description = "Name of the bucket for production webpage .pb files"
+  type        = string
+  default     = "pabulib_webpage_files"
 }
 
 variable "location" {
@@ -28,8 +34,14 @@ variable "storage_class" {
   default     = "STANDARD"
 }
 
-variable "account_id" {
-  description = "ID for the service account (unique within the project)"
+variable "admin_account_id" {
+  description = "ID for the admin service account with access to both buckets"
   type        = string
   default     = "storage-object-admin-sa"
+}
+
+variable "viewer_account_id" {
+  description = "ID for the viewer service account with access to the web bucket only"
+  type        = string
+  default     = "storage-object-viewer-sa"
 }

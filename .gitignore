@@ -1,5 +1,6 @@
 # GCS service account key
 service_account_key.json
+sa_*_key.json
 
 # Python trash
 __pycache__/

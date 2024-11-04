@@ -11,4 +11,6 @@ Need to add selected (from coloured cell) column:
 ```
 
 [source](https://techcommunity.microsoft.com/t5/excel/paste-to-visible-cells-only-in-a-filtered-cells-only/m-p/1013991)
+
+Also, in 2024 data needed to replace empty project `Nr . ,` into 20: `Nr 20.`
     

@@ -1,12 +1,17 @@
 import os
 from dataclasses import dataclass
 
-from dotenv import load_dotenv
 from google.cloud import storage
 
 from helpers.utilities import load_pb_file_from_gcs
 
-load_dotenv()
+
+def load_gcp_credentials(PROD=False):
+    if PROD:
+        sa_key = "sa_viewer_key.json"
+    else:
+        sa_key = "sa_admin_key.json"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(os.getcwd(), sa_key)
 
 
 @dataclass
