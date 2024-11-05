@@ -13,6 +13,21 @@ from process_data.base_config import BaseConfig
 from process_data.models import ProjectItem, VoterItem
 
 unknown_value = "unknown"
+unit = "Stanford Dataset"
+
+# projects with no cost or no votes etc
+instances_with_bugs = (
+    "Programing for July 2022 - Participatory Budget El Nido",
+    "Programing for July 2023 - Participatory Budget El Nido",
+    "Candler Park Decides 2021",
+    "PB Boston 2016",
+)
+
+fully_funded = {
+    "Saratoga NY 2022",
+    "PB Oakland 2017 District 1",
+    "PB Oakland 2017 District 2",
+}
 
 
 @dataclass
@@ -261,6 +276,7 @@ class ProcessData(BaseConfig):
             self.voters = self.voters_per_election[election_id]
             projects = self.projects_per_election[election_id]
             all_projects = self.create_project_items(projects)
+
             for vote_name, vote_data in self.all_votes.items():
                 self.vote_name = vote_name
                 self.all_projects_votes = {"votes": {}, "score": {}}
@@ -277,8 +293,16 @@ class ProcessData(BaseConfig):
                 all_voters = self.create_all_voters_dict(vote_data)
 
                 self.instance = election_data["name"]
+
+                if self.instance in instances_with_bugs:
+                    continue
+
+                country = self.country
+                if "Dieppe" in self.instance:
+                    country = "Canada"
+
                 name = f"{self.instance.replace(" ", "_").replace(":", "")}_{vote_name}"
-                file_name = f"{self.country}_{self.unit}_{name}"
+                file_name = f"{country}_{self.unit}_{name}"
                 file_, csv_file = utils.create_csv_file(file_name)
 
                 # create projects section
@@ -316,10 +340,10 @@ class ProcessData(BaseConfig):
 
                 file_.close()
 
-                self.add_metadata(file_name, election_data, year)
+                self.add_metadata(file_name, election_data, year, country)
         # raise RuntimeError(f"Vote types counted: {self.all_vote_types}")
 
-    def add_metadata(self, file_name, election_data, year):
+    def add_metadata(self, file_name, election_data, year, country):
         # print(election_data)
         path_to_file = utils.get_path_to_file(file_name)
 
@@ -372,14 +396,16 @@ class ProcessData(BaseConfig):
 
         temp_meta = deepcopy(self.metadata)
 
+        subunit = self.vote_name.replace("_clean", "").replace("_", " ")
+
         metadata = (
             "META\n"
             "key;value\n"
             f"description;{description}\n"
-            f"country;{self.country}\n"
-            f"unit;{self.unit}\n"
+            f"country;{country}\n"
+            f"unit;{unit}\n"
             f"instance;{self.instance}\n"
-            f"subunit;{self.vote_name}\n"
+            f"subunit;{subunit}\n"
             f"num_projects;{num_projects}\n"
             f"num_votes;{num_votes_counted}\n"
             f"vote_type;{self.vote_type}\n"
@@ -390,7 +416,17 @@ class ProcessData(BaseConfig):
             # f"language;{unknown_value}\n" # from settings
         )
 
+        if self.instance in fully_funded:
+            metadata += f"fully_funded;1\n"
+
         for key, value in temp_meta.items():
+            if key == "comment":
+                if self.vote_type == "approval":
+                    value.append(
+                        "The rule is unknown, however, it was most likely a greedy rule."
+                    )
+                comments = [f"#{idx}: {com}" for idx, com in enumerate(value, 1)]
+                value = " ".join(comments)
             metadata += f"{key};{value}\n"
 
         if self.vote_type in ("approval", "ordinal"):

@@ -1,0 +1,4 @@
+2024, used comments:
+* comment;#1: The cost of Project 237 was exceeding the district budget (546 000), which should not have happened. Unfortunately, it was eligible to be voted on; therefore, we reduced its cost to align with the budget (542 052). (Wrzosowiak)
+* comment;#1: If there are unused funds remaining in any district or the citywide budget, they are aggregated and allocated to the district with the highest turnout. Therefore, we adjusted the budget from 194 431 to 236 277. (Kiedrzyn)
+* comment;#1: Project 586 was free (cost 0). To keep data consistent and not to have 0-cost projects (may cause problems when processing data) we set its cost to an artificial value of 1. (Częstochówka-Parkitka)
