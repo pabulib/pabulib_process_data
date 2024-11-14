@@ -5,6 +5,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import List
 
+import pycountry
+
 import helpers.utilities as utils
 from helpers.settings import output_path
 
@@ -346,6 +348,33 @@ class CheckOutputFiles:
                     text = f"Empty line found at line {line_number} !"
                     self.log_and_add_to_report(error, text)
 
+    def check_language_and_currency_codes(self, meta):
+        language_code = meta.get("language")
+        if language_code:
+            # Check if the language code is in ISO 639-1 format (two-letter code).
+            if pycountry.languages.get(alpha_2=language_code) is None:
+                # there is no such code:
+                error = "Wrong language ISO 639-1 format code"
+                text = f"language ISO 639-1 format code: {language_code}"
+                self.log_and_add_to_report(error, text)
+
+        currency_code = meta.get("currency")
+        if currency_code:
+            # Check if the currency code is in ISO 4217 format (three-letter code).
+            if pycountry.currencies.get(alpha_3=currency_code) is None:
+                # there is no such code
+                error = "Wrong currency ISO 4217 format code"
+                text = f"currency ISO 4217 format code: {currency_code}"
+                self.log_and_add_to_report(error, text)
+
+    def check_comments(self, meta):
+        comment = meta.get("comment")
+        if comment:
+            if not comment.startswith("#1: "):
+                error = "Wrong comment format (not #1 iteration)"
+                text = f"wrong comment: {comment}"
+                self.log_and_add_to_report(error, text)
+
     def run_checks(self, pb_file: str) -> None:
         """Run all checks on a given .pb file."""
 
@@ -362,6 +391,8 @@ class CheckOutputFiles:
         self.check_vote_length(meta, votes)
         self.check_votes_and_scores(projects, votes)
         self.verify_selected(meta, projects)
+        self.check_language_and_currency_codes(meta)
+        self.check_comments(meta)
         country = meta["country"]
         unit = meta["unit"]
         instance = meta["instance"]
@@ -560,6 +591,9 @@ class CheckOutputFiles:
             self.log_exceeded_budget(budget_available, budget_spent)
             for project in all_projects:
                 print(project)
+        if meta.get("fully_funded") and int(meta["fully_funded"]) == 1:
+            return
+        # IF NOT FULLY FUNDED FLAG, THEN CHECK IF budget not exceeded:
         if budget_available > all_projects_cost:
             self.log_all_projects_funded(budget_available, all_projects_cost)
 

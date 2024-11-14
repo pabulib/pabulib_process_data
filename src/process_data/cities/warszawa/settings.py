@@ -64,7 +64,7 @@ all_data = {
             "rule": "greedy",
             "date_begin": "15.06.2024",
             "date_end": "30.06.2024",
-            "language": "polish",
+            "language": "pl",
             "edition": "11",
             "currency": "PLN",
             "unit": {
@@ -139,7 +139,7 @@ all_data = {
             "rule": "greedy",
             "date_begin": "15.06.2023",
             "date_end": "30.06.2023",
-            "language": "polish",
+            "language": "pl",
             "edition": "10",
             "currency": "PLN",
             "unit": {

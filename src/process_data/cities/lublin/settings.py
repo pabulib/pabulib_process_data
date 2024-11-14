@@ -39,7 +39,7 @@ all_data = {
             "rule": "greedy",
             "date_begin": "23.09.2019",
             "date_end": "07.10.2019",
-            "language": "polish",
+            "language": "pl",
             "min_length": "1",
             "max_length": "2",
             "edition": "7",

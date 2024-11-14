@@ -11,11 +11,12 @@ saves new files to output/cleaned dir.
 import collections
 import csv
 import glob
-import math
 import os
 import re
 from copy import deepcopy
 from dataclasses import dataclass
+
+import pycountry
 
 import helpers.utilities as utils
 from helpers.settings import (
@@ -155,7 +156,7 @@ class ModifyPBFiles:
         # self.add_currency()
         # self.add_description()
         # self.change_type_into_choose_1()
-        # self.get_all_used_comments()
+        self.get_all_used_comments()
         # self.change_description()
         # self.modify_zurich_files()
         # self.modify_mechanical_turk_files()
@@ -163,7 +164,48 @@ class ModifyPBFiles:
         # self.standarize_category_column_in_projects()
         # self.check_dates()
         # self.change_true_flags_to_1()
-        self.modify_stanford_files()
+        # self.modify_stanford_files()
+        # self.check_language_and_currency_codes()
+        # self.check_comment_iteration()
+
+    def check_comment_iteration(self):
+        comment = self.meta.get("comment")
+        if comment:
+            if not comment.startswith("#1: "):
+                self.meta["comment"] = f"#1: {comment}"
+                self.modified = True
+
+    def check_language_and_currency_codes(self):
+        language_code_mapping = {
+            "polish": "pl",
+            "english": "en",
+            "french": "fr",
+            "Dutch": "nl",
+        }
+
+        language_code = self.meta.get("language")
+        if language_code:
+            # Check if the language code is in ISO 639-1 format (two-letter code).
+            if pycountry.languages.get(alpha_2=language_code) is None:
+                try:
+                    language_code = language_code_mapping[language_code]
+                    self.meta["language"] = language_code
+                    self.modified = True
+                except KeyError:
+                    raise RuntimeError(f"language_code: {language_code}")
+
+        currency_code_mapping = {}
+
+        currency_code = self.meta.get("currency")
+        if currency_code:
+            # Check if the language code is in ISO 639-1 format (two-letter code).
+            if pycountry.currencies.get(alpha_3=currency_code) is None:
+                try:
+                    currency_code = currency_code_mapping[currency_code]
+                    self.meta["currency"] = currency_code
+                    self.modified = True
+                except KeyError:
+                    raise RuntimeError(f"currency_code: {currency_code}")
 
     def modify_stanford_files(self):
         vote_type = self.meta["vote_type"]
@@ -317,21 +359,13 @@ class ModifyPBFiles:
         self.meta["currency"] = currency
 
     def add_fully_funded(self):
-        budget_spent = 0
-        all_projects_cost = 0
-        budget_available = math.floor(float(self.meta["budget"].replace(",", ".")))
-        all_projects = list()
-        for _, project_data in self.projects.items():
-            selected_field = project_data.get("selected")
-            project_cost = int(project_data["cost"])
-            all_projects_cost += project_cost
-            if selected_field:
-                if int(selected_field) == 1:
-                    all_projects.append([_, project_cost, project_data["name"]])
-                    budget_spent += project_cost
-        if budget_available > all_projects_cost:
+        budget = self.meta["budget"]
+        projects = [project for project in self.projects.values()]
+        fully_funded = utils.check_if_fully_funded(budget, projects)
+        if fully_funded:
             self.meta["fully_funded"] = 1
             logger.info(f"Added fully funded tag to {self.filename}")
+            self.modified = True
 
     def change_year_into_dates(self):
         year = self.meta.pop("year")

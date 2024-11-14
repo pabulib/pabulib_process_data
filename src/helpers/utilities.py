@@ -2,6 +2,7 @@ import csv
 import glob
 import io
 import json
+import math
 import os
 import re
 import sys
@@ -381,6 +382,27 @@ def create_logger(logger_level=None):
     logger.remove()  # All configured handlers are removed
     logger.configure(**config)
     return logger
+
+
+def check_if_fully_funded(budget, projects):
+    budget_spent = 0
+    all_projects_cost = 0
+    if not isinstance(budget, int):
+        budget_available = math.floor(float(budget.replace(",", ".")))
+    else:
+        budget_available = budget
+    # all_projects = list()
+    for project_data in projects:
+        # project_name = project_data["name"]
+        selected_field = project_data.get("selected")
+        project_cost = int(project_data["cost"])
+        all_projects_cost += project_cost
+        if selected_field:
+            if int(selected_field) == 1:
+                # all_projects.append([project_name, project_cost, project_data["name"]])
+                budget_spent += project_cost
+    if budget_available > all_projects_cost:
+        return True
 
 
 def create_web_driver(path_to_chromedriver="./chromedriver"):

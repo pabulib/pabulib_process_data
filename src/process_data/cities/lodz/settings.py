@@ -60,7 +60,7 @@ all_data = {
             "rule": "greedy",
             "date_begin": "02.10.2023",
             "date_end": "31.10.2023",
-            "language": "polish",
+            "language": "pl",
             "edition": "11",
             "currency": "PLN",
             "max_length": "5",

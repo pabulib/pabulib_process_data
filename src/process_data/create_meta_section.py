@@ -135,4 +135,18 @@ class CreateMetaSections(BaseConfig):
                 comments = [f"#{idx}: {com}" for idx, com in enumerate(value, 1)]
                 value = " ".join(comments)
             metadata += f"{key};{value}\n"
+
+        # ADD fully_funded flag
+        all_projects = self.get_json_file("projects_data_per_district")
+        if district == "unit":
+            district = "CITYWIDE"
+        if self.subdistricts:
+            projects = all_projects[district][subdistrict]
+            raise RuntimeError("NEEDS TO BE CHECKED WITH SUBDISTRICTS!!!")
+        else:
+            projects = all_projects[district]
+        fully_funded = utils.check_if_fully_funded(budget, projects)
+        if fully_funded:
+            metadata += "fully_funded;1\n"
+
         return metadata
