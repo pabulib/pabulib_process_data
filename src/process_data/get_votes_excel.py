@@ -18,7 +18,7 @@ class GetVotesExcel(BaseConfig):
     excel_ext: str = "xlsx"
     valid_value: str = ""
     first_row: int = 1
-    data_dir: str = None
+    data_dir: str = ""
     voter_id_integer: bool = True
     district_name_mapping: bool = False
     only_valid_votes: bool = False

@@ -94,21 +94,24 @@ class CreateMetaSections(BaseConfig):
         else:
             if self.subdistricts_mapping:
                 district = self.subdistricts_mapping[district]
-            if self.unit.title() == "Warszawa":
-                unit = "Warsaw"
-            else:
-                unit = self.unit.title()
+            unit = self.unit.title()
+            district_title = district.title()
             if temp_meta.get("district") and temp_meta["district"].get("description"):
                 description = temp_meta["district"].pop("description")
             elif self.subdistricts_mapping or subdistrict:
-                description = f"Local PB in {unit}, " f"{district} | {subdistrict}"
+                subdistrict_title = subdistrict.title()
+                description = (
+                    f"Local PB in {unit}, " f"{district_title} | {subdistrict_title}"
+                )
             else:
-                description = f"District PB in {unit}, {district}"
+                description = f"District PB in {unit}, {district_title}"
             if not subdistrict:
                 subdistrict = district
-            district_txt = f"district;{district}\n"
+            district_txt = f"district;{district_title}\n"
 
-            subunit = self.create_subunit_value(temp_meta, district, subdistrict)
+            subunit = self.create_subunit_value(
+                temp_meta, district_title, subdistrict_title
+            )
 
             dict_to_update = temp_meta.pop("district", None)
             temp_meta.pop("unit", None)
@@ -142,9 +145,12 @@ class CreateMetaSections(BaseConfig):
             district = "CITYWIDE"
         if self.subdistricts:
             projects = all_projects[district][subdistrict]
-            raise RuntimeError("NEEDS TO BE CHECKED WITH SUBDISTRICTS!!!")
+            # raise RuntimeError("NEEDS TO BE CHECKED WITH SUBDISTRICTS!!!")
         else:
-            projects = all_projects[district]
+            try:
+                projects = all_projects[district.upper()]
+            except KeyError:
+                projects = all_projects[district.title()]
         fully_funded = utils.check_if_fully_funded(budget, projects)
         if fully_funded:
             metadata += "fully_funded;1\n"

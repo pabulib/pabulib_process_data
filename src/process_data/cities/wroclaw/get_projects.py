@@ -213,7 +213,7 @@ class GetProjects(BaseConfig):
             item = ProjectItem(project_id)
             item.add_name(name)
             selected = row_values[col_names_indexes["Projekty wygrane"]]
-            item.selected = 1 if selected == "wygrany" else 0
+            item.selected = 1 if selected in ["wygrany", "tak"] else 0
             item.project_url = f"https://www.wroclaw.pl/wbo/projekty-{self.instance}/projekt,id,{project_id}"
             item.district = row_values[col_names_indexes["Nazwa osiedla"]]
             item.neighborhood = row_values[col_names_indexes["Nazwa osiedla"]]
@@ -229,7 +229,14 @@ class GetProjects(BaseConfig):
             votes_from_excel = row_values[
                 col_names_indexes["Liczba głosów projektów wygranych"]
             ]
-            votes_from_url = projects_votes[project_id]
+            try:
+                votes_from_url = projects_votes[project_id]
+            except KeyError:
+                self.logger.info(
+                    f"Project `{project_id}` probably was not admitted to the voting process.\n"
+                    f"url: https://www.wroclaw.pl/wbo/projekty-{self.instance}/projekt,id,{project_id}"
+                )
+                continue
             if votes_from_excel:
                 votes_from_excel = int(votes_from_excel)
                 if votes_from_excel != votes_from_url:

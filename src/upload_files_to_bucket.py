@@ -53,7 +53,37 @@ upload_pb_files()
 
 ### GET ONLY NEWEST VERSIONS AND UPLOAD TO web_bucket
 
+from collections import defaultdict
+
+# Assuming `all_blobs` is a list of blobs you already have
+# and each blob's `name` attribute is structured as 'timestamp/filename'
+
+
+def get_latest_files(all_blobs):
+    # Dictionary to store the latest blob for each unique filename
+    latest_files = defaultdict(lambda: (None, None))  # {filename: (timestamp, blob)}
+
+    for blob in all_blobs:
+        # Split the blob name to get timestamp and filename
+        file_timestamp, file_name = blob.name.split("/")
+
+        # Check if we need to update the latest file for this filename
+        if (
+            latest_files[file_name][0] is None
+            or file_timestamp > latest_files[file_name][0]
+        ):
+            latest_files[file_name] = (file_timestamp, blob)
+
+    # Extract only the blob objects for the latest files
+    result = [blob for _, blob in latest_files.values()]
+    return result
+
+
+# Get only newest version of files
 # all_blobs = client.get_all_blobs()
-# for blob in all_blobs:
-#     print(blob.name)
-#     raise RuntimeError
+# latest_files = get_latest_files(all_blobs)
+# print(f"Number of latest files: {len(latest_files)}")
+# print("Newest files for each unique filename:")
+# for blob in latest_files:
+#     if "netherlands_assen_2024_.pb" in blob.name:
+#         print(blob.name)

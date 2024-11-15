@@ -156,7 +156,7 @@ class ModifyPBFiles:
         # self.add_currency()
         # self.add_description()
         # self.change_type_into_choose_1()
-        self.get_all_used_comments()
+        # self.get_all_used_comments()
         # self.change_description()
         # self.modify_zurich_files()
         # self.modify_mechanical_turk_files()
@@ -167,6 +167,28 @@ class ModifyPBFiles:
         # self.modify_stanford_files()
         # self.check_language_and_currency_codes()
         # self.check_comment_iteration()
+        # self.change_warsaw_and_czestochowa()
+
+    def change_warsaw_and_czestochowa(self):
+        # description = self.meta["description"]
+        # if "Warsaw" in description:
+        #     description = description.replace("Warsaw", "Warszawa")
+        #     self.meta["description"] = description
+        #     self.modified = True
+        # elif self.meta["unit"] == "Czestochowa":
+        #     self.meta["unit"] = "Częstochowa"
+        #     self.modified = True
+        district = self.meta.get("district")
+        subunit = self.meta.get("subunit")
+        description = self.meta["description"]
+        if district and district.isupper():
+            self.meta["district"] = district.title()
+            self.meta["description"] = description.replace(district, district.title())
+            self.modified = True
+        if subunit and subunit.isupper():
+            self.meta["subunit"] = subunit.title()
+            self.meta["description"] = description.replace(subunit, subunit.title())
+            self.modified = True
 
     def check_comment_iteration(self):
         comment = self.meta.get("comment")
@@ -336,9 +358,9 @@ class ModifyPBFiles:
             subunit = self.meta["subunit"]
             unit = self.meta["unit"]
             if district == subunit:
-                description = f"District PB in Warsaw, {district}"
+                description = f"District PB in Warszawa, {district}"
             else:
-                description = f"Local PB in Warsaw, {district} | {subunit}"
+                description = f"Local PB in Warszawa, {district} | {subunit}"
             # if district == subunit:
             #     description = f'District PB in {unit}, {district}'
             # else:
