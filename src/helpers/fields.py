@@ -27,9 +27,6 @@ META_FIELDS_ORDER = [
     "budget_per_neighbourhood",
     "vote_type",
     "rule",
-    "language",
-    "edition",
-    "comment",
     "min_length",
     "max_length",
     "min_sum_cost",
@@ -51,8 +48,11 @@ META_FIELDS_ORDER = [
     "categories",
     "fully_funded",
     "experimental",
+    "language",
+    "edition",
     "currency",
     "acknowledgments",
+    "comment",
 ]
 
 PROJECT_OBLIGATORY_FIELDS = [
@@ -62,12 +62,12 @@ PROJECT_OBLIGATORY_FIELDS = [
 
 PROJECT_FIELDS_ORDER = [
     "project_id",
+    "votes",
+    "score",
     "cost",
     "name",
     "category",
     "target",
-    "votes",
-    "score",
     "selected",
     "neighbourhood",
     "subunit",
@@ -86,11 +86,11 @@ VOTES_OBLIGATORY_FIELDS = [
 
 VOTES_FIELDS_ORDER = [
     "voter_id",
+    "vote",
+    "points",
     "age",
     "sex",
     "voting_method",
-    "vote",
-    "points",
     "district",
     "neighborhood",
     "education",
