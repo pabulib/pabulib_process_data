@@ -7,6 +7,7 @@ from typing import List
 
 import pycountry
 
+import helpers.fields as flds
 import helpers.utilities as utils
 from helpers.settings import output_path
 
@@ -393,6 +394,7 @@ class CheckOutputFiles:
         self.verify_selected(meta, projects)
         self.check_language_and_currency_codes(meta)
         self.check_comments(meta)
+        self.check_fields(meta, projects, votes)
         country = meta["country"]
         unit = meta["unit"]
         instance = meta["instance"]
@@ -400,6 +402,48 @@ class CheckOutputFiles:
         if meta.get("subunit"):
             webpage_name += f" {meta['subunit']}"
         logger.info(f"PB name would be created on webpage: `{webpage_name}`")
+
+    def check_fields(self, meta, projects, votes):
+        def validate_fields(data, obligatory_fields, fields_order, field_name):
+            """Check if all obligatory fields are present"""
+            missing_fields = [item for item in obligatory_fields if item not in data]
+            if missing_fields:
+                text = f"missing {field_name} obligatory field: {missing_fields}"
+                error = f"missing {field_name} obligatory field"
+                self.log_and_add_to_report(error, text)
+
+            # Check for not known fields
+            not_known_fields = [item for item in data if item not in fields_order]
+            if not_known_fields:
+                text = f"{field_name} contains fields not known fields: {not_known_fields}."
+                error = f"not known {field_name} fields"
+                self.log_and_add_to_report(error, text)
+
+            # TODO
+            # Check for field order
+
+        # Check meta fields
+        validate_fields(
+            meta, flds.META_OBLIGATORY_FIELDS, flds.META_FIELDS_ORDER, "meta"
+        )
+
+        # Check projects fields
+        first_project = next(iter(projects.values()), {})
+        validate_fields(
+            first_project,
+            flds.PROJECT_OBLIGATORY_FIELDS,
+            flds.PROJECT_FIELDS_ORDER,
+            "project",
+        )
+
+        # Check votes fields
+        first_vote = next(iter(votes.values()), {})
+        # voter_id filed is checked during loading pb file. But maybe would be nice
+        # to load name of column and later on check if correct one
+        first_vote["voter_id"] = "placeholder"
+        validate_fields(
+            first_vote, flds.VOTES_OBLIGATORY_FIELDS, flds.VOTES_FIELDS_ORDER, "votes"
+        )
 
     def check_votes_and_scores(self, projects, votes):
         if not any([self.check_votes, self.check_scores]):

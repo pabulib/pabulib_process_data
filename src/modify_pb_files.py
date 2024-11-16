@@ -18,12 +18,8 @@ from dataclasses import dataclass
 
 import pycountry
 
+import helpers.fields as flds
 import helpers.utilities as utils
-from helpers.settings import (
-    meta_fields_order,
-    projects_fields_order,
-    votes_fields_order,
-)
 
 logger = utils.create_logger()
 
@@ -336,10 +332,12 @@ class ModifyPBFiles:
     def sort_meta_fields(self):
         # TODO nie ogarnie additional keys, tych co nie ma w mappingu
         known_fileds = {
-            key: self.meta[key] for key in meta_fields_order if key in self.meta
+            key: self.meta[key] for key in flds.META_FIELDS_ORDER if key in self.meta
         }
         additional_fields = {
-            key: self.meta[key] for key in self.meta if key not in meta_fields_order
+            key: self.meta[key]
+            for key in self.meta
+            if key not in flds.META_FIELDS_ORDER
         }
 
         self.meta = known_fileds | additional_fields
@@ -479,20 +477,22 @@ class ModifyPBFiles:
     def sort_projects_fields(self, project_info):
         known_fields = {
             key: project_info[key]
-            for key in projects_fields_order
+            for key in flds.PROJECT_FIELDS_ORDER
             if key in project_info
         }
         additional_fields = {
             key: project_info[key]
             for key in project_info
-            if key not in projects_fields_order
+            if key not in flds.PROJECT_FIELDS_ORDER
         }
         return known_fields | additional_fields
 
     def sort_votes_fields(self, vote):
-        known_fields = {key: vote[key] for key in votes_fields_order if key in vote}
+        known_fields = {
+            key: vote[key] for key in flds.VOTES_FIELDS_ORDER if key in vote
+        }
         additional_fields = {
-            key: vote[key] for key in vote if key not in votes_fields_order
+            key: vote[key] for key in vote if key not in flds.VOTES_FIELDS_ORDER
         }
         return known_fields | additional_fields
 
@@ -501,7 +501,9 @@ class ModifyPBFiles:
         save_headers = True
         for project_id, project_info in self.projects.items():
             sorted_fields = self.sort_projects_fields(project_info)
-            del sorted_fields["id"]
+            # double check
+            # del sorted_fields["id"]
+            del sorted_fields["project_id"]
             if save_headers:
                 project_headers = list(sorted_fields.keys())
                 if "categories" in project_headers:

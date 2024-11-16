@@ -27,6 +27,8 @@ META_FIELDS_ORDER = [
     "budget_per_neighbourhood",
     "vote_type",
     "rule",
+    "date_begin",
+    "date_end",
     "min_length",
     "max_length",
     "min_sum_cost",
@@ -77,6 +79,7 @@ PROJECT_FIELDS_ORDER = [
     "public_id",
     "longitude",
     "latitude",
+    "neighborhood",  # In Wrocław, there is one local voting for all districts. Hence, "neighborhood" column is needed
 ]
 
 VOTES_OBLIGATORY_FIELDS = [
@@ -94,4 +97,13 @@ VOTES_FIELDS_ORDER = [
     "district",
     "neighborhood",
     "education",
+    # switzerland_zurich
+    "topic_preference_transport",
+    "topic_preference_culture",
+    "topic_preference_nature",
+    "district_preference",
+    "time_taken_seconds",
+    "format_easiness",
+    "format_expressiveness",
+    "format_rank",
 ]

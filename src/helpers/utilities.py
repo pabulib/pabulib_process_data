@@ -242,7 +242,9 @@ def create_project_selected_mapping_by_district(file_name):
     for district, project_dicts in json_file.items():
         project_selected_mapping[district] = {}
         for project_dict in project_dicts:
-            project_id = project_dict["id"]
+            # double check needed
+            # project_id = project_dict["id"]
+            project_id = project_dict["project_id"]
             project_id = project_id.split(".")[2].split("/")[0]
             selected = project_dict["selected"]
             project_selected_mapping[district][project_id] = selected
@@ -254,7 +256,9 @@ def create_project_selected_mapping(file_name):
     json_file = load_json_obj(file_name)
     for district, project_dicts in json_file.items():
         for project_dict in project_dicts:
-            project_id = project_dict["id"]
+            # double check needed
+            # project_id = project_dict["id"]
+            project_id = project_dict["project_id"]
             project_selected_mapping[project_id] = project_dict["selected"]
     return project_selected_mapping
 
@@ -426,12 +430,22 @@ def parse_pb_content(csvfile):
             if str(row[0]).strip().lower() in ["meta", "projects", "votes"]:
                 section = str(row[0]).strip().lower()
                 header = next(reader)
+                check_header = header[0].strip().lower()
+                # Validate header for each section
+                if section == "projects" and check_header != "project_id":
+                    raise ValueError(
+                        "First value in PROJECTS section is not 'project_id': {check_header}"
+                    )
+                if section == "votes" and check_header != "voter_id":
+                    raise ValueError(
+                        f"First value in VOTES section is not 'voter_id': {check_header}"
+                    )
             elif section == "meta":
                 meta[row[0]] = row[1].strip()
             elif section == "projects":
                 votes_in_projects = True if "votes" in header else False
                 scores_in_projects = True if "score" in header else False
-                projects[row[0]] = {"id": row[0]}
+                projects[row[0]] = {"project_id": row[0]}
                 for it, key in enumerate(header[1:]):
                     projects[row[0]][key.strip()] = row[it + 1].strip()
             elif section == "votes":
