@@ -384,6 +384,19 @@ class CheckOutputFiles:
         (meta, projects, votes, self.check_votes, self.check_scores) = (
             utils.load_pb_file(pb_file)
         )
+        self.do_checks(pb_file, meta, projects, votes)
+        self.log_webpage_name(meta)
+
+    def log_webpage_name(self, meta):
+        country = meta["country"]
+        unit = meta["unit"]
+        instance = meta["instance"]
+        webpage_name = f"{country} {unit} {instance}"
+        if meta.get("subunit"):
+            webpage_name += f" {meta['subunit']}"
+        logger.info(f"PB name would be created on webpage: `{webpage_name}`")
+
+    def do_checks(self, pb_file, meta, projects, votes):
         self.check_if_empty_lines(pb_file)
         self.check_if_commas_in_floats(meta, projects)
         self.check_budgets(meta, projects)
@@ -395,13 +408,6 @@ class CheckOutputFiles:
         self.check_language_and_currency_codes(meta)
         self.check_comments(meta)
         self.check_fields(meta, projects, votes)
-        country = meta["country"]
-        unit = meta["unit"]
-        instance = meta["instance"]
-        webpage_name = f"{country} {unit} {instance}"
-        if meta.get("subunit"):
-            webpage_name += f" {meta['subunit']}"
-        logger.info(f"PB name would be created on webpage: `{webpage_name}`")
 
     def check_fields(self, meta, projects, votes):
         def validate_fields(data, obligatory_fields, fields_order, field_name):

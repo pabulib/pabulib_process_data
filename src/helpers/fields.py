@@ -72,6 +72,7 @@ PROJECTS_FIELDS_ORDER = [
     "target",
     "selected",
     "neighbourhood",
+    "neighborhood",
     "subunit",
     "district",
     "description",
@@ -79,7 +80,6 @@ PROJECTS_FIELDS_ORDER = [
     "public_id",
     "longitude",
     "latitude",
-    "neighborhood",  # In Wrocław, there is one local voting for all districts. Hence, "neighborhood" column is needed
 ]
 
 VOTES_OBLIGATORY_FIELDS = [
