@@ -57,12 +57,12 @@ META_FIELDS_ORDER = [
     "comment",
 ]
 
-PROJECT_OBLIGATORY_FIELDS = [
+PROJECTS_OBLIGATORY_FIELDS = [
     "project_id",
     "cost",
 ]
 
-PROJECT_FIELDS_ORDER = [
+PROJECTS_FIELDS_ORDER = [
     "project_id",
     "votes",
     "score",

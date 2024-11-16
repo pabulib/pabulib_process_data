@@ -477,13 +477,13 @@ class ModifyPBFiles:
     def sort_projects_fields(self, project_info):
         known_fields = {
             key: project_info[key]
-            for key in flds.PROJECT_FIELDS_ORDER
+            for key in flds.PROJECTS_FIELDS_ORDER
             if key in project_info
         }
         additional_fields = {
             key: project_info[key]
             for key in project_info
-            if key not in flds.PROJECT_FIELDS_ORDER
+            if key not in flds.PROJECTS_FIELDS_ORDER
         }
         return known_fields | additional_fields
 

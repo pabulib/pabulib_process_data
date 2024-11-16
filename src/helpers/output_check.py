@@ -431,8 +431,8 @@ class CheckOutputFiles:
         first_project = next(iter(projects.values()), {})
         validate_fields(
             first_project,
-            flds.PROJECT_OBLIGATORY_FIELDS,
-            flds.PROJECT_FIELDS_ORDER,
+            flds.PROJECTS_OBLIGATORY_FIELDS,
+            flds.PROJECTS_FIELDS_ORDER,
             "project",
         )
 
