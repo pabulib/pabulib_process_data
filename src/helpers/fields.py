@@ -1,3 +1,6 @@
+"""NOTE: IF NEW CUSTOM FIELD, IT HAS TO BE ADDED HERE.
+Otherwise they will be skipped when saving."""
+
 import helpers.fields_validations as validate
 
 META_FIELDS_ORDER = {
@@ -14,9 +17,6 @@ META_FIELDS_ORDER = {
     "num_projects": {"datatype": int, "obligatory": True},
     "num_votes": {"datatype": int, "obligatory": True},
     "budget": {"datatype": float, "obligatory": True},
-    "leftover_budget": {"datatype": str},
-    "budget_per_category": {"datatype": list, "checker": validate.if_list},
-    "budget_per_neighborhood": {"datatype": list, "checker": validate.if_list},
     "vote_type": {
         "datatype": str,
         "checker": lambda x: x in validate.VOTE_TYPES,
@@ -38,41 +38,43 @@ META_FIELDS_ORDER = {
     "max_length": {"datatype": int},
     "min_sum_cost": {"datatype": float},
     "max_sum_cost": {"datatype": float},
-    "scoring_fn": {"datatype": str},
     "min_points": {"datatype": int},
     "max_points": {"datatype": int},
     "min_sum_points": {"datatype": int},
     "max_sum_points": {"datatype": int},
-    "default_score": {"datatype": float},
     "min_project_cost": {"datatype": int},
     "max_project_cost": {"datatype": int},
-    "min_length_per_category": {"datatype": int},
-    "max_length_per_category": {"datatype": int},
-    "min_sum_cost_per_category": {"datatype": list, "checker": validate.if_list},
-    "max_sum_cost_per_category": {"datatype": list, "checker": validate.if_list},
     "neighborhoods": {"datatype": str},
     "subdistricts": {"datatype": str},
     "categories": {"datatype": str},
-    "fully_funded": {"datatype": int, "checker": lambda x: x in [1]},
-    "experimental": {"datatype": int, "checker": lambda x: x in [1]},
+    "edition": {"datatype": str},
     "language": {
         "datatype": str,
         "checker": validate.language_code,
     },
-    "edition": {"datatype": str},
     "currency": {
         "datatype": str,
         "checker": validate.currency_code,
     },
-    "acknowledgments": {"datatype": str},
+    "fully_funded": {"datatype": int, "checker": lambda x: x in [1]},
+    "experimental": {"datatype": int, "checker": lambda x: x in [1]},
     "comment": {"datatype": str, "checker": lambda x: x.startswith("#1: ")},
+    "acknowledgments": {"datatype": str},
+    # Amsterdam specific fields
+    "leftover_budget": {"datatype": str},
+    "budget_per_category": {"datatype": list, "checker": validate.if_list},
+    "budget_per_neighborhood": {"datatype": list, "checker": validate.if_list},
+    "min_length_per_category": {"datatype": int},
+    "max_length_per_category": {"datatype": int},
+    "min_sum_cost_per_category": {"datatype": list, "checker": validate.if_list},
+    "max_sum_cost_per_category": {"datatype": list, "checker": validate.if_list},
 }
 
 PROJECTS_FIELDS_ORDER = {
     "project_id": {"datatype": list, "checker": validate.if_list, "obligatory": True},
+    "cost": {"datatype": int, "obligatory": True},
     "votes": {"datatype": list, "checker": validate.if_list},
     "score": {"datatype": list, "checker": validate.if_list},
-    "cost": {"datatype": int, "obligatory": True},
     "name": {"datatype": str},
     "category": {"datatype": list, "checker": validate.if_list, "nullable": True},
     "target": {"datatype": list, "checker": validate.if_list, "nullable": True},
@@ -101,7 +103,7 @@ VOTES_FIELDS_ORDER = {
     "district": {"datatype": str, "nullable": True},
     "neighborhood": {"datatype": str},
     "education": {"datatype": str},
-    # Switzerland-specific fields
+    # Zurich specific fields
     "topic_preference_transport": {"datatype": int},
     "topic_preference_culture": {"datatype": int},
     "topic_preference_nature": {"datatype": int},

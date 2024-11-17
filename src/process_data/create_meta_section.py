@@ -1,6 +1,7 @@
 from copy import deepcopy
 from dataclasses import dataclass
 
+import helpers.fields as flds
 import helpers.utilities as utils
 from process_data.base_config import BaseConfig
 
@@ -74,13 +75,19 @@ class CreateMetaSections(BaseConfig):
         else:
             path_to_file = utils.get_path_to_file(self.unit_file_name, district_upper)
         metadata = self.create_metadata(path_to_file, district, budget, subdistrict)
-        utils.prepend_line_at_the_beggining_of_file(metadata, path_to_file)
+        metadata = {
+            key: metadata[key] for key in flds.META_FIELDS_ORDER if key in metadata
+        }
+        metadata_txt = "META\nkey;value\n"
+        for key, value in metadata.items():
+            metadata_txt += f"{key};{value}\n"
+        utils.prepend_line_at_the_beggining_of_file(metadata_txt, path_to_file)
 
     def create_subunit_value(self, metadata, district, subdistrict):
         if metadata.get("subdistrict_sizes"):
             metadata.pop("subdistrict_sizes")
-            return f"subunit;{district} | {subdistrict}\n"
-        return f"subunit;{subdistrict}\n"
+            return f"{district} | {subdistrict}\n"
+        return subdistrict
 
     def create_metadata(self, path_to_file, district, budget, subdistrict):
         temp_meta = deepcopy(self.metadata)
@@ -106,8 +113,8 @@ class CreateMetaSections(BaseConfig):
             else:
                 description = f"District PB in {unit}, {district_title}"
             if not subdistrict:
-                subdistrict = district
-            district_txt = f"district;{district_title}\n"
+                subdistrict_title = district.title()
+            district_txt = district_title
 
             subunit = self.create_subunit_value(
                 temp_meta, district_title, subdistrict_title
@@ -120,24 +127,24 @@ class CreateMetaSections(BaseConfig):
             temp_meta.update(dict_to_update)
         num_projects, num_votes = utils.count_projects_and_votes(path_to_file)
 
-        metadata = (
-            "META\n"
-            "key;value\n"
-            f"description;{description}\n"
-            f"country;{self.country}\n"
-            f"unit;{self.unit}\n"
-            f"{subunit}"
-            f"instance;{self.instance}\n"
-            f"{district_txt}"
-            f"num_projects;{num_projects}\n"
-            f"num_votes;{num_votes}\n"
-            f"budget;{budget}\n"
-        )
+        metadata = {
+            "description": description,
+            "country": self.country,
+            "unit": self.unit,
+            "instance": self.instance,
+            "num_projects": num_projects,
+            "num_votes": num_votes,
+            "budget": budget,
+        }
+        if district_txt:
+            metadata["district"] = district_txt
+        if subunit:
+            metadata["subunit"] = subunit
         for key, value in temp_meta.items():
             if key == "comment":
                 comments = [f"#{idx}: {com}" for idx, com in enumerate(value, 1)]
                 value = " ".join(comments)
-            metadata += f"{key};{value}\n"
+            metadata[key] = value
 
         # ADD fully_funded flag
         all_projects = self.get_json_file("projects_data_per_district")
@@ -153,6 +160,6 @@ class CreateMetaSections(BaseConfig):
                 projects = all_projects[district.title()]
         fully_funded = utils.check_if_fully_funded(budget, projects)
         if fully_funded:
-            metadata += "fully_funded;1\n"
+            metadata["fully_funded"] = 1
 
         return metadata

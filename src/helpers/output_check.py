@@ -427,15 +427,30 @@ class CheckOutputFiles:
                 error = f"not known {field_name} fields"
                 self.log_and_add_to_report(error, text)
 
-            # TODO its done, but order is changed so need to change all files
-            # Check for field order
-            # data_order = [
-            #     item for item in data if item in fields_order
-            # ]  # Only consider fields in fields_order
-            # if data_order != fields_order[: len(data_order)]:
-            #     text = f"{field_name} wrong fields order: {data_order}."
-            #     error = f"wrong {field_name} fields order"
-            #     self.log_and_add_to_report(error, text)
+            # Check if fields in correct order
+            fields_order_keys = list(
+                fields_order.keys()
+            )  # Get the ordered list of keys
+            data_order = [
+                item for item in data if item in fields_order_keys
+            ]  # Filter data keys
+
+            # Check if the relative order in data matches the expected order
+            expected_order_index = 0
+            for field in data_order:
+                # Find the index of the current field in the expected order
+                while (
+                    expected_order_index < len(fields_order_keys)
+                    and fields_order_keys[expected_order_index] != field
+                ):
+                    expected_order_index += 1
+
+                # If the field is not found in the expected order, report an error
+                if expected_order_index >= len(fields_order_keys):
+                    text = f"{field_name} wrong fields order: {data_order}."
+                    error = f"wrong {field_name} fields order"
+                    self.log_and_add_to_report(error, text)
+                    break
 
             # Validate each field
             for field, value in data.items():

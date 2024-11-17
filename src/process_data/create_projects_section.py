@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import helpers.fields as flds
 import helpers.utilities as utils
 from process_data.base_config import BaseConfig
 
@@ -54,6 +55,10 @@ class CreateProjectsSections(BaseConfig):
                 )
             file_, csv_file = utils.create_csv_file(self.unit_file_name, district_upper)
             fields = self.districts_fields
+
+        # sort to be consistent with order in fields.py file
+        fields = [field for field in flds.PROJECTS_FIELDS_ORDER if field in fields]
+
         self.add_projects_section(csv_file, fields)
 
         for project_dict in projects:

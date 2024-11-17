@@ -1,6 +1,7 @@
 import csv
 from dataclasses import dataclass
 
+import helpers.fields as flds
 import helpers.utilities as utils
 from process_data.base_config import BaseConfig
 
@@ -56,6 +57,10 @@ class CreateVotesSections(BaseConfig):
                 )
             path_to_file = utils.get_path_to_file(self.unit_file_name, district_upper)
             fields = self.districts_fields
+
+        # sort to be consistent with order in fields.py file
+        fields = [field for field in flds.VOTES_FIELDS_ORDER if field in fields]
+
         with open(path_to_file, "a+", newline="", encoding="utf-8") as file_:
             csv_file = csv.writer(file_, delimiter=";")
             self.add_votes_section(csv_file, fields)

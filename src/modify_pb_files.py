@@ -6,6 +6,10 @@ or to calculate selected projects from budget value.
 
 It loads pb file (from output directory), makes some changes and (if wanted)
 saves new files to output/cleaned dir.
+
+NOTE: if field is not mentioned in fields.py file, it
+will not be saved during modifications. So if there is an
+extra (custom) new field, it will be skipped.
 """
 
 import collections
@@ -369,17 +373,9 @@ class ModifyPBFiles:
             self.meta["comment"] = comment
 
     def sort_meta_fields(self):
-        # TODO nie ogarnie additional keys, tych co nie ma w mappingu
-        known_fileds = {
+        self.meta = {
             key: self.meta[key] for key in flds.META_FIELDS_ORDER if key in self.meta
         }
-        additional_fields = {
-            key: self.meta[key]
-            for key in self.meta
-            if key not in flds.META_FIELDS_ORDER
-        }
-
-        self.meta = known_fileds | additional_fields
 
     def get_all_fields(self):
         meta_fileds = self.meta.keys()
@@ -514,26 +510,14 @@ class ModifyPBFiles:
             writer.writerow([key, value])
 
     def sort_projects_fields(self, project_info):
-        known_fields = {
+        return {
             key: project_info[key]
             for key in flds.PROJECTS_FIELDS_ORDER
             if key in project_info
         }
-        additional_fields = {
-            key: project_info[key]
-            for key in project_info
-            if key not in flds.PROJECTS_FIELDS_ORDER
-        }
-        return known_fields | additional_fields
 
     def sort_votes_fields(self, vote):
-        known_fields = {
-            key: vote[key] for key in flds.VOTES_FIELDS_ORDER if key in vote
-        }
-        additional_fields = {
-            key: vote[key] for key in vote if key not in flds.VOTES_FIELDS_ORDER
-        }
-        return known_fields | additional_fields
+        return {key: vote[key] for key in flds.VOTES_FIELDS_ORDER if key in vote}
 
     def write_projects_section(self, writer):
         writer.writerow(["PROJECTS"])
