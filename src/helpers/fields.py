@@ -16,7 +16,7 @@ META_FIELDS_ORDER = {
     "budget": {"datatype": float, "obligatory": True},
     "leftover_budget": {"datatype": str},
     "budget_per_category": {"datatype": list, "checker": validate.if_list},
-    "budget_per_neighbourhood": {"datatype": list, "checker": validate.if_list},
+    "budget_per_neighborhood": {"datatype": list, "checker": validate.if_list},
     "vote_type": {
         "datatype": str,
         "checker": lambda x: x in validate.VOTE_TYPES,
@@ -27,7 +27,7 @@ META_FIELDS_ORDER = {
         "checker": lambda x: x in validate.RULES,
         "obligatory": True,
     },
-    # change on page that dates are obligatory
+    # change on the webpage that dates are obligatory
     "date_begin": {
         "datatype": str,
         "checker": validate.date_format,
@@ -50,7 +50,7 @@ META_FIELDS_ORDER = {
     "max_length_per_category": {"datatype": int},
     "min_sum_cost_per_category": {"datatype": list, "checker": validate.if_list},
     "max_sum_cost_per_category": {"datatype": list, "checker": validate.if_list},
-    "neighbourhoods": {"datatype": str},
+    "neighborhoods": {"datatype": str},
     "subdistricts": {"datatype": str},
     "categories": {"datatype": str},
     "fully_funded": {"datatype": int, "checker": lambda x: x in [1]},
@@ -77,8 +77,6 @@ PROJECTS_FIELDS_ORDER = {
     "category": {"datatype": list, "checker": validate.if_list, "nullable": True},
     "target": {"datatype": list, "checker": validate.if_list, "nullable": True},
     "selected": {"datatype": int, "checker": lambda x: x in [0, 1, 2]},
-    # SHOULD BE ONE OF THESE, but in Amsterdam data we have other
-    "neighbourhood": {"datatype": str},
     "neighborhood": {"datatype": str},
     "subunit": {"datatype": str},
     "district": {"datatype": str},

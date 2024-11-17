@@ -423,7 +423,7 @@ class CheckOutputFiles:
             # Check for not known fields
             not_known_fields = [item for item in data if item not in fields_order]
             if not_known_fields:
-                text = f"{field_name} contains fields not known fields: {not_known_fields}."
+                text = f"{field_name} contains not known fields: {not_known_fields}."
                 error = f"not known {field_name} fields"
                 self.log_and_add_to_report(error, text)
 

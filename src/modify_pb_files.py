@@ -164,6 +164,45 @@ class ModifyPBFiles:
         # self.check_language_and_currency_codes()
         # self.check_comment_iteration()
         # self.change_warsaw_and_czestochowa()
+        # self.new_fields_changes()
+
+    def new_fields_changes(self):
+        from datetime import datetime
+
+        # change x.xx.xxxx dates
+        for key in ["date_begin", "date_end"]:
+            try:
+                # Attempt to parse the date in the format x.xx.xxxx
+                date_value = self.meta[key]
+                if len(date_value.split(".")[0]) == 1:
+                    # Parse and reformat only if in x.xx.xxxx format
+                    parsed_date = datetime.strptime(date_value, "%d.%m.%Y")
+                    print(parsed_date)
+                    formatted_date = parsed_date.strftime("%d.%m.%Y")
+                    print(formatted_date)
+                    self.meta[key] = formatted_date
+                    self.modified = True
+            except ValueError:
+                pass
+
+        # if meta["rule"] == "none"
+
+        if self.meta.get("budget_per_neighbourhood"):
+            self.meta["budget_per_neighborhood"] = self.meta.pop(
+                "budget_per_neighbourhood"
+            )
+            self.modified = True
+
+        if self.meta.get("neighbourhoods"):
+            self.meta["neighborhoods"] = self.meta.pop("neighbourhoods")
+            self.modified = True
+
+        # Iterate through the dictionary and rename 'score' to 'scores'
+        projects_fileds = next(iter(self.projects.items()))[1].keys()
+        if "neighbourhood" in projects_fileds:
+            for key, nested_dict in self.projects.items():
+                nested_dict["neighborhood"] = nested_dict.pop("neighbourhood")
+            self.modified = True
 
     def change_warsaw_and_czestochowa(self):
         # description = self.meta["description"]
