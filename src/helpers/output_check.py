@@ -1,11 +1,10 @@
 import glob
 import math
 import os
+import re
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import List
-
-import pycountry
 
 import helpers.fields as flds
 import helpers.utilities as utils
@@ -349,32 +348,33 @@ class CheckOutputFiles:
                     text = f"Empty line found at line {line_number} !"
                     self.log_and_add_to_report(error, text)
 
-    def check_language_and_currency_codes(self, meta):
-        language_code = meta.get("language")
-        if language_code:
-            # Check if the language code is in ISO 639-1 format (two-letter code).
-            if pycountry.languages.get(alpha_2=language_code) is None:
-                # there is no such code:
-                error = "Wrong language ISO 639-1 format code"
-                text = f"language ISO 639-1 format code: {language_code}"
-                self.log_and_add_to_report(error, text)
+    # 17/11/2024 moved to fields.py
+    # def check_language_and_currency_codes(self, meta):
+    #     language_code = meta.get("language")
+    #     if language_code:
+    #         # Check if the language code is in ISO 639-1 format (two-letter code).
+    #         if pycountry.languages.get(alpha_2=language_code) is None:
+    #             # there is no such code:
+    #             error = "Wrong language ISO 639-1 format code"
+    #             text = f"language ISO 639-1 format code: {language_code}"
+    #             self.log_and_add_to_report(error, text)
 
-        currency_code = meta.get("currency")
-        if currency_code:
-            # Check if the currency code is in ISO 4217 format (three-letter code).
-            if pycountry.currencies.get(alpha_3=currency_code) is None:
-                # there is no such code
-                error = "Wrong currency ISO 4217 format code"
-                text = f"currency ISO 4217 format code: {currency_code}"
-                self.log_and_add_to_report(error, text)
+    #     currency_code = meta.get("currency")
+    #     if currency_code:
+    #         # Check if the currency code is in ISO 4217 format (three-letter code).
+    #         if pycountry.currencies.get(alpha_3=currency_code) is None:
+    #             # there is no such code
+    #             error = "Wrong currency ISO 4217 format code"
+    #             text = f"currency ISO 4217 format code: {currency_code}"
+    #             self.log_and_add_to_report(error, text)
 
-    def check_comments(self, meta):
-        comment = meta.get("comment")
-        if comment:
-            if not comment.startswith("#1: "):
-                error = "Wrong comment format (not #1 iteration)"
-                text = f"wrong comment: {comment}"
-                self.log_and_add_to_report(error, text)
+    # def check_comments(self, meta):
+    #     comment = meta.get("comment")
+    #     if comment:
+    #         if not comment.startswith("#1: "):
+    #             error = "Wrong comment format (not #1 iteration)"
+    #             text = f"wrong comment: {comment}"
+    #             self.log_and_add_to_report(error, text)
 
     def run_checks(self, pb_file: str) -> None:
         """Run all checks on a given .pb file."""
@@ -397,22 +397,24 @@ class CheckOutputFiles:
         logger.info(f"PB name would be created on webpage: `{webpage_name}`")
 
     def do_checks(self, pb_file, meta, projects, votes):
-        self.check_if_empty_lines(pb_file)
-        self.check_if_commas_in_floats(meta, projects)
-        self.check_budgets(meta, projects)
-        self.check_number_of_votes(meta["num_votes"], votes)
-        self.check_number_of_projects(meta["num_projects"], projects)
-        self.check_vote_length(meta, votes)
-        self.check_votes_and_scores(projects, votes)
-        self.verify_selected(meta, projects)
-        self.check_language_and_currency_codes(meta)
-        self.check_comments(meta)
+        # self.check_if_empty_lines(pb_file)
+        # self.check_if_commas_in_floats(meta, projects)
+        # self.check_budgets(meta, projects)
+        # self.check_number_of_votes(meta["num_votes"], votes)
+        # self.check_number_of_projects(meta["num_projects"], projects)
+        # self.check_vote_length(meta, votes)
+        # self.check_votes_and_scores(projects, votes)
+        # self.verify_selected(meta, projects)
         self.check_fields(meta, projects, votes)
 
     def check_fields(self, meta, projects, votes):
-        def validate_fields(data, obligatory_fields, fields_order, field_name):
-            """Check if all obligatory fields are present"""
-            missing_fields = [item for item in obligatory_fields if item not in data]
+        def validate_fields(data, fields_order, field_name):
+            # Check for missing obligatory fields
+            missing_fields = [
+                field
+                for field, props in fields_order.items()
+                if props.get("obligatory") and field not in data
+            ]
             if missing_fields:
                 text = f"missing {field_name} obligatory field: {missing_fields}"
                 error = f"missing {field_name} obligatory field"
@@ -425,31 +427,99 @@ class CheckOutputFiles:
                 error = f"not known {field_name} fields"
                 self.log_and_add_to_report(error, text)
 
-            # TODO
+            # TODO its done, but order is changed so need to change all files
             # Check for field order
+            # data_order = [
+            #     item for item in data if item in fields_order
+            # ]  # Only consider fields in fields_order
+            # if data_order != fields_order[: len(data_order)]:
+            #     text = f"{field_name} wrong fields order: {data_order}."
+            #     error = f"wrong {field_name} fields order"
+            #     self.log_and_add_to_report(error, text)
+
+            # Validate each field
+            for field, value in data.items():
+                if field not in fields_order:
+                    continue  # Skip fields not in the order list
+
+                field_rules = fields_order[field]
+                expected_type = field_rules["datatype"]
+                checker = field_rules.get("checker")
+                nullable = field_rules.get("nullable")
+
+                # Handle nullable fields
+                if not value:
+                    if not nullable:
+                        text = f"{field_name} field '{field}' cannot be None."
+                        error = f"invalid {field_name} field value"
+                        self.log_and_add_to_report(error, text)
+                    continue
+
+                # Attempt to cast to expected type
+                try:
+                    value = expected_type(value)
+                except (ValueError, TypeError):
+                    text = (
+                        f"{field_name} field '{field}' has incorrect datatype. "
+                        f"Expected {expected_type.__name__}, found {type(value).__name__}."
+                    )
+                    error = f"incorrect {field_name} field datatype"
+                    self.log_and_add_to_report(error, text)
+                    continue
+
+                # Apply custom checker if defined
+                if checker:
+                    check_result = checker(value) if callable(checker) else True
+                    if check_result is not True:  # Validation failed
+                        text = (
+                            check_result  # Use checker-provided message if available
+                            if isinstance(check_result, str)
+                            else f"{field_name} field '{field}' failed validation with value: {value}."
+                        )
+                        error = f"invalid {field_name} field value"
+                        self.log_and_add_to_report(error, text)
 
         # Check meta fields
-        validate_fields(
-            meta, flds.META_OBLIGATORY_FIELDS, flds.META_FIELDS_ORDER, "meta"
-        )
+        validate_fields(meta, flds.META_FIELDS_ORDER, "meta")
+
+        self.validate_date_range(meta)
 
         # Check projects fields
         first_project = next(iter(projects.values()), {})
         validate_fields(
             first_project,
-            flds.PROJECTS_OBLIGATORY_FIELDS,
             flds.PROJECTS_FIELDS_ORDER,
-            "project",
+            "projects",
         )
 
         # Check votes fields
         first_vote = next(iter(votes.values()), {})
         # voter_id filed is checked during loading pb file. But maybe would be nice
         # to load name of column and later on check if correct one
-        first_vote["voter_id"] = "placeholder"
-        validate_fields(
-            first_vote, flds.VOTES_OBLIGATORY_FIELDS, flds.VOTES_FIELDS_ORDER, "votes"
-        )
+        first_vote = {"voter_id": "placeholder", **first_vote}
+        validate_fields(first_vote, flds.VOTES_FIELDS_ORDER, "votes")
+
+    def validate_date_range(self, meta):
+
+        def parse_date(date_str):
+            # Convert date string to a comparable format.
+            # - YYYY -> "YYYY-01-01"
+            # - DD.MM.YYYY -> "YYYY-MM-DD"
+
+            if re.match(r"^\d{4}$", date_str):  # Year-only format
+                return f"{date_str}-01-01"
+            if re.match(r"^\d{2}\.\d{2}\.\d{4}$", date_str):  # Full date format
+                day, month, year = map(int, date_str.split("."))
+                return f"{year:04d}-{month:02d}-{day:02d}"
+
+        parsed_begin = parse_date(meta["date_begin"])
+        parsed_end = parse_date(meta["date_end"])
+
+        if parsed_begin and parsed_end:
+            if parsed_begin > parsed_end:
+                text = f"date end ({parsed_end}) earlier than start ({parsed_begin})!"
+                error = f"date range missmatch"
+                self.log_and_add_to_report(error, text)
 
     def check_votes_and_scores(self, projects, votes):
         if not any([self.check_votes, self.check_scores]):
