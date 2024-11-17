@@ -155,7 +155,7 @@ VOTES_FIELDS_ORDER = {
     "sex": {
         "datatype": str,
         "checker": lambda x: x in ["M", "F"],
-    },  # Example values
+    },
     "voting_method": {"datatype": str},
     "district": {"datatype": str, "nullable": True},
     "neighborhood": {"datatype": str},
