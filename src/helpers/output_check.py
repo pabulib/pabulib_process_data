@@ -397,14 +397,14 @@ class CheckOutputFiles:
         logger.info(f"PB name would be created on webpage: `{webpage_name}`")
 
     def do_checks(self, pb_file, meta, projects, votes):
-        # self.check_if_empty_lines(pb_file)
-        # self.check_if_commas_in_floats(meta, projects)
-        # self.check_budgets(meta, projects)
-        # self.check_number_of_votes(meta["num_votes"], votes)
-        # self.check_number_of_projects(meta["num_projects"], projects)
-        # self.check_vote_length(meta, votes)
-        # self.check_votes_and_scores(projects, votes)
-        # self.verify_selected(meta, projects)
+        self.check_if_empty_lines(pb_file)
+        self.check_if_commas_in_floats(meta, projects)
+        self.check_budgets(meta, projects)
+        self.check_number_of_votes(meta["num_votes"], votes)
+        self.check_number_of_projects(meta["num_projects"], projects)
+        self.check_vote_length(meta, votes)
+        self.check_votes_and_scores(projects, votes)
+        self.verify_selected(meta, projects)
         self.check_fields(meta, projects, votes)
 
     def check_fields(self, meta, projects, votes):
@@ -498,8 +498,6 @@ class CheckOutputFiles:
         # to load name of column and later on check if correct one
         first_vote = {"voter_id": "placeholder", **first_vote}
         validate_fields(first_vote, flds.VOTES_FIELDS_ORDER, "votes")
-
-        raise RuntimeError
 
     def validate_date_range(self, meta):
 
