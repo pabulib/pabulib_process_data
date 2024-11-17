@@ -499,6 +499,8 @@ class CheckOutputFiles:
         first_vote = {"voter_id": "placeholder", **first_vote}
         validate_fields(first_vote, flds.VOTES_FIELDS_ORDER, "votes")
 
+        raise RuntimeError
+
     def validate_date_range(self, meta):
 
         def parse_date(date_str):
