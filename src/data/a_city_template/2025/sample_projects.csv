@@ -1,7 +1,7 @@
-Project ID,Title,Cost,Votes,District,Selected,Normalized District
-1,Park Renovation,10000,3,District 1,1,DISTRICT_1
-2,Library Upgrade,12000,3,District 2,0,DISTRICT_2
-3,New Playground,5000,4,District 1,1,DISTRICT_1
-4,Bike Lanes,8000,5,Citywide,1,CITYWIDE
-5,Community Garden,7000,4,District 2,1,DISTRICT_2
-6,Sports Facility,6000,5,Citywide,0,CITYWIDE
+Project ID,Title,Cost,Votes,District,Selected
+1,Park Renovation,10000,3,District 1,1
+2,Library Upgrade,12000,3,District 2,0
+3,New Playground,5000,4,District 1,1
+4,Bike Lanes,8000,5,Citywide,1
+5,Community Garden,7000,4,District 2,1
+6,Sports Facility,6000,5,Citywide,0
