@@ -3,14 +3,14 @@ all_data = {
     2025: {
         # --- General Metadata ---
         "base_data": {
-            "country": "NEW_COUNTRY",  # Country name, e.g., "Poland"
-            "unit": "NEW_CITY",  # City name, e.g., "Warszawa"
+            "country": "Poland",  # Country name, e.g., "Poland"
+            "unit": "a_city_template",  # City name, e.g., "Warszawa"
             "instance": 2025,  # Year or unique identifier for this instance
         },
         # --- Project Data Configuration ---
         "get_projects": {
             "data_dir": "2025",  # Directory for storing project data (relative to `data/<city>/`)
-            "excel_filename": "projects_2025",  # Excel file name (without extension) containing project data
+            "excel_filename": "sample_projects",  # Excel file name (without extension) containing project data
             "columns_mapping": {  # Maps file column headers to internal keys
                 "project_id": "Project ID",  # ID for the project
                 "name": "Title",  # Project name/title
@@ -23,7 +23,7 @@ all_data = {
         },
         # --- Vote Data Configuration ---
         "get_votes": {
-            "excel_filename": "votes_2025",  # Excel file name (without extension) containing vote data
+            "excel_filename": "sample_votes",  # Excel file name (without extension) containing vote data
             "data_dir": "2025",  # Directory for storing vote data (relative to `data/`)
             "only_valid_votes": False,  # Set to True if the file contains only valid votes
             "valid_value": "valid",  # Keyword in the file that marks votes as valid
@@ -57,8 +57,8 @@ all_data = {
                 "votes",
                 "name",
                 "selected",
-                "category",
-                "target",
+                # "category",
+                # "target",
             ],
             # Specify which project fields should be included in the output `.pb` files.
             # Add additional fields as needed based on your data schema.
@@ -84,7 +84,7 @@ all_data = {
             "date_end": "31.01.2025",  # End date of voting (DD.MM.YYYY)
             "language": "en",  # Language code (ISO 639-1, e.g., "en", "pl")
             "edition": "1",  # Edition of participatory budgeting (e.g., "1", "2025")
-            "currency": "NEW_CURRENCY",  # Currency used (e.g., "PLN", "USD")
+            "currency": "PLN",  # Currency used (e.g., "PLN", "USD")
             "unit": {  # Additional metadata for citywide projects
                 "max_length": "10",  # Max vote length, different for citywide and district
                 "comment": [

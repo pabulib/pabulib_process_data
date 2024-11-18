@@ -3,11 +3,9 @@ budgets = {
     # "source": "URL-to-official-budget-documentation",
     # Example year data (replace with actual city-specific data)
     2025: {
-        "CITYWIDE": 0,  # citywide budget allocation
-        "DISTRICT_1": 0,  # Placeholder for district 1 budget
-        "DISTRICT_2": 0,  # Placeholder for district 2 budget
-        "DISTRICT_3": 0,  # Placeholder for district 3 budget
-        # Add more districts as needed
+        "CITYWIDE": 10000,
+        "DISTRICT_1": 15000,
+        "DISTRICT_2": 12000,
     },
     2024: {
         "CITYWIDE": 0,

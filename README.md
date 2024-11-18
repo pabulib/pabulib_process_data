@@ -32,6 +32,16 @@ pip install -r requirements.txt
     start_process.py
 ```
 
+### Example processing run
+To better understand how the pipeline works, you can use the provided example template. This example processes a fictional city (a_city_template) for the year 2025 and generates .pb files based on example data:
+
+just run
+```
+python start_process_template.py
+```
+
+and see the results in `output` directory!
+
 ### Check if output .pb files are correct
 ```
 1. set in params path to .pb files you want to check:
