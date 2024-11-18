@@ -27,8 +27,8 @@ pip install -r requirements.txt
 ```
 1. add data to data/<city> directory
 2. add all needed scritps to process_data/cities/<city>
-    settings.py and budgets.py are obligatory
-3. run the process:
+    settings.py and budgets.py are obligatory, please check `cities/a_city_template` dir as a reference
+3. run the process. Choose year and the city in the script and run it:
     start_process.py
 ```
 
@@ -47,8 +47,9 @@ pip install -r requirements.txt
 ```
 modify_pb_files.py
 ```
+if `self.modified` is changed to `True`, new file will be saved in `output/cleaned` directory.
 
-### Visualize (WIP):
+### Visualize, play with data:
 ```
-visualize.py
+src/analytics/test.ipynb
 ```
