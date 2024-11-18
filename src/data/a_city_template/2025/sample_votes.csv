@@ -1,0 +1,21 @@
+Voter ID,Age,Sex,District,Citywide Projects,District Projects,Vote Status,Voting Method
+1,34,M,District 1,4,1,valid,internet
+2,45,F,District 1,4,"1,3",valid,internet
+3,29,M,District 1,"4,6",3,valid,paper
+4,40,F,District 1,6,3,valid,internet
+5,25,M,District 1,6,,valid,internet
+6,50,F,District 2,,2,valid,internet
+7,30,M,District 2,,"2,5",valid,internet
+8,28,F,District 2,,5,valid,internet
+9,35,M,District 2,,5,valid,internet
+10,31,F,District 2,,5,valid,paper
+11,29,M,Citywide,4,,valid,internet
+12,48,F,Citywide,4,,valid,internet
+13,36,M,Citywide,6,,valid,internet
+14,26,F,Citywide,,,valid,internet
+15,33,M,Citywide,6,,valid,paper
+16,41,F,District 1,,1,valid,internet
+17,39,M,District 1,,3,valid,internet
+18,47,F,District 2,,2,valid,internet
+19,44,M,District 2,,,valid,internet
+20,38,F,Citywide,,,valid,internet

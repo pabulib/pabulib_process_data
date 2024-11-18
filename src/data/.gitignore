@@ -10,3 +10,4 @@
 # but keep directories
 
 !/a_city_template/2025/*.xlsx
+!/a_city_template/2025/*.csv
