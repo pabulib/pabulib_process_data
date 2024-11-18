@@ -4,7 +4,7 @@
 # To run the processing for a specific city and year, uncomment
 # lines in start_process.py and ensure no other city is uncommented.
 #
-# This file is a template to show to process pipeline looks,
+# This file is a template to show how process pipeline looks,
 # with example data. In data/a_city_template/2025 directory
 # you will find two sample Excels in a format as we usally get
 # from cities: projects and votes.
