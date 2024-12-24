@@ -55,7 +55,7 @@ def country_name(value, *args):
     """
     Validate that the value is a valid country name or in the allowed custom list.
     """
-    custom_countries = {"Worldwide", "Earth"}  # Add custom names here
+    custom_countries = ["Worldwide"]
     if value in custom_countries:
         return True
     try:

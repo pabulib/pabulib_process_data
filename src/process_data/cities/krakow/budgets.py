@@ -50,8 +50,8 @@ budgets = {
 
 year = 2024
 
-suma = 0
-for district, budget in budgets[year].items():
-    suma += budget
+# suma = 0
+# for district, budget in budgets[year].items():
+#     suma += budget
 
-print(suma)
+# print(suma)

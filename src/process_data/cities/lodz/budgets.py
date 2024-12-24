@@ -2,6 +2,55 @@
 
 
 budgets = {
+    2024: {
+        "BAŁUTY": {
+            "BAŁUTY-CENTRUM": 1169000,
+            "BAŁUTY-DOŁY": 1102000,
+            "BAŁUTY ZACHODNIE": 538000,
+            "JULIANÓW-MARYSIN-ROGI": 620000,
+            "ŁAGIEWNIKI": 430000,
+            "RADOGOSZCZ": 960000,
+            "TEOFILÓW-WIELKOPOLSKA": 1137000,
+            "WZNIESIEŃ ŁÓDZKICH": 426000,
+        },
+        "GÓRNA": {
+            "CHOJNY": 994000,
+            "CHOJNY-DĄBROWA": 1211000,
+            "GÓRNIAK": 705000,
+            "NAD NEREM": 421000,
+            "PIASTÓW-KURAK": 733000,
+            "ROKICIE": 699000,
+            "RUDA": 605000,
+            "WISKITNO": 474000,
+        },
+        "POLESIE": {
+            "KAROLEW-RETKINIA WSCHÓD": 1032000,
+            "KOZINY": 569000,
+            "LUBLINEK-PIENISTA": 515000,
+            "IM. JÓZEFA MONTWIŁŁA-MIRECKIEGO": 429000,
+            "RETKINIA ZACHÓD-SMULSKO": 862000,
+            "STARE POLESIE": 963000,
+            "ZŁOTNO": 600000,
+            "ZDROWIE-MANIA": 465000,
+        },
+        "ŚRÓDMIEŚCIE": {
+            "KATEDRALNA": 1002000,
+            "ŚRÓDMIEŚCIE-WSCHÓD": 693000,
+        },
+        "WIDZEW": {
+            "ANDRZEJÓW": 516000,
+            "DOLINA ŁÓDKI": 451000,
+            "MILESZKI": 445000,
+            "NOWOSOLNA": 493000,
+            "OLECHÓW-JANÓW": 799000,
+            "NR 33": 429000,
+            "STARY WIDZEW": 772000,
+            "STOKI-SIKAWA-PODGÓRZE": 612000,
+            "WIDZEW-WSCHÓD": 1073000,
+            "ZARZEW": 756000,
+        },
+        "CITYWIDE": {"CITYWIDE": 9632750},
+    },
     2023: {
         "BAŁUTY": {
             "BAŁUTY-CENTRUM": 993000,

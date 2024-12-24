@@ -7,12 +7,12 @@ all_data = {
         },
         "get_projects": {
             "data_dir": "2024",
-            "excel_filename": "ZbiórProjektówBO2024",
+            "excel_filename": "ZbiórProjektówBO2024_v4",
             "columns_mapping": {
                 "project_id": "PROJEKT",
                 "name": "TYTUL",
                 "cost": "KOSZT",
-                "score": "PUNKTY",
+                "score": "SUMA_PUNKTOW",
                 "votes": "GLOSY",
                 "district": "DZIELNICA",
                 "category": "KATEGORIA",
@@ -20,11 +20,11 @@ all_data = {
             },
         },
         "get_votes": {
-            "excel_filename": "ZbiórGłosówBO2024",
+            "excel_filename": "ZbiórGłosówBO2024_v4",
             "data_dir": "2024",
             "only_valid_votes": True,
             "columns_mapping": {
-                "voter_id": "ID",
+                "voter_id": "ID2",
                 "sex": "MALE",
                 "age": "WIEK",
                 "points": "LICZBA_PUNKTOW",

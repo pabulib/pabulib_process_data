@@ -392,7 +392,7 @@ def check_if_fully_funded(budget, projects):
     budget_spent = 0
     all_projects_cost = 0
     if not isinstance(budget, int):
-        budget_available = math.floor(float(budget.replace(",", ".")))
+        budget_available = math.floor(float(str(budget).replace(",", ".")))
     else:
         budget_available = budget
     # all_projects = list()
@@ -547,7 +547,7 @@ def sort_projects_data_per_dictrict(projects_data, subdistricts=False):
     else:
         score_field = "votes"
     if subdistricts:
-        print(projects_data)
+        # print(projects_data)
         return {
             district: {
                 subdistrict: sorted(

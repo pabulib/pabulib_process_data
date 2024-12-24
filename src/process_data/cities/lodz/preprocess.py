@@ -41,15 +41,15 @@ class Preprocess(BaseConfig):
             indexed = cell.fill.start_color.index
             tint = cell.fill.start_color.tint
             if tint == -0.249977111117893:
-                district = cell.value
+                district = cell.value.strip()
                 if district == "PONADOSIEDLOWE":
                     district = "CITYWIDE"
                     subdistrict = "CITYWIDE"
                 continue
             elif tint == -0.1499984740745262:
-                subdistrict = cell.value
+                subdistrict = cell.value.strip()
                 continue
-            elif cell.value == "Lp":
+            elif str(cell.value).startswith("Lp"):
                 column_names = [cell.value for cell in row]
                 continue
             elif indexed == "FFFFFF00":

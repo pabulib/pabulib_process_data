@@ -71,10 +71,10 @@ META_FIELDS_ORDER = {
 }
 
 PROJECTS_FIELDS_ORDER = {
-    "project_id": {"datatype": list, "checker": validate.if_list, "obligatory": True},
+    "project_id": {"datatype": str, "obligatory": True},
     "cost": {"datatype": int, "obligatory": True},
-    "votes": {"datatype": list, "checker": validate.if_list},
-    "score": {"datatype": list, "checker": validate.if_list},
+    "votes": {"datatype": int},
+    "score": {"datatype": int},
     "name": {"datatype": str},
     "category": {"datatype": list, "checker": validate.if_list, "nullable": True},
     "target": {"datatype": list, "checker": validate.if_list, "nullable": True},
@@ -99,7 +99,10 @@ VOTES_FIELDS_ORDER = {
         "datatype": str,
         "checker": lambda x: x in ["M", "F"],
     },
-    "voting_method": {"datatype": str},
+    "voting_method": {
+        "datatype": str,
+        "checker": lambda x: x in ["internet", "paper"],
+    },
     "district": {"datatype": str, "nullable": True},
     "neighborhood": {"datatype": str},
     "education": {"datatype": str},
