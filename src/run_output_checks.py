@@ -22,20 +22,20 @@ You can select
         if set to True will save output report to .txt file
 """
 
-from helpers.output_check import CheckOutputFiles  # noqa: F401
+import glob
 
-params = {
-    # all files in output path
-    "files_in_output_dir": "*",
-    # just selected files
-    # "files_in_output_dir": "Poland_Warszawa_*",
-    # just files in output/cleaned dir
-    # "files_in_output_dir": "/cleaned/*",
-    # provide your own absolute path (remember about `*` to match all files)
-    # "files_in_absolute_dir": "/*",
-    # save output to txt file
-    "create_txt_report": False,
-}
+from pabulib.checker import Checker
 
-cof = CheckOutputFiles(**params)
-cof.check_output_files()
+import helpers.utilities as utils
+from helpers.settings import output_path
+
+files_in_output_dir = "*"
+# files_in_output_dir = "Poland_Warszawa_*"
+# files_in_output_dir = "/cleaned/*"
+
+path_to_all_files = f"{output_path}/{files_in_output_dir}.pb"
+
+files = glob.glob(path_to_all_files)
+utils.human_sorting(files)
+checker = Checker()
+checker.process_files(files)
