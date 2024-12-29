@@ -11,6 +11,7 @@ all_data = {
             "budget": 500000,
             "date_begin": "2022",
             "date_end": "2022",
+            "rule": "unknown",
             "language": "en",
             "edition": "1",  # ?
             # "comment": "comment",

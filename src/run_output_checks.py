@@ -23,6 +23,7 @@ You can select
 """
 
 import glob
+import json
 
 from pabulib.checker import Checker
 
@@ -35,7 +36,18 @@ files_in_output_dir = "*"
 
 path_to_all_files = f"{output_path}/{files_in_output_dir}.pb"
 
+# path_to_all_files = (
+#     "/Users/gignac/Desktop/Projects/pabulib_process_data/src/analytics/pb_files/*.pb"
+# )
+
 files = glob.glob(path_to_all_files)
 utils.human_sorting(files)
 checker = Checker()
-checker.process_files(files)
+results = checker.process_files(files)
+
+
+print(json.dumps(results["summary"], indent=4))
+
+print(json.dumps(results["metadata"], indent=4))
+
+# print(json.dumps(results, indent=4))
