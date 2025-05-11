@@ -405,7 +405,7 @@ def check_if_fully_funded(budget, projects):
             if int(selected_field) == 1:
                 # all_projects.append([project_name, project_cost, project_data["name"]])
                 budget_spent += project_cost
-    if budget_available > all_projects_cost:
+    if budget_available >= all_projects_cost:
         return True
 
 

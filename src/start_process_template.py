@@ -15,7 +15,13 @@
 # settings in there, .pb files will be created.
 # ============================================================
 
-from helpers.output_check import CheckOutputFiles  # noqa: F401
+import glob
+import json
+
+from pabulib.checker import Checker  # noqa: F401
+
+import helpers.utilities as utils
+from helpers.settings import output_path
 from helpers.utilities import create_logger
 from process_data.run_it import run_it
 
@@ -28,9 +34,24 @@ settings = {"year": 2025, "unit": "a_city_template"}
 run_it(**settings)
 
 # CHECK IF DATA IN PRODUCED .PB FILES IS CORRECT
-files_to_check = "*"
-cof = CheckOutputFiles(files_to_check)
-cof.check_output_files()
+
+files_in_output_dir = "*"
+# files_in_output_dir = "Poland_Warszawa_*"
+# files_in_output_dir = "/cleaned/*"
+
+path_to_all_files = f"{output_path}/{files_in_output_dir}.pb"
+
+files = glob.glob(path_to_all_files)
+utils.human_sorting(files)
+checker = Checker()
+results = checker.process_files(files)
+
+
+print(json.dumps(results["summary"], indent=4))
+
+print(json.dumps(results["metadata"], indent=4))
+
+# print(json.dumps(results, indent=4))
 
 # ============================================================
 # NOTE: Once you will run this script, it will generate three

@@ -1,4 +1,4 @@
-Need to add selected (from coloured cell) column:
+PROJECTS (zadania) workbook: Need to add selected (from coloured cell) column:
 ```
     1. Copy a cell with "1" filled to the clipboard
     2. "Unmerge" all of cells

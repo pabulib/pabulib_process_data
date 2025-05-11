@@ -53,8 +53,12 @@ class GetProjects(BaseConfig):
         for col_idx in range(1, self.sheet.nrows):
             row_values = self.sheet.row_values(col_idx)
             project_id = row_values[self.col["project_id"]]
+            if isinstance(project_id, str):
+                project_id = project_id.strip()
+            elif isinstance(project_id, float):
+                project_id = str(int(project_id))
             votes = row_values[self.col["votes"]]
-            if project_id == "" or votes == "":
+            if project_id in ("", "NULL") or votes == "":
                 # Project not allowed to vote
                 continue
             item = ProjectItem()
@@ -80,7 +84,7 @@ class GetProjects(BaseConfig):
                 selected = row_values[self.col["selected"]]
                 item.add_selected(selected)
 
-            district = row_values[self.col["district"]]
+            district = row_values[self.col["district"]].strip()
             if district.lower().startswith("ogólnomi"):
                 district = "CITYWIDE"
                 if self.unit == "Poznań":

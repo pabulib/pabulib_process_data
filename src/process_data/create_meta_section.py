@@ -106,18 +106,21 @@ class CreateMetaSections(BaseConfig):
             if temp_meta.get("district") and temp_meta["district"].get("description"):
                 description = temp_meta["district"].pop("description")
             elif self.subdistricts_mapping or subdistrict:
-                subdistrict_title = subdistrict.title()
+                if subdistrict in ("small", "large"):
+                    subdistrict_txt = subdistrict
+                else:
+                    subdistrict_txt = subdistrict.title()
                 description = (
-                    f"Local PB in {unit}, " f"{district_title} | {subdistrict_title}"
+                    f"Local PB in {unit}, " f"{district_title} | {subdistrict_txt}"
                 )
             else:
                 description = f"District PB in {unit}, {district_title}"
             if not subdistrict:
-                subdistrict_title = district.title()
+                subdistrict_txt = district.title()
             district_txt = district_title
 
             subunit = self.create_subunit_value(
-                temp_meta, district_title, subdistrict_title
+                temp_meta, district_title, subdistrict_txt
             )
 
             dict_to_update = temp_meta.pop("district", None)
@@ -139,7 +142,7 @@ class CreateMetaSections(BaseConfig):
         if district_txt:
             metadata["district"] = district_txt
         if subunit:
-            metadata["subunit"] = subunit
+            metadata["subunit"] = subunit.strip("\n")
         for key, value in temp_meta.items():
             if key == "comment":
                 comments = [f"#{idx}: {com}" for idx, com in enumerate(value, 1)]

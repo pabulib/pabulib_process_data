@@ -1,5 +1,6 @@
 """Votes are combined in one cell: need to separate it."""
 
+import os
 import re
 from dataclasses import dataclass
 
@@ -19,10 +20,20 @@ class Preprocess(BaseConfig):
         self.data_dir = self.preprocess["data_dir"]
         return super().__post_init__()
 
-    def get_votes_data(self):
-        excel_path = utils.get_path_to_file_by_unit(
-            self.votes_excel, self.unit, self.data_dir, ext="xls"
+    def get_existing_excel_path(self, filename, extensions=("xls", "xlsx")):
+        for ext in extensions:
+            path = utils.get_path_to_file_by_unit(
+                filename, self.unit, self.data_dir, ext=ext
+            )
+            if os.path.exists(path):
+                return path
+        raise FileNotFoundError(
+            f"No Excel file found with extensions {extensions} for {filename}"
         )
+
+    def get_votes_data(self):
+        excel_path = self.get_existing_excel_path(self.votes_excel)
+
         self.logger.info(f"Loading `{excel_path}` file...")
         sheet = utils.open_excel_workbook(excel_path)
         col_names_indexes = utils.get_col_names_indexes(sheet)
@@ -54,9 +65,8 @@ class Preprocess(BaseConfig):
         return data
 
     def get_projects_data(self):
-        excel_path = utils.get_path_to_file_by_unit(
-            self.projects_excel, self.unit, self.data_dir, ext="xls"
-        )
+        excel_path = self.get_existing_excel_path(self.projects_excel)
+
         self.logger.info(f"Loading `{excel_path}` file...")
 
         self.project_id_district_mapping = {}

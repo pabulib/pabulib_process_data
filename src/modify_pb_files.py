@@ -169,6 +169,7 @@ class ModifyPBFiles:
         # self.check_comment_iteration()
         # self.change_warsaw_and_czestochowa()
         # self.new_fields_changes()
+        self.remove_unwanted_values()
 
     def new_fields_changes(self):
         from datetime import datetime
@@ -207,6 +208,16 @@ class ModifyPBFiles:
             for key, nested_dict in self.projects.items():
                 nested_dict["neighborhood"] = nested_dict.pop("neighbourhood")
             self.modified = True
+
+    def remove_unwanted_values(self):
+        for voter_id, voter_data in self.votes.items():
+            for field_value, field_data in voter_data.items():
+                if "None" in field_data:
+                    self.votes[voter_id][field_value] = field_data.replace("None", "")
+                    self.modified = True
+                if r"\N" in field_data:
+                    self.votes[voter_id][field_value] = field_data.replace(r"\N", "")
+                    self.modified = True
 
     def change_warsaw_and_czestochowa(self):
         # description = self.meta["description"]
@@ -414,6 +425,8 @@ class ModifyPBFiles:
         self.meta["currency"] = currency
 
     def add_fully_funded(self):
+        if self.meta.get("fully_funded"):
+            return
         budget = self.meta["budget"]
         projects = [project for project in self.projects.values()]
         fully_funded = utils.check_if_fully_funded(budget, projects)

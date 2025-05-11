@@ -471,6 +471,11 @@ class GetVotesExcel(BaseConfig):
     def handle_no_points_separate_votes(self, _, row, voter_id):
         voter_item = self.create_voter_item(row, voter_id)
         vote = row[self.col["vote_column"]]
+        if vote == "NULL":
+            # Poznań 2025
+            # "The value 'NULL' means that in the case of voting, no vote was
+            # cast/assigned (there was an issue with recording/submitting the form)."
+            return
         for project_id in vote.split(","):
             if self.col.get("distirct"):
                 # TODO get district from row

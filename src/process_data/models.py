@@ -59,6 +59,7 @@ class ProjectItem:
                     float(
                         str(cost)
                         .replace("zł", "")
+                        .replace("PLN", "")
                         .replace(" ", "")
                         .replace(",", ".")
                         .replace("\xa0", "")
