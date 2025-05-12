@@ -5,6 +5,7 @@ all_data = {
             "unit": "Warszawa",
             "instance": 2025,
         },
+        "preprocess": True,
         "get_projects": {
             "data_dir": "2025",
             "excel_filename": "projekty-2025_PBL",
@@ -87,6 +88,7 @@ all_data = {
             "unit": "Warszawa",
             "instance": 2024,
         },
+        "preprocess": True,
         "get_projects": {
             "data_dir": "2024",
             "excel_filename": "projekty_BO2024_PBL",
