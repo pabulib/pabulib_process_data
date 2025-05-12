@@ -8,7 +8,7 @@ from helpers.settings import output_path
 from helpers.utilities import create_logger
 from process_data.run_it import run_it
 
-settings = {"year": 2025}
+settings = {"year": 2024}
 
 logger = create_logger()
 
@@ -21,8 +21,8 @@ logger = create_logger()
 # city = "Lublin"
 # city = "Wrocław"
 # city = "Kraków"
-# city = "Katowice"
-city = "Częstochowa"
+city = "Katowice"
+# city = "Częstochowa"
 
 settings["unit"] = city
 
@@ -47,8 +47,18 @@ checker = Checker()
 results = checker.process_files(files)
 
 
-print(json.dumps(results["summary"], indent=4, ensure_ascii=False))
+# print(json.dumps(results["summary"], indent=4, ensure_ascii=False))
 
-print(json.dumps(results["metadata"], indent=4, ensure_ascii=False))
+# print(json.dumps(results["metadata"], indent=4, ensure_ascii=False))
 
-print(json.dumps(results, indent=4, ensure_ascii=False))
+# print(json.dumps(results, indent=4, ensure_ascii=False))
+
+# Filter out files where 'results' is "File looks correct!"
+filtered_results = {
+    key: value
+    for key, value in results.items()
+    if not (isinstance(value, dict) and value.get("results") == "File looks correct!")
+}
+
+# Print the filtered JSON
+print(json.dumps(filtered_results, indent=4))

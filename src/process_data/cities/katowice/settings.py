@@ -127,9 +127,10 @@ all_data = {
             "currency": "PLN",
             "unit": {},
             "district": {},
-            "comment": [
-                "Projects required a minimum of 50 votes to be eligible for funding. If a project met the budgetary requirements but failed to reach the 50-vote threshold, it was marked with the designation 'selected=2'."
-            ],
+            "min_project_score_threshold": 50,
+            # "comment": [
+            #     "Projects required a minimum of 50 votes to be eligible for funding. If a project met the budgetary requirements but failed to reach the 50-vote threshold, it was marked with the designation 'selected=2'."
+            # ],
         },
     },
     2023: {

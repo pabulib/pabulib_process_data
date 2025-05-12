@@ -30,7 +30,7 @@ all_data = {
             "columns_mapping": {
                 "voter_id": "Lp.",
                 "voting_method": "TYP",
-                # "sex": "Płeć", # no gender anymore :(
+                # "sex": "Płeć", # no gender ATM, we should get it
                 "points": "pkt",
                 "vote_column": "nr",
                 "district": "district",
@@ -50,7 +50,7 @@ all_data = {
         "votes_data": {
             "unit_fields": [
                 "voter_id",
-                "sex",
+                # "sex", # waiting for it
                 "vote",
                 "points",
                 "voting_method",

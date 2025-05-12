@@ -30,9 +30,13 @@ def upload_pb_files():
     files = glob.glob(upload_files)
     # utils.human_sorting(files)
 
+    total_files = len(files)
+
     current_timestamp = int(time.time())
     for idx, pb_file in enumerate(files):
         client.upload_pb_file(pb_file, current_timestamp)
+
+        logger.info(f"File {idx+1}/{total_files} processed")
 
     logger.info(f"Uploading finished. Processed `{idx+1}` files.")
 

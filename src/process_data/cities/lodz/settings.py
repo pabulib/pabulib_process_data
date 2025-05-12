@@ -64,6 +64,7 @@ all_data = {
             "edition": "12",
             "currency": "PLN",
             "max_length": "5",
+            "min_project_score_threshold": 50,
             "unit": {
                 "comment": [
                     "Initially, the budget for the citywide projects was set at 9,000,000. However, due to regulations, unused funds from district PBs were reallocated to citywide projects. Consequently, the citywide budget was increased to 9,632,750."

@@ -31,7 +31,7 @@ budgets = {
         "DZBOW": 397036,
         "GNASZYN-KAWODRZA": 253512,
         "GRABOWKA": 256582,
-        "KIEDRZYN": 204307,
+        "KIEDRZYN": 371000,
         "LISINIEC": 382831,
         "MIROW": 285194,
         "OSTATNI_GROSZ": 226623,
