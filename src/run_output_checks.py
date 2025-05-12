@@ -63,9 +63,9 @@ filtered_results = {
 }
 
 # Print the filtered JSON
-# print(json.dumps(filtered_results, indent=4))
+print(json.dumps(filtered_results, indent=4))
 
 
 # save it to file
-with open("errors.txt", "w") as file:
-    json.dump(filtered_results, file, indent=4)
+# with open("errors.txt", "w") as file:
+#     json.dump(filtered_results, file, indent=4)

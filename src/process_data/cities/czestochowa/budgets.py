@@ -1,5 +1,5 @@
 budgets = {
-    2025: {
+    2026: {
         # https://czestochowa.budzet-obywatelski.eu/wszystko-o-budzecie/podzial-srodkow,59
         "CITYWIDE": 2601981,
         "BLESZNO": 366780,
@@ -22,6 +22,30 @@ budgets = {
         "WRZOSOWIAK": 592378,
         "WYCZERPY-ANIOLOW": 468326,
         "ZAWODZIE-DABIE": 473772,
+    },
+    2025: {
+        # https://czestochowa.budzet-obywatelski.eu/poprzednie-edycje/11/wyniki
+        "CITYWIDE": 2472104,
+        "BLESZNO": 346165,
+        "CZESTOCHOWKA-PARKITKA": 326309,
+        "DZBOW": 397036,
+        "GNASZYN-KAWODRZA": 253512,
+        "GRABOWKA": 256582,
+        "KIEDRZYN": 204307,
+        "LISINIEC": 382831,
+        "MIROW": 285194,
+        "OSTATNI_GROSZ": 226623,
+        "PODJASNOGORSKA": 145947,
+        "POLNOC": 686515,
+        "RAKOW": 479213,
+        "STARE_MIASTO": 263154,
+        "STRADOM": 452222,
+        "SRODMIESCIE": 339749,
+        "TRZECH_WIESZCZOW": 253282,
+        "TYSIACLECIE": 656405,
+        "WRZOSOWIAK": 566788,
+        "WYCZERPY-ANIOLOW": 443816,
+        "ZAWODZIE-DABIE": 450661,
     },
     2024: {
         # https://cdnbo.com.pl/gminy/czestochowa/download/10/za%C5%82%C4%85cznik%20nr%201.pdf?WGQ3

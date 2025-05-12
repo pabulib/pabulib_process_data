@@ -61,14 +61,17 @@ all_data = {
         "metadata": {
             "vote_type": "cumulative",
             "rule": "greedy",
-            "date_begin": "07.09.2023",
-            "date_end": "21.09.2023",
+            "date_begin": "23.09.2024",
+            "date_end": "07.10.2024",
             "language": "pl",
             "max_sum_points": "10",
-            "edition": "10",
+            "edition": "11",
             "currency": "PLN",
-            "unit": {},
-            "district": {},
+            # comment only to one district with highest turnout
+            # ['poland_czestochowa_2025_kiedrzyn.pb']
+            # comment;#1: If there are unused funds remaining in any district or the citywide budget, they are aggregated and allocated to the district with the highest turnout. Therefore, we adjusted the budget from 204 307 to 371 000.
+            "unit": {"min_project_score_threshold": 1000},
+            "district": {"min_project_score_threshold": 300},
         },
     },
     2024: {
