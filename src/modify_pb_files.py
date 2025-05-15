@@ -21,8 +21,8 @@ from copy import deepcopy
 from dataclasses import dataclass
 
 import pycountry
+from pabulib.checker import flds
 
-import helpers.fields as flds
 import helpers.utilities as utils
 
 logger = utils.create_logger()
@@ -169,7 +169,13 @@ class ModifyPBFiles:
         # self.check_comment_iteration()
         # self.change_warsaw_and_czestochowa()
         # self.new_fields_changes()
-        self.remove_unwanted_values()
+        # self.remove_unwanted_values()
+        self.swap_latitude_and_longitude()
+
+    def swap_latitude_and_longitude(self):
+        (_, project_data), *_ = self.projects.items()
+        if project_data.get("latitude"):
+            self.modified = True
 
     def new_fields_changes(self):
         from datetime import datetime
@@ -384,6 +390,13 @@ class ModifyPBFiles:
             self.meta["comment"] = comment
 
     def sort_meta_fields(self):
+        unknown_keys = [key for key in self.meta if key not in flds.META_FIELDS_ORDER]
+        if unknown_keys:
+            raise ValueError(
+                f"Unknown meta field(s) found: {unknown_keys}. "
+                f"Did you forget to add them to META_FIELDS_ORDER?"
+            )
+
         self.meta = {
             key: self.meta[key] for key in flds.META_FIELDS_ORDER if key in self.meta
         }

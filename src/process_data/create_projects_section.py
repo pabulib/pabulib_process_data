@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
-import helpers.fields as flds
+from pabulib.checker import flds
+
 import helpers.utilities as utils
 from process_data.base_config import BaseConfig
 

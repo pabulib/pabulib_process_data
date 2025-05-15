@@ -14,11 +14,12 @@ Coordinates are extracted from the detailed project pages using the 'markersMap'
 Utilities used:
 - `utils.get_soup` for standard HTML fetching
 - `utils.get_soup_requests_with` for detail page parsing
-- `utils.create_json_file_name` and `utils.save_dict_as_json` for saving results
+- `utils.create_json_filepath` and `utils.save_dict_as_json` for saving results
 """
 
 import ast
 import itertools
+import os
 import re
 from dataclasses import dataclass
 
@@ -131,12 +132,18 @@ class Preprocess(BaseConfig):
         return coordinates_dict
 
     def start(self):
-        coordinates_dict = self.scrape_projects_coordinates()
-        # Save to JSON
         obj_name = "project_coordinates"
-        json_file_name = utils.create_json_file_name(
+        json_filepath = utils.create_json_filepath(
             self.country, self.unit, self.instance, obj_name
         )
-        utils.save_dict_as_json(coordinates_dict, json_file_name)
-        self.logger.info(f"Saved coordinates to {json_file_name}")
-        raise RuntimeError("Process complete (intentional)")
+
+        if os.path.exists(json_filepath):
+            self.logger.info(
+                f"File already exists: {os.path.basename(json_filepath)} — skipping scraping."
+            )
+            return
+
+        coordinates_dict = self.scrape_projects_coordinates()
+        # Save to JSON
+        utils.save_dict_as_json(coordinates_dict, json_filepath)
+        self.logger.info(f"Saved coordinates to {os.path.basename(json_filepath)}")

@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 
 import helpers.utilities as utils
@@ -17,11 +18,11 @@ class BaseConfig:
     def save_mappings_as_jsons(self, objects):
         self.logger.info("Saving JSON files...")
         for obj_name, obj in objects.items():
-            json_file_name = utils.create_json_file_name(
+            filepath = utils.create_json_filepath(
                 self.country, self.unit, self.instance, obj_name
             )
-            utils.save_dict_as_json(obj, json_file_name)
-            self.logger.info(f"{json_file_name} file saved.")
+            utils.save_dict_as_json(obj, filepath)
+            self.logger.info(f"{os.path.basename(filepath)} file saved.")
 
     def get_json_file(self, file_name):
         return utils.name_and_load_dict_as_json(

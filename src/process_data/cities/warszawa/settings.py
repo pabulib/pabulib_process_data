@@ -47,6 +47,8 @@ all_data = {
                 "selected",
                 "category",
                 "target",
+                "longitude",
+                "latitude",
             ]
         },
         "votes_data": {
@@ -130,6 +132,8 @@ all_data = {
                 "selected",
                 "category",
                 "target",
+                "longitude",
+                "latitude",
             ]
         },
         "votes_data": {

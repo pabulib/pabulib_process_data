@@ -204,41 +204,36 @@ def get_file_path(unit_file_name, district_upper):
     return file_path
 
 
-def create_json_file_name(country, unit, year, file_name):
-    return f"{country}_{unit}_{year}_{file_name}"
+def create_json_filepath(country, unit, year, file_name):
+    filename = f"{country}_{unit}_{year}_{file_name}.json"
+    return os.path.join(settings.output_path, "jsons", filename).replace("\\", "/")
 
 
-def save_dict_as_json(data_dict, file_name):
-    path_to_file = os.path.join(settings.output_path, "jsons", file_name).replace(
-        "\\", "/"
-    )
+def save_dict_as_json(data_dict, filepath):
     # Serializing json
     json_object = json.dumps(data_dict, indent=4, ensure_ascii=False)
     # Writing to sample.json
-    with open(path_to_file + ".json", "w", encoding="utf-8") as outfile:
+    with open(filepath, "w", encoding="utf-8") as outfile:
         outfile.write(json_object)
 
 
 def name_and_load_dict_as_json(country, unit, year, name):
-    file_name = create_json_file_name(country, unit, year, name)
-    json_object = load_json_obj(file_name)
+    filepath = create_json_filepath(country, unit, year, name)
+    json_object = load_json_obj(filepath)
     return json_object
 
 
-def load_json_obj(file_name):
-    path_to_file = os.path.join(settings.output_path, "jsons", file_name).replace(
-        "\\", "/"
-    )
+def load_json_obj(filepath):
     # Opening JSON file
-    with open(path_to_file + ".json", "r", encoding="utf-8") as openfile:
+    with open(filepath, "r", encoding="utf-8") as openfile:
         # Reading from json file
         json_object = json.load(openfile)
     return json_object
 
 
-def create_project_selected_mapping_by_district(file_name):
+def create_project_selected_mapping_by_district(filepath):
     project_selected_mapping = {}
-    json_file = load_json_obj(file_name)
+    json_file = load_json_obj(filepath)
     for district, project_dicts in json_file.items():
         project_selected_mapping[district] = {}
         for project_dict in project_dicts:
@@ -251,9 +246,9 @@ def create_project_selected_mapping_by_district(file_name):
     return project_selected_mapping
 
 
-def create_project_selected_mapping(file_name):
+def create_project_selected_mapping(filepath):
     project_selected_mapping = {}
-    json_file = load_json_obj(file_name)
+    json_file = load_json_obj(filepath)
     for district, project_dicts in json_file.items():
         for project_dict in project_dicts:
             # double check needed

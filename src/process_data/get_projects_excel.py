@@ -161,11 +161,30 @@ class GetProjects(BaseConfig):
         mappings = ",".join(mappings)
         return mappings
 
+    def post_process(self):
+        if self.unit == "Warszawa":
+            # Add project coordinates from JSON (scrpaed in preprocess)
+            filename = "project_coordinates"
+            filepath = utils.create_json_filepath(
+                self.country, self.unit, self.instance, filename
+            )
+            coordinates_dict = utils.load_json_obj(filepath)
+
+            # Inject lat/lng into project dictionaries
+            for _, projects in self.projects_data_per_district.items():
+                for project in projects:
+                    project_id = str(project.get("project_id"))
+                    coords = coordinates_dict.get(project_id)
+                    if coords:
+                        project["latitude"] = coords.get("lat")
+                        project["longitude"] = coords.get("lng")
+
     def start(self):
         self.prepare_excel_sheet()
         self.handle_columns_indexes()
         self.iterate_through_projects()
         self.create_district_upper_mapping()
+        self.post_process()
         objects = {
             "district_projects_mapping": self.district_projects_mapping,
             "projects_data_per_district": self.projects_data_per_district,
