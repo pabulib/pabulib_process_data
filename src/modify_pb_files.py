@@ -170,7 +170,26 @@ class ModifyPBFiles:
         # self.change_warsaw_and_czestochowa()
         # self.new_fields_changes()
         # self.remove_unwanted_values()
-        self.swap_latitude_and_longitude()
+        # self.swap_latitude_and_longitude()
+        self.add_projects_coordinates()
+
+    def add_projects_coordinates(self):
+        "Wielczka special case: we've got coords, but Wieliczka wasnt process via this code."
+        filename = "project_coordinates"
+
+        country = self.meta["country"]
+        unit = self.meta["unit"]
+        instance = self.meta["instance"]
+
+        filepath = utils.create_json_filepath(country, unit, instance, filename)
+        coordinates_dict = utils.load_json_obj(filepath)
+
+        # Inject lat/lng into project dictionaries
+        for project_id, project_data in self.projects.items():
+            coords = coordinates_dict.get(project_id)
+            project_data["latitude"] = coords["lat"] if coords else None
+            project_data["longitude"] = coords["lng"] if coords else None
+        self.modified = True
 
     def swap_latitude_and_longitude(self):
         (_, project_data), *_ = self.projects.items()
