@@ -39,6 +39,12 @@ category_mapping = {
     "inne": None,
     "edukacja, dzieci i młodzież": "education, children and youth",
     "drogi/komunikacja": "public transit and roads",
+    "kultura i sztuka": "culture",
+    "edukacja i nauka": "education and science",
+    "integracja i wzmacnianie wspólnoty": "community building",
+    "komunikacja publiczna i infrastruktura drogowa": "public transit and roads",
+    "zieleń i natura": "nature and greenery",
+    "ochrona środowiska i zwierzęta": "environmental protection",
 }
 
 target_mapping = {

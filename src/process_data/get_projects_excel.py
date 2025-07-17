@@ -98,7 +98,8 @@ class GetProjects(BaseConfig):
                 item.category = self.map_categories(category_pl)
             elif self.unit == "Warszawa":
                 item.category = self.get_mappings_warszawa("categories", row_values)
-                item.target = self.get_mappings_warszawa("targets", row_values)
+                if self.instance < 2026:
+                    item.target = self.get_mappings_warszawa("targets", row_values)
             cost = row_values[self.col["cost"]]
             item.add_cost(cost)
             if self.subdistricts:
@@ -153,13 +154,13 @@ class GetProjects(BaseConfig):
 
         mappings = []
         for cat_pl, cat_eng in mapping.items():
+
             col_index = self.col_names_indexes.get(cat_pl)
             if col_index:
                 if row_values[col_index] == "TAK":
                     mappings.append(cat_eng)
-
-        mappings = ",".join(mappings)
-        return mappings
+        if mappings and mappings[0]:
+            return ",".join(mappings)
 
     def post_process(self):
         if self.unit == "Warszawa":

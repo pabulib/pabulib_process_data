@@ -8,7 +8,7 @@ from helpers.settings import output_path
 from helpers.utilities import create_logger
 from process_data.run_it import run_it
 
-settings = {"year": 2025}
+settings = {"year": 2026}
 
 logger = create_logger()
 
