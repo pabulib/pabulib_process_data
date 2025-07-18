@@ -81,6 +81,8 @@ class ProjectItem:
         self.name = utils.clean_name(name)
 
     def add_subdistrict(self, subdistrict):
+        if not subdistrict:
+            raise RuntimeError("There is no subdistrict you are trying to add!")
         if subdistrict.lower() in ("mały"):
             self.subdistrict = "small"
         elif subdistrict.lower() in ("duży"):

@@ -85,7 +85,7 @@ class GetProjects(BaseConfig):
                 item.add_selected(selected)
 
             district = row_values[self.col["district"]].strip()
-            if district.lower().startswith("ogólnomi"):
+            if district.lower().startswith("ogólnomi") or district.lower() == "miejski":
                 district = "CITYWIDE"
                 if self.unit == "Poznań":
                     district = "_CITYWIDE"
@@ -103,7 +103,11 @@ class GetProjects(BaseConfig):
             cost = row_values[self.col["cost"]]
             item.add_cost(cost)
             if self.subdistricts:
-                item.add_subdistrict(row_values[self.col["subdistrict"]])
+                subdistrict = row_values[self.col["subdistrict"]]
+                if self.unit == "Warszawa":
+                    subdistrict = subdistrict or item.district
+                    subdistrict = subdistrict.replace('"', "")
+                item.add_subdistrict(subdistrict)
             self.add_projects_to_mappings(item)
 
     def add_projects_to_mappings(self, item):
@@ -172,13 +176,23 @@ class GetProjects(BaseConfig):
             coordinates_dict = utils.load_json_obj(filepath)
 
             # Inject lat/lng into project dictionaries
-            for _, projects in self.projects_data_per_district.items():
-                for project in projects:
-                    project_id = str(project.get("project_id"))
-                    coords = coordinates_dict.get(project_id)
-                    if coords:
-                        project["latitude"] = coords.get("lat")
-                        project["longitude"] = coords.get("lng")
+            if self.subdistricts:
+                for _, districts in self.projects_data_per_district.items():
+                    for _, projects in districts.items():
+                        for project in projects:
+                            project_id = str(project.get("project_id"))
+                            coords = coordinates_dict.get(project_id)
+                            if coords:
+                                project["latitude"] = coords.get("lat")
+                                project["longitude"] = coords.get("lng")
+            else:
+                for _, projects in self.projects_data_per_district.items():
+                    for project in projects:
+                        project_id = str(project.get("project_id"))
+                        coords = coordinates_dict.get(project_id)
+                        if coords:
+                            project["latitude"] = coords.get("lat")
+                            project["longitude"] = coords.get("lng")
 
     def start(self):
         self.prepare_excel_sheet()

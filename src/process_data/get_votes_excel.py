@@ -445,8 +445,26 @@ class GetVotesExcel(BaseConfig):
             else:
                 voter_item.vote = self.clean_votes_field(unit_votes)
                 self.votes_data_per_district["CITYWIDE"].append(vars(voter_item))
+
         for subdistrict, column_index in self.district_columns.items():
+
             district_votes = row[column_index]
+
+            if not district_votes:
+                return
+
+            if self.load_subdistricts_mapping:
+                # it will be taken from settings votes_columns ('local', 'subdistrict')
+                # if needed, disrict / subdistrict need to be mapped
+                if "," in str(district_votes):
+                    project_id = int(district_votes.split(",")[0])
+                else:
+                    project_id = int(district_votes)
+                subdistrict_level = subdistrict
+                subdistrict = self.project_subdistrict_mapping[str(project_id)]
+                if subdistrict_level == "local":
+                    voter_item.neighborhood = subdistrict
+
             neighborhood = voter_item.neighborhood or subdistrict
             if district_votes and district_votes not in utils.wrong_votes:
                 voter_item_cp = deepcopy(voter_item)

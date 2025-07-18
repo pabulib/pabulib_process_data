@@ -4,6 +4,7 @@ all_data = {
             "country": "Poland",
             "unit": "Warszawa",
             "instance": 2026,
+            "subdistricts": True,  # from 2026 there are local projects
         },
         "preprocess": True,
         "get_projects": {
@@ -15,6 +16,7 @@ all_data = {
                 "cost": "Koszt",
                 "votes": "Liczba głosów ważnych",
                 "district": "Dzielnica",
+                "subdistrict": "Obszar",
                 "selected": "Status",
                 # "category": "multiple category & target columns",
             },
@@ -24,6 +26,7 @@ all_data = {
             "data_dir": "2026",
             "only_valid_votes": False,
             "valid_value": "ważny",
+            "load_subdistricts_mapping": True,
             "columns_mapping": {
                 "voter_id": "ID karty",
                 "sex": "Płeć",
@@ -32,8 +35,9 @@ all_data = {
                 "voting_method": "Sposób głosowania",
                 "if_valid": "Status karty do głosowania",
                 "votes_columns": {
-                    "unit": "Numery projektów ogólnomiejskich",
+                    "unit": "Numery projektów miejskich",
                     "local": "Numery projektów dzielnicowych",
+                    "subdistrict": "Numery projektów lokalnych",
                 },
             },
             "rows_iterator_handler": "one_voter_one_row_no_points",
