@@ -432,6 +432,7 @@ class GetVotesExcel(BaseConfig):
         self.votes_data_per_district["local"].append(vars(voter_item_cp))
 
     def handle_one_row_no_points(self, _, row, voter_id):
+
         voter_item = self.create_voter_item(row, voter_id)
         unit_votes = row[self.col["unit_votes"]]
         if unit_votes and unit_votes not in utils.wrong_votes:
@@ -451,7 +452,7 @@ class GetVotesExcel(BaseConfig):
             district_votes = row[column_index]
 
             if not district_votes:
-                return
+                continue
 
             if self.load_subdistricts_mapping:
                 # it will be taken from settings votes_columns ('local', 'subdistrict')
@@ -466,6 +467,15 @@ class GetVotesExcel(BaseConfig):
                     voter_item.neighborhood = subdistrict
 
             neighborhood = voter_item.neighborhood or subdistrict
+            if neighborhood == "-":
+                # WE NEED TO MAP district (neighbourhood) from subdistrict
+                # for example, voter 218264 didnt vote for any district project
+                # hence, we dont know it
+                neighborhood = self.project_district_mapping[str(project_id)]
+            # if int(voter_id) == 218264:
+            #     raise RuntimeError(
+            #         f"{neighborhood}, {subdistrict}, {subdistrict_level}, {voter_item.neighborhood}"
+            #     )
             if district_votes and district_votes not in utils.wrong_votes:
                 voter_item_cp = deepcopy(voter_item)
                 voter_item_cp.vote = self.clean_votes_field(district_votes)
@@ -474,6 +484,7 @@ class GetVotesExcel(BaseConfig):
                         self.votes_data_per_district[neighborhood] = (
                             collections.defaultdict(list)
                         )
+
                     self.votes_data_per_district[neighborhood][subdistrict].append(
                         vars(voter_item_cp)
                     )

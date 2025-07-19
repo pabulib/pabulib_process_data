@@ -49,6 +49,9 @@ class CreateMetaSections(BaseConfig):
                 return self.budgets[district][0]
             else:
                 self.logger.critical(f"Gdynia: Not known subdistrict: {subdistrict}!")
+        elif self.unit == "Warszawa":
+            if subdistrict.lower() in ("citywide"):
+                return self.budgets[district]
         return self.budgets[district][subdistrict]
 
     def iterate_through_subdistricts(self):

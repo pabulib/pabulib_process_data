@@ -1,0 +1,144 @@
+{
+    "metadata": {
+        "processed": 75,
+        "valid": 68,
+        "invalid": 7
+    },
+    "summary": {
+        "unused budget": 43,
+        "greedy rule not followed": 6,
+        "different values in votes": 1
+    },
+    "Poland_Warszawa_2026_": {
+        "webpage_name": "Poland_Warszawa_2026",
+        "results": {
+            "errors": {
+                "unused budget": {
+                    "1": "project: 1664 can be funded but it's not selected"
+                },
+                "greedy rule not followed": {
+                    "1": "Projects not selected but should be: {'1664'}, and selected but shouldn't: "
+                }
+            },
+            "warnings": {}
+        }
+    },
+    "Poland_Warszawa_2026_BEMOWO_BEMOWO": {
+        "webpage_name": "Poland_Warszawa_2026_Bemowo",
+        "results": {
+            "errors": {
+                "unused budget": {
+                    "2": "project: 1356 can be funded but it's not selected"
+                },
+                "greedy rule not followed": {
+                    "2": "Projects not selected but should be: {'1356'}, and selected but shouldn't: "
+                }
+            },
+            "warnings": {}
+        }
+    },
+    "Poland_Warszawa_2026_MOKOTOW_WIERZBNO,_KSAWEROW": {
+        "webpage_name": "Poland_Warszawa_2026_Wierzbno, Ksawer\u00f3w",
+        "results": {
+            "errors": {
+                "different values in votes": {
+                    "1": "project: `1242` file votes (in PROJECTS section): `223` vs counted: 222"
+                }
+            },
+            "warnings": {}
+        }
+    },
+    "Poland_Warszawa_2026_OCHOTA_OCHOTA": {
+        "webpage_name": "Poland_Warszawa_2026_Ochota",
+        "results": {
+            "errors": {
+                "unused budget": {
+                    "3": "project: 472 can be funded but it's not selected"
+                },
+                "greedy rule not followed": {
+                    "3": "Projects not selected but should be: {'472'}, and selected but shouldn't: "
+                }
+            },
+            "warnings": {}
+        }
+    },
+    "Poland_Warszawa_2026_REMBERTOW_REMBERTOW": {
+        "webpage_name": "Poland_Warszawa_2026_Rembert\u00f3w",
+        "results": {
+            "errors": {
+                "unused budget": {
+                    "4": "project: 391 can be funded but it's not selected",
+                    "5": "project: 144 can be funded but it's not selected",
+                    "6": "project: 1537 can be funded but it's not selected",
+                    "7": "project: 1251 can be funded but it's not selected",
+                    "8": "project: 719 can be funded but it's not selected",
+                    "9": "project: 1520 can be funded but it's not selected",
+                    "10": "project: 759 can be funded but it's not selected"
+                },
+                "greedy rule not followed": {
+                    "4": "Projects not selected but should be: {'391'}, and selected but shouldn't: "
+                }
+            },
+            "warnings": {}
+        }
+    },
+    "Poland_Warszawa_2026_TARGOWEK_TARGOWEK": {
+        "webpage_name": "Poland_Warszawa_2026_Targ\u00f3wek",
+        "results": {
+            "errors": {
+                "unused budget": {
+                    "11": "project: 879 can be funded but it's not selected"
+                },
+                "greedy rule not followed": {
+                    "5": "Projects not selected but should be: {'879'}, and selected but shouldn't: "
+                }
+            },
+            "warnings": {}
+        }
+    },
+    "Poland_Warszawa_2026_WESOLA_WESOLA": {
+        "webpage_name": "Poland_Warszawa_2026_Weso\u0142a",
+        "results": {
+            "errors": {
+                "unused budget": {
+                    "12": "project: 691 can be funded but it's not selected",
+                    "13": "project: 1688 can be funded but it's not selected",
+                    "14": "project: 615 can be funded but it's not selected",
+                    "15": "project: 1219 can be funded but it's not selected",
+                    "16": "project: 622 can be funded but it's not selected",
+                    "17": "project: 631 can be funded but it's not selected",
+                    "18": "project: 614 can be funded but it's not selected",
+                    "19": "project: 653 can be funded but it's not selected",
+                    "20": "project: 1865 can be funded but it's not selected",
+                    "21": "project: 282 can be funded but it's not selected",
+                    "22": "project: 1225 can be funded but it's not selected",
+                    "23": "project: 530 can be funded but it's not selected",
+                    "24": "project: 637 can be funded but it's not selected",
+                    "25": "project: 1218 can be funded but it's not selected",
+                    "26": "project: 583 can be funded but it's not selected",
+                    "27": "project: 293 can be funded but it's not selected",
+                    "28": "project: 2062 can be funded but it's not selected",
+                    "29": "project: 560 can be funded but it's not selected",
+                    "30": "project: 1998 can be funded but it's not selected",
+                    "31": "project: 871 can be funded but it's not selected",
+                    "32": "project: 612 can be funded but it's not selected",
+                    "33": "project: 1910 can be funded but it's not selected",
+                    "34": "project: 860 can be funded but it's not selected",
+                    "35": "project: 1236 can be funded but it's not selected",
+                    "36": "project: 661 can be funded but it's not selected",
+                    "37": "project: 1683 can be funded but it's not selected",
+                    "38": "project: 1717 can be funded but it's not selected",
+                    "39": "project: 656 can be funded but it's not selected",
+                    "40": "project: 1496 can be funded but it's not selected",
+                    "41": "project: 799 can be funded but it's not selected",
+                    "42": "project: 1641 can be funded but it's not selected",
+                    "43": "project: 1666 can be funded but it's not selected"
+                },
+                "greedy rule not followed": {
+                    "6": "Projects not selected but should be: {'615', '691', '530', '631', '637', '614'}, and selected but shouldn't: "
+                }
+            },
+            "warnings": {}
+        }
+    }
+}
