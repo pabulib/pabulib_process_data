@@ -75,16 +75,25 @@ all_data = {
             "edition": "12",
             "currency": "PLN",
             "unit": {
-                "max_length": "10",
+                "max_length": "5",
                 "comment": [
                     "The metadata regarding the age of voters shows very low values (starting from zero), indicating that one doesn't need to be an adult to vote: If a voter is under 13, they can vote with the consent of a parent or guardian. Hence, for example, age 0 likely corresponds to cases where parents/guardians are voting on behalf of their children.",
                 ],
+                "min_project_score_threshold": "3000",
             },
             "district": {
-                "max_length": "15",
+                "max_length": "5",
                 "comment": [
                     "The metadata regarding the age of voters shows very low values (starting from zero), indicating that one doesn't need to be an adult to vote: If a voter is under 13, they can vote with the consent of a parent or guardian. Hence, for example, age 0 likely corresponds to cases where parents/guardians are voting on behalf of their children.",
                 ],
+                "min_project_score_threshold": "150",
+            },
+            "local": {
+                "max_length": "5",
+                "comment": [
+                    "The metadata regarding the age of voters shows very low values (starting from zero), indicating that one doesn't need to be an adult to vote: If a voter is under 13, they can vote with the consent of a parent or guardian. Hence, for example, age 0 likely corresponds to cases where parents/guardians are voting on behalf of their children.",
+                ],
+                "min_project_score_threshold": "30",
             },
         },
     },
