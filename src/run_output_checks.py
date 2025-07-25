@@ -46,13 +46,13 @@ checker = Checker()
 results = checker.process_files(files)
 
 # PRINT JUST SUMMARY
-print(json.dumps(results["summary"], indent=4))
+# print(json.dumps(results["summary"], indent=4, ensure_ascii=False))
 
 # PRINT JUST METADATA
-# print(json.dumps(results["metadata"], indent=4))
+# print(json.dumps(results["metadata"], indent=4, ensure_ascii=False))
 
 # PRINT ALL
-# print(json.dumps(results, indent=4))
+# print(json.dumps(results, indent=4, ensure_ascii=False))
 
 # PRINT ALL WITHOUT VALID FILES
 # Filter out files where 'results' is "File looks correct!"
@@ -63,9 +63,9 @@ filtered_results = {
 }
 
 # Print the filtered JSON
-# print(json.dumps(filtered_results, indent=4))
+print(json.dumps(filtered_results, indent=4, ensure_ascii=False))
 
 
 # save it to file
-with open("errors.txt", "w") as file:
-    json.dump(filtered_results, file, indent=4)
+# with open("errors.txt", "w") as file:
+#     json.dump(filtered_results, file, indent=4, ensure_ascii=False)
