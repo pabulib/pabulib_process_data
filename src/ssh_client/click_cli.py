@@ -39,6 +39,7 @@ import click
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = REPO_ROOT / "src"
 DEFAULT_OUTPUT_DIR = SRC_ROOT / "output"
+DEFAULT_DOWNLOAD_DIR = Path(__file__).resolve().parent / "downloads"
 
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
@@ -178,6 +179,18 @@ def _preview_and_confirm(files: list[Path]) -> bool:
     return click.confirm("Do you want to upload all of them?", default=False)
 
 
+def _preview_and_confirm_download(files: list[Path], dest: Path) -> bool:
+    """Preview files to download and ask for confirmation."""
+    if not files:
+        click.echo("No files to download.")
+        return False
+    click.echo(f"The following files will be downloaded to: {dest}")
+    for f in files:
+        click.echo(f"  - {f.name}")
+    click.echo("")
+    return click.confirm("Do you want to download all of them?", default=False)
+
+
 @click.group(
     context_settings={"help_option_names": ["-h", "--help"]},
     invoke_without_command=True,
@@ -297,6 +310,138 @@ def upload_cmd(
                 return
             with _silent_ssh_client(host) as client:
                 _upload_many(client, matches, container_name, force)
+    except SSHClientError as e:
+        _err(str(e))
+        raise SystemExit(1)
+    except Exception as e:
+        _err(f"Unexpected error: {e}")
+        raise SystemExit(1)
+
+
+@cli.command("download-all")
+@click.option(
+    "--dir",
+    "directory",
+    type=click.Choice(
+        ["all", "pb_files", "pb_files_depreciated"], case_sensitive=False
+    ),
+    default="all",
+    show_default=True,
+    help="Which remote directory to download from",
+)
+@click.option(
+    "--dest",
+    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
+    default=DEFAULT_DOWNLOAD_DIR,
+    show_default=True,
+    help="Local destination directory",
+)
+@click.option("--force", is_flag=True, help="Overwrite existing local files")
+@click.option(
+    "--recursive/--no-recursive",
+    default=True,
+    show_default=True,
+    help="Recurse into subdirectories on the server",
+)
+@click.pass_context
+def download_all_cmd(
+    ctx: click.Context, directory: str, dest: Path, force: bool, recursive: bool
+):
+    """Download .pb files from the server to a local directory."""
+    host = ctx.obj.get("host")
+    dest.mkdir(parents=True, exist_ok=True)
+
+    try:
+        with _silent_ssh_client(host) as client:
+            from ssh_client.ssh_client import SSHClientError  # noqa
+
+            groups: list[tuple[str, list[dict], str]]  # (group_name, files, base_dir)
+            if directory == "pb_files":
+                base = client.remote_pb_files_dir  # type: ignore[attr-defined]
+                files = (
+                    client.list_pb_files_recursive()
+                    if recursive
+                    else client.list_pb_files()
+                )
+                groups = [("pb_files", files, str(base))]
+            elif directory == "pb_files_depreciated":
+                base = client.remote_pb_depreciated_dir  # type: ignore[attr-defined]
+                files = (
+                    client.list_pb_depreciated_files_recursive()
+                    if recursive
+                    else client.list_pb_depreciated_files()
+                )
+                groups = [("pb_files_depreciated", files, str(base))]
+            else:
+                # both
+                base_pb = client.remote_pb_files_dir  # type: ignore[attr-defined]
+                base_dep = client.remote_pb_depreciated_dir  # type: ignore[attr-defined]
+                files_pb = (
+                    client.list_pb_files_recursive()
+                    if recursive
+                    else client.list_pb_files()
+                )
+                files_dep = (
+                    client.list_pb_depreciated_files_recursive()
+                    if recursive
+                    else client.list_pb_depreciated_files()
+                )
+                groups = [
+                    ("pb_files", files_pb, str(base_pb)),
+                    ("pb_files_depreciated", files_dep, str(base_dep)),
+                ]
+
+            # Build download plan
+            plan: list[tuple[str, Path]] = []  # list of (remote_path, local_path)
+            preview: list[Path] = []
+            for group_name, files, base_dir in groups:
+                sub_dest = dest if directory != "all" else dest / group_name
+                sub_dest.mkdir(parents=True, exist_ok=True)
+                for info in files:
+                    remote_path = info.get("path") or ""
+                    name = info.get("name") or ""
+                    if not remote_path or not name:
+                        continue
+                    # Preserve directory structure when recursive
+                    relpath = name
+                    if recursive and base_dir:
+                        try:
+                            prefix = base_dir.rstrip("/") + "/"
+                            if remote_path.startswith(prefix):
+                                relpath = remote_path[len(prefix) :]
+                            else:
+                                relpath = name
+                        except Exception:
+                            relpath = name
+
+                    local_path = sub_dest / str(relpath)
+                    plan.append((str(remote_path), local_path))
+                    preview.append(local_path)
+
+            if not plan:
+                _err("No files found to download")
+                raise SystemExit(1)
+
+            if not _preview_and_confirm_download(preview, dest):
+                click.echo("Aborted.")
+                return
+
+            # Execute downloads
+            ok = 0
+            for remote_path, local_path in plan:
+                res = client.download_file(remote_path, local_path, overwrite=force)
+                if res.get("ok"):
+                    size = res.get("size") or 0
+                    click.echo(
+                        f"  ↓ {local_path.name} ({(int(size) /(1024*1024)):.2f} MB)"
+                    )
+                    ok += 1
+                else:
+                    click.echo(f"  ✗ {local_path.name}: {res.get('error')}")
+
+            click.echo(f"Completed: {ok}/{len(plan)} successful")
+            if ok != len(plan):
+                raise SystemExit(1)
     except SSHClientError as e:
         _err(str(e))
         raise SystemExit(1)
@@ -528,6 +673,7 @@ def _interactive_menu(ctx: click.Context) -> None:
                 "Upload from src/output dir",
                 "Upload files from provided directory(ies)",
                 "Upload file from provided path(s)",
+                "Download all .pb files from the server",
                 "List all .pb files on the server",
                 "List depreciated .pb files on the server",
                 "Test SSH connection",
@@ -591,6 +737,32 @@ def _interactive_menu(ctx: click.Context) -> None:
                     default=os.environ.get("SSH_DOCKER_CONTAINER", ""),
                 ).ask()
             ctx.invoke(upload_all_cmd, force=False, container=container)
+        elif choice == "Download all .pb files from the server":
+            # Ask destination optionally
+            default_dest = str(DEFAULT_DOWNLOAD_DIR)
+            dest_text = questionary.text(
+                "Local destination directory (leave empty for default)",
+                default=default_dest,
+            ).ask()
+            dest = Path(dest_text or default_dest)
+            which = questionary.select(
+                "Which remote directory to download?",
+                choices=["all", "pb_files", "pb_files_depreciated"],
+                default="all",
+            ).ask()
+            recursive = questionary.confirm(
+                "Recurse into subdirectories?", default=True
+            ).ask()
+            force = questionary.confirm(
+                "Overwrite existing local files if present?", default=False
+            ).ask()
+            ctx.invoke(
+                download_all_cmd,
+                directory=which,
+                dest=dest,
+                force=bool(force),
+                recursive=bool(recursive),
+            )
         elif choice == "List all .pb files on the server":
             ctx.invoke(list_cmd, directory="all")
         elif choice == "List depreciated .pb files on the server":
@@ -620,10 +792,11 @@ def _interactive_menu(ctx: click.Context) -> None:
         click.echo("  1) Upload from src/output dir")
         click.echo("  2) Upload files from provided directory(ies)")
         click.echo("  3) Upload file from provided path(s)")
-        click.echo("  4) List all .pb files on the server")
-        click.echo("  5) List depreciated .pb files on the server")
-        click.echo("  6) Test SSH connection")
-        click.echo("  7) Exit")
+        click.echo("  4) Download all .pb files from the server")
+        click.echo("  5) List all .pb files on the server")
+        click.echo("  6) List depreciated .pb files on the server")
+        click.echo("  7) Test SSH connection")
+        click.echo("  8) Exit")
 
         choice = click.prompt("Select option", type=int, default=1)
         if choice == 1:
@@ -663,10 +836,34 @@ def _interactive_menu(ctx: click.Context) -> None:
                 upload_paths_cmd, paths=tuple(paths), force=force, container=container
             )
         elif choice == 4:
-            ctx.invoke(list_cmd, directory="all")
+            dest = Path(
+                click.prompt(
+                    "Local destination directory", default=str(DEFAULT_DOWNLOAD_DIR)
+                )
+            )
+            which = click.prompt(
+                "Which remote directory to download? (all/pb_files/pb_files_depreciated)",
+                type=click.Choice(
+                    ["all", "pb_files", "pb_files_depreciated"], case_sensitive=False
+                ),
+                default="all",
+            )
+            recursive = click.confirm("Recurse into subdirectories?", default=True)
+            force = click.confirm(
+                "Overwrite existing local files if present?", default=False
+            )
+            ctx.invoke(
+                download_all_cmd,
+                directory=which,
+                dest=dest,
+                force=force,
+                recursive=recursive,
+            )
         elif choice == 5:
-            ctx.invoke(list_cmd, directory="pb_files_depreciated")
+            ctx.invoke(list_cmd, directory="all")
         elif choice == 6:
+            ctx.invoke(list_cmd, directory="pb_files_depreciated")
+        elif choice == 7:
             # Test connection with visible connection prints
             host = ctx.obj.get("host")
             try:

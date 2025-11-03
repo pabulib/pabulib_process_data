@@ -361,6 +361,143 @@ class SSHClient:
             "pb_files_depreciated": self.list_pb_depreciated_files(),
         }
 
+    # ----------
+    # Recursive
+    # ----------
+
+    def _walk_remote_pb_files(
+        self, remote_dir: str
+    ) -> List[Dict[str, Union[str, int, datetime]]]:
+        """
+        Recursively walk a remote directory and collect .pb files with metadata.
+
+        Returns list with keys: name, size, modified, path
+        """
+        self._ensure_connected()
+        assert self._sftp is not None
+        out: List[Dict[str, Union[str, int, datetime]]] = []
+
+        stack = [remote_dir.rstrip("/")]
+        visited = set()
+        while stack:
+            current = stack.pop()
+            if current in visited:
+                continue
+            visited.add(current)
+            try:
+                entries = self._sftp.listdir_attr(current)
+            except FileNotFoundError:
+                continue
+            except Exception as e:
+                raise SSHClientError(f"Failed to list {current}: {e}")
+
+            for fa in entries:
+                name = fa.filename
+                full_path = f"{current}/{name}"
+                mode = fa.st_mode
+                if stat.S_ISDIR(mode):
+                    stack.append(full_path)
+                elif stat.S_ISREG(mode) and name.endswith(".pb"):
+                    out.append(
+                        {
+                            "name": name,
+                            "size": fa.st_size,
+                            "modified": datetime.fromtimestamp(fa.st_mtime),
+                            "path": full_path,
+                        }
+                    )
+
+        return sorted(out, key=lambda x: x["path"])  # type: ignore[index]
+
+    def list_pb_files_recursive(self) -> List[Dict[str, Union[str, int, datetime]]]:
+        """Recursively list .pb files under the pb_files directory."""
+        try:
+            assert self.remote_pb_files_dir is not None
+            return self._walk_remote_pb_files(self.remote_pb_files_dir)
+        except Exception as e:
+            raise SSHClientError(f"Failed to recursively list pb_files: {str(e)}")
+
+    def list_pb_depreciated_files_recursive(
+        self,
+    ) -> List[Dict[str, Union[str, int, datetime]]]:
+        """Recursively list .pb files under the pb_files_depreciated directory."""
+        try:
+            assert self.remote_pb_depreciated_dir is not None
+            return self._walk_remote_pb_files(self.remote_pb_depreciated_dir)
+        except Exception as e:
+            raise SSHClientError(
+                f"Failed to recursively list pb_files_depreciated: {str(e)}"
+            )
+
+    def download_file(
+        self,
+        remote_path: str,
+        local_path: Union[str, Path],
+        overwrite: bool = False,
+        preserve_mtime: bool = True,
+    ) -> Dict[str, Union[bool, str, int]]:
+        """
+        Download a single remote file to a local path via SFTP.
+
+        Args:
+            remote_path: Full remote path to the file
+            local_path: Destination local filepath
+            overwrite: If False and local file exists, skip with error
+            preserve_mtime: When True, preserve remote modification time
+
+        Returns:
+            Dict with keys: ok, error/message, local_path, size
+        """
+        self._ensure_connected()
+        assert self._sftp is not None
+
+        local_path = Path(local_path)
+        local_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if local_path.exists() and not overwrite:
+            return {
+                "ok": False,
+                "error": f"Local file already exists: {local_path}",
+            }
+
+        # Download to a temp file first for atomicity, then rename
+        tmp_path = local_path.with_suffix(local_path.suffix + ".part")
+        try:
+            self._sftp.get(remote_path, str(tmp_path))
+            # Determine size and mtime from remote
+            st = self._sftp.stat(remote_path)
+            size = int(getattr(st, "st_size", 0) or 0)
+
+            # Move into place
+            if local_path.exists():
+                try:
+                    local_path.unlink()
+                except Exception:
+                    pass
+            tmp_path.replace(local_path)
+
+            if preserve_mtime:
+                try:
+                    mtime = int(getattr(st, "st_mtime", 0) or 0)
+                    os.utime(local_path, (mtime, mtime))
+                except Exception:
+                    pass
+
+            return {
+                "ok": True,
+                "message": f"Downloaded to {local_path}",
+                "local_path": str(local_path),
+                "size": size,
+            }
+        except Exception as e:
+            # Cleanup temp file
+            try:
+                if tmp_path.exists():
+                    tmp_path.unlink()
+            except Exception:
+                pass
+            return {"ok": False, "error": f"Failed to download: {e}"}
+
     def get_file_info(
         self, filename: str, directory: str = "pb_files"
     ) -> Optional[Dict[str, Union[str, int, datetime]]]:

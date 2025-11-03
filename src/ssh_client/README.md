@@ -11,6 +11,8 @@ Click-based helper to list and upload `.pb` files to the remote server and into 
   - `python src/ssh_client/click_cli.py list`
   - `python src/ssh_client/click_cli.py list --dir pb_files`
   - `python src/ssh_client/click_cli.py list --dir pb_files_depreciated`
+  - `python src/ssh_client/click_cli.py download-all` (downloads all `.pb` recursively to `src/ssh_client/downloads` by default)
+  - `python src/ssh_client/click_cli.py download-all --dir pb_files --dest path/to/local/dir --no-recursive` (choose source dir/dest and disable recursion)
   - `python src/ssh_client/click_cli.py upload <file_or_dir>`
   - `python src/ssh_client/click_cli.py upload-paths <path_or_glob> [<path_or_glob> ...]`
   - `python src/ssh_client/click_cli.py upload-dirs <dir> [<dir> ...]`

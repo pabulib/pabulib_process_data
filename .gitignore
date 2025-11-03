@@ -37,3 +37,5 @@ output_check_report*.txt
 
 # Secrets
 client_secret.json
+
+src/ssh_client/downloads/
