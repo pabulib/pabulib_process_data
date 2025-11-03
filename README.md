@@ -76,3 +76,33 @@ if `self.modified` is changed to `True`, new file will be saved in `output/clean
 ```
 src/analytics/test.ipynb
 ```
+
+## SSH client: list and upload pb files
+
+Convenient CLI to interact with the remote PB files server and Admin uploads. First, install deps (once):
+
+```bash
+pip install -r requirements.txt
+```
+
+Then use the Click CLI:
+
+```bash
+# List remote files (both published and archived)
+python src/ssh_client/click_cli.py list
+
+# Upload all .pb files produced locally (from src/output)
+python src/ssh_client/click_cli.py upload-all
+
+# Upload a specific file or a whole directory
+python src/ssh_client/click_cli.py upload path/to/file.pb
+python src/ssh_client/click_cli.py upload path/to/dir
+
+# Upload multiple paths (files or glob patterns)
+python src/ssh_client/click_cli.py upload-paths path/to/*.pb other/file.pb
+
+# Upload all .pb files from multiple directories
+python src/ssh_client/click_cli.py upload-dirs src/output another/dir
+```
+
+Tip: set SSH connection details in `.env` (or use `--host` to reference an entry in `~/.ssh/config`). For Admin uploads, set `SSH_DOCKER_CONTAINER` so the Admin UI can see the uploaded files inside the container.
