@@ -171,7 +171,37 @@ class ModifyPBFiles:
         # self.new_fields_changes()
         # self.remove_unwanted_values()
         # self.swap_latitude_and_longitude()
-        self.add_projects_coordinates()
+        # self.add_projects_coordinates()
+        # self.cumulative_length_fix()
+
+    def cumulative_length_fix(self):
+        if self.meta["vote_type"] == "cumulative":
+            # Rename legacy cumulative fields to new naming
+            renamed = False
+            if self.meta.get("min_length") is not None:
+                # Only set new key if not already present or value differs
+                if (
+                    self.meta.get("min_sum_points") is None
+                    or self.meta["min_sum_points"] != self.meta["min_length"]
+                ):
+                    self.meta["min_sum_points"] = self.meta.pop("min_length")
+                else:
+                    # New key already present with same value; just drop old
+                    self.meta.pop("min_length")
+                renamed = True
+
+            if self.meta.get("max_length") is not None:
+                if (
+                    self.meta.get("max_sum_points") is None
+                    or self.meta["max_sum_points"] != self.meta["max_length"]
+                ):
+                    self.meta["max_sum_points"] = self.meta.pop("max_length")
+                else:
+                    self.meta.pop("max_length")
+                renamed = True
+
+            if renamed:
+                self.modified = True
 
     def add_projects_coordinates(self):
         "Wielczka special case: we've got coords, but Wieliczka wasnt process via this code."
