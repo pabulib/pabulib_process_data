@@ -27,12 +27,16 @@ pip install -r requirements.txt
 
 NOTE: The checker is currently in deployment/testing mode. If there are changes in Checker repo (which happens quite often), you must reinstall it to apply the latest updates.
 
-(This ensures you're using the most recent pushed code)
-To reinstall the latest version from GitHub:
+To install the checker:
 
 ```bash
-pip uninstall -y pabulib 
-pip install git+https://github.com/pabulib/checker.git
+pip install pabulib-checker
+```
+
+To update to the latest version:
+
+```bash
+pip install --upgrade pabulib-checker
 ```
 
 
