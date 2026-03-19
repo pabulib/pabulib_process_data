@@ -1,4 +1,67 @@
 all_data = {
+    2025: {
+        "base_data": {
+            "country": "Poland",
+            "unit": "Kraków",
+            "instance": 2025,
+        },
+        "get_projects": {
+            "data_dir": "2025",
+            "excel_filename": "ZbiórProjektówBO2025",
+            "columns_mapping": {
+                "project_id": "PROJEKT",
+                "name": "TYTUL",
+                "cost": "KOSZT",
+                "score": "PUNKTY",
+                "votes": "GLOSY_SUMA",
+                "district": "DZIELNICA",
+                "category": "KATEGORIA",
+                "selected": "Status",
+            },
+        },
+        "get_votes": {
+            "excel_filename": "ZbiórGłosówBO2025",
+            "data_dir": "2025",
+            "only_valid_votes": True,
+            "columns_mapping": {
+                "voter_id": "ID2",
+                "sex": "MALE",
+                "age": "WIEK",
+                "points": "LICZBA_PUNKTOW",
+                "vote_column": "NR_PROJEKTU",
+                "voting_method": "VTYPE",
+            },
+            "rows_iterator_handler": "one_voter_multiple_rows_with_points",
+        },
+        "projects_data": {
+            "unit_fields": [
+                "project_id",
+                "cost",
+                "votes",
+                "score",
+                "name",
+                "selected",
+                "category",
+            ]
+        },
+        "votes_data": {
+            "unit_fields": ["voter_id", "age", "sex", "vote", "neighborhood"],
+            "districts_fields": ["voter_id", "age", "sex", "vote"],
+        },
+        "metadata": {
+            "vote_type": "ordinal",
+            "rule": "greedy",
+            "date_begin": "19.09.2025",
+            "date_end": "03.10.2025",
+            "language": "pl",
+            "min_length": "3",
+            "max_length": "3",
+            "edition": "12",
+            "currency": "PLN",
+            "unit": {},
+            "district": {},
+        },
+    },
     2024: {
         "base_data": {
             "country": "Poland",

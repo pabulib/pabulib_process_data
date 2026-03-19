@@ -1,4 +1,26 @@
 budgets = {
+    # https://budzet.krakow.pl/aktualnosci/290844,1909,komunikat,srodki_na_budzet_obywatelski_miasta_krakowa_2025.html
+    2025: {
+        "CITYWIDE": 10200000,
+        "STARE_MIASTO": 1716138.17,
+        "GRZEGORZKI": 1784786.62,
+        "PRADNIK_CZERWONY": 2136006.63,
+        "PRADNIK_BIALY": 2828094.61,
+        "KROWODRZA": 1910481.37,
+        "BRONOWICE": 2215170.17,
+        "ZWIERZYNIEC": 2332627.21,
+        "DEBNIKI": 3160164.47,
+        "LAGIEWNIKI-BOREK_FALECKI": 1734355.54,
+        "SWOSZOWICE": 1920218.79,
+        "PODGORZE_DUCHACKIE": 2160234.87,
+        "BIEZANOW-PROKOCIM": 2532645.83,
+        "PODGORZE": 2917710.16,
+        "CZYZYNY": 2081866.72,
+        "MISTRZEJOWICE": 1994767.23,
+        "BIENCZYCE": 1698575.39,
+        "WZGORZA_KRZESLAWICKIE": 2488835.61,
+        "NOWA_HUTA": 3187320.61,
+    },
     # https://budzet.krakow.pl/twoje_bo/267608,artykul,srodki_na_budzet_obywatelski.html
     2024: {
         "CITYWIDE": 9200000,

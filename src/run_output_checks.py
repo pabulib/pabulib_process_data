@@ -55,11 +55,19 @@ results = checker.process_files(files)
 # print(json.dumps(results, indent=4, ensure_ascii=False))
 
 # PRINT ALL WITHOUT VALID FILES
-# Filter out files where 'results' is "File looks correct!"
+# Keep only files where checker reported a warning/error.
 filtered_results = {
     key: value
     for key, value in results.items()
-    if not (isinstance(value, dict) and value.get("results") == "File looks correct!")
+    if (
+        isinstance(value, dict)
+        and "results" in value
+        and isinstance(value.get("results"), dict)
+        and (
+            bool(value["results"].get("errors"))
+            or bool(value["results"].get("warnings"))
+        )
+    )
 }
 
 # Print the filtered JSON

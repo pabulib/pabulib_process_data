@@ -8,11 +8,11 @@ from helpers.settings import output_path
 from helpers.utilities import create_logger
 from process_data.run_it import run_it
 
-settings = {"year": 2026}
+settings = {"year": 2025}
 
 logger = create_logger()
 
-city = "Warszawa"
+# city = "Warszawa"
 # city = "Łódź"
 # city = "Poznań"
 # city = "Gdynia"
@@ -20,7 +20,7 @@ city = "Warszawa"
 # city = "stanford"
 # city = "Lublin"
 # city = "Wrocław"
-# city = "Kraków"
+city = "Kraków"
 # city = "Katowice"
 # city = "Częstochowa"
 
@@ -53,12 +53,20 @@ results = checker.process_files(files)
 
 # print(json.dumps(results, indent=4, ensure_ascii=False))
 
-# Filter out files where 'results' is "File looks correct!"
+# Keep only files where checker reported a warning/error.
 filtered_results = {
     key: value
     for key, value in results.items()
-    if not (isinstance(value, dict) and value.get("results") == "File looks correct!")
+    if (
+        isinstance(value, dict)
+        and "results" in value
+        and isinstance(value.get("results"), dict)
+        and (
+            bool(value["results"].get("errors"))
+            or bool(value["results"].get("warnings"))
+        )
+    )
 }
 
 # Print the filtered JSON
-print(json.dumps(filtered_results, indent=4))
+print(json.dumps(filtered_results, indent=4, ensure_ascii=False))
