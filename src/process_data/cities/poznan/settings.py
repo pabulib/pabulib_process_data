@@ -1,4 +1,74 @@
 all_data = {
+    2026: {
+        "base_data": {
+            "country": "Poland",
+            "unit": "Poznań",
+            "instance": 2026,
+            "subdistricts": True,
+        },
+        "preprocess": {
+            "data_dir": "2026",
+            "source_votes_csv": "glosy-20251204 - UJ.csv",
+            "projects_filename": "pbo26-projekty",
+            "votes_filename": "pbo26-glosy",
+        },
+        "get_projects": {
+            "data_dir": "2026",
+            "excel_filename": "pbo26-projekty",
+            "columns_mapping": {
+                "project_id": "Numer",
+                "name": "Nazwa i opis",
+                "cost": "Koszt",
+                "votes": "Liczba głosów",
+                "district": "dzielnica",
+                "subdistrict": "rodzaj",
+                "selected": "czy wybrany",
+            },
+        },
+        "get_votes": {
+            "excel_filename": "pbo26-glosy",
+            "excel_ext": "xlsx",
+            "data_dir": "2026",
+            "only_valid_votes": True,
+            "columns_mapping": {
+                "voter_id": "voter_id",
+                "vote_column": "vote",
+            },
+            "rows_iterator_handler": "no_points_votes_not_separated",
+            "load_subdistricts_mapping": True,
+        },
+        "projects_data": {
+            "unit_fields": [
+                "project_id",
+                "cost",
+                "votes",
+                "name",
+                "selected",
+            ],
+        },
+        "votes_data": {
+            "unit_fields": ["voter_id", "vote"],
+            "districts_fields": ["voter_id", "vote"],
+        },
+        "metadata": {
+            "vote_type": "choose-1",
+            "rule": "greedy-custom",
+            "date_begin": "06.10.2025",
+            "date_end": "29.10.2025",
+            "language": "pl",
+            "min_length": "1",
+            "max_length": "1",
+            "edition": "14",
+            "currency": "PLN",
+            "unit": {},
+            "district": {},
+            "subdistrict_sizes": True,
+            "comment": [
+                "This special greedy rule works as follows: At the beginning, we sort projects based on the number of votes. Then, we fund projects that received the highest number of votes until the next project on the list does not fit within the budget. Finally, if the remaining budget is enough to fund at least 80% of that project, we fund it as well with the external reserve funds (for example, the unused funds remaining in other districts). We mark such project with number 2 in the selected column",
+                "Sometimes, additional funds (for example, unused funds from other districts) are allocated to a district. These funds are used to finance the highest-voted projects that have not yet been selected. We mark such projects with number 3 in the selected column",
+            ],
+        },
+    },
     2025: {
         "base_data": {
             "country": "Poland",
@@ -47,7 +117,7 @@ all_data = {
         },
         "metadata": {
             "vote_type": "choose-1",
-            "rule": "greedy",
+            "rule": "greedy-custom",
             "date_begin": "02.10.2024",
             "date_end": "23.10.2024",
             "language": "pl",
@@ -59,10 +129,8 @@ all_data = {
             "district": {},
             "subdistrict_sizes": True,
             "comment": [
-                "The GreedySort works as follows: At the beginning, we sort projects based on the number of votes. Then, we fund projects that received the highest number of votes until the next project on the list does not fit within the budget. Finally, if the remaining budget is enough to fund at least 80% of that project, we fund it as well with the external reserve funds (for example, the unused funds remaining in other districts). We mark such project with number 2 in the selected column.",
-                # only to one file with `3` as selected (1 - large)
-                "Sometimes, additional funds (for example, unused funds from other districts) are allocated to a district. These funds are used to finance the highest-voted projects that have not yet been selected. We mark such projects with number 3 in the selected column.",
-                "Due to a voting system glitch, eight voters cast ballots for projects from the same category (e.g., two large projects in their district), violating regulations. To align with city-wide results, we tagged these voters with the prefix 999999 and separated their ballots into two distinct votes. The final election outcome was not affected.",
+                "This special greedy rule works as follows: At the beginning, we sort projects based on the number of votes. Then, we fund projects that received the highest number of votes until the next project on the list does not fit within the budget. Finally, if the remaining budget is enough to fund at least 80% of that project, we fund it as well with the external reserve funds (for example, the unused funds remaining in other districts). We mark such project with number 2 in the selected column",
+                "Sometimes, additional funds (for example, unused funds from other districts) are allocated to a district. These funds are used to finance the highest-voted projects that have not yet been selected. We mark such projects with number 3 in the selected column",
             ],
         },
     },
@@ -114,7 +182,7 @@ all_data = {
         },
         "metadata": {
             "vote_type": "choose-1",
-            "rule": "greedy",
+            "rule": "greedy-custom",
             "date_begin": "13.09.2023",
             "date_end": "27.09.2023",
             "language": "pl",
@@ -126,9 +194,8 @@ all_data = {
             "district": {},
             "subdistrict_sizes": True,
             "comment": [
-                "The GreedySort works as follows: At the beginning, we sort projects based on the number of votes. Then, we fund projects that received the highest number of votes until the next project on the list does not fit within the budget. Finally, if the remaining budget is enough to fund at least 80% of that project, we fund it as well with the external reserve funds (for example, the unused funds remaining in other districts). We mark such project with number 2 in the selected column.",
-                # only to one file with `3` as selected (1 - large)
-                # "Sometimes, additional funds (for example, unused funds from other districts) are allocated to a district. These funds are used to finance the highest-voted projects that have not yet been selected. We mark such projects with number 3 in the selected column."
+                "This special greedy rule works as follows: At the beginning, we sort projects based on the number of votes. Then, we fund projects that received the highest number of votes until the next project on the list does not fit within the budget. Finally, if the remaining budget is enough to fund at least 80% of that project, we fund it as well with the external reserve funds (for example, the unused funds remaining in other districts). We mark such project with number 2 in the selected column",
+                "Sometimes, additional funds (for example, unused funds from other districts) are allocated to a district. These funds are used to finance the highest-voted projects that have not yet been selected. We mark such projects with number 3 in the selected column",
             ],
         },
     },

@@ -8,19 +8,19 @@ from helpers.settings import output_path
 from helpers.utilities import create_logger
 from process_data.run_it import run_it
 
-settings = {"year": 2025}
+settings = {"year": 2026}
 
 logger = create_logger()
 
 # city = "Warszawa"
 # city = "Łódź"
-# city = "Poznań"
+city = "Poznań"
 # city = "Gdynia"
 # city = "mechanical_turk"
 # city = "stanford"
 # city = "Lublin"
 # city = "Wrocław"
-city = "Kraków"
+# city = "Kraków"
 # city = "Katowice"
 # city = "Częstochowa"
 
@@ -53,6 +53,7 @@ results = checker.process_files(files)
 
 # print(json.dumps(results, indent=4, ensure_ascii=False))
 
+# PRINT ALL WITHOUT VALID FILES
 # Keep only files where checker reported a warning/error.
 filtered_results = {
     key: value
@@ -68,5 +69,12 @@ filtered_results = {
     )
 }
 
-# Print the filtered JSON
-print(json.dumps(filtered_results, indent=4, ensure_ascii=False))
+print("\n=== Output Check Summary ===\n")
+print(json.dumps(results["metadata"], indent=4, ensure_ascii=False))
+
+if not filtered_results:
+    pass
+else:
+    print("\n=== Warnings/Errors Details ===")
+    # Print only files that contain warnings/errors.
+    print(json.dumps(filtered_results, indent=4, ensure_ascii=False))

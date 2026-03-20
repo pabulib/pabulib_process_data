@@ -70,8 +70,15 @@ filtered_results = {
     )
 }
 
-# Print the filtered JSON
-print(json.dumps(filtered_results, indent=4, ensure_ascii=False))
+print("\n=== Output Check Summary ===\n")
+print(json.dumps(results["metadata"], indent=4, ensure_ascii=False))
+
+if not filtered_results:
+    pass
+else:
+    print("\n=== Warnings/Errors Details ===")
+    # Print only files that contain warnings/errors.
+    print(json.dumps(filtered_results, indent=4, ensure_ascii=False))
 
 
 # save it to file

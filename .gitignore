@@ -39,3 +39,5 @@ output_check_report*.txt
 client_secret.json
 
 src/ssh_client/downloads/
+
+GREEDY_WARSZAWA_TO_CHECK/
