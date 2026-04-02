@@ -1,4 +1,74 @@
 all_data = {
+    2025: {
+        "base_data": {
+            "country": "Poland",
+            "unit": "Katowice",
+            "instance": 2025,
+        },
+        "preprocess": {
+            "excel_to_preprocess": "BO Katowice 2025 - glosowanie",
+            "votes_excel": "II do informacji publicznej",
+            "data_dir": "2025",
+            "output_excel_path": "BO Katowice 2025 - glosowanie processed",
+        },
+        "get_projects": {
+            "data_dir": "2025",
+            "excel_filename": "BO Katowice 2025 - glosowanie processed",
+            "columns_mapping": {
+                "project_id": "NR ID",
+                "name": "TYTUŁ ZADANIA",
+                "cost": "KOSZT ZADANIA",
+                "votes": "LICZBA_GLOSUJACYCH",
+                "score": "SUMA_PUNKTOW",
+                "district": "DZIELNICA",
+                "category": "KATEGORIA PROJEKTU",
+                "selected": "WYBRANE / NIEWYBRANE W GŁOSOWANIU",
+            },
+        },
+        "get_votes": {
+            "excel_filename": "II do informacji publicznej",
+            "data_dir": "2025",
+            "only_valid_votes": True,
+            "district_name_mapping": True,
+            "columns_mapping": {
+                "voter_id": "IDWPIS",
+                "sex": "PLEC",
+                "age": "WIEK",
+                "points": "PUNKTY",
+                "vote_column": "ID",
+                "district": "DZIELNICA_KOD",
+            },
+            "rows_iterator_handler": "one_voter_multiple_rows_with_points",
+        },
+        "projects_data": {
+            "unit_fields": [
+                "project_id",
+                "cost",
+                "votes",
+                "score",
+                "name",
+                "selected",
+                "category",
+            ]
+        },
+        "votes_data": {
+            "unit_fields": ["voter_id", "age", "sex", "vote", "points", "neighborhood"],
+            "districts_fields": ["voter_id", "age", "sex", "vote", "points"],
+        },
+        "metadata": {
+            "vote_type": "cumulative",
+            "rule": "greedy-threshold",
+            "date_begin": "12.09.2025",
+            "date_end": "25.09.2025",
+            "language": "pl",
+            "min_sum_points": "1",
+            "max_sum_points": "3",
+            "edition": "12",
+            "currency": "PLN",
+            "unit": {"min_project_score_threshold": 200},
+            "district": {"min_project_score_threshold": 50},
+        },
+    },
     2022: {
         "base_data": {
             "country": "Poland",

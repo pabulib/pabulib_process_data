@@ -10,6 +10,11 @@ from process_data.base_config import BaseConfig
 @dataclass(kw_only=True)
 class Preprocess(BaseConfig):
     preprocess: dict
+    subdistrict_name_mapping = {
+        "BAŁUTY CENTRUM": "BAŁUTY-CENTRUM",
+        "RAGODOSZCZ": "RADOGOSZCZ",
+        "IM. JÓZEFA MOTWIŁŁA-MIRECKIEGO": "IM. JÓZEFA MONTWIŁŁA-MIRECKIEGO",
+    }
 
     def __post_init__(self):
         self.excel_to_preprcess = self.preprocess["excel_to_preprocess"]
@@ -29,6 +34,13 @@ class Preprocess(BaseConfig):
         sheet = workbook.worksheets[0]
         return sheet
 
+    def normalize_district_name(self, district):
+        return district.strip()
+
+    def normalize_subdistrict_name(self, subdistrict):
+        subdistrict = subdistrict.strip()
+        return self.subdistrict_name_mapping.get(subdistrict, subdistrict)
+
     def get_excel_data(self, sheet):
         data = []
 
@@ -41,13 +53,13 @@ class Preprocess(BaseConfig):
             indexed = cell.fill.start_color.index
             tint = cell.fill.start_color.tint
             if tint == -0.249977111117893:
-                district = cell.value.strip()
+                district = self.normalize_district_name(cell.value)
                 if district == "PONADOSIEDLOWE":
                     district = "CITYWIDE"
                     subdistrict = "CITYWIDE"
                 continue
             elif tint == -0.1499984740745262:
-                subdistrict = cell.value.strip()
+                subdistrict = self.normalize_subdistrict_name(cell.value)
                 continue
             elif str(cell.value).startswith("Lp"):
                 column_names = [cell.value for cell in row]

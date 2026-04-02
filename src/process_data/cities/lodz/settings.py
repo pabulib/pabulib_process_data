@@ -1,4 +1,78 @@
 all_data = {
+    2025: {
+        "base_data": {
+            "country": "Poland",
+            "unit": "Łódź",
+            "instance": 2025,
+            "subdistricts": True,
+        },
+        "preprocess": {
+            "excel_to_preprocess": "Wyniki_XIII_LBO_publikacja_n",
+            "data_dir": "2025",
+            "output_excel_path": "Lodz_2025_projects_processed",
+        },
+        "get_projects": {
+            "data_dir": "2025",
+            "excel_filename": "Lodz_2025_projects_processed",
+            "columns_mapping": {
+                "project_id": "Id",
+                "name": "Tytuł",
+                "cost": "Kwota",
+                "votes": "Głosów",
+                "district": "district",
+                "subdistrict": "subdistrict",
+                "selected": "selected",
+                "category": "Kategoria",
+            },
+        },
+        "get_votes": {
+            "excel_filename": "Głosowanie - dane XIII edycja",
+            "data_dir": "2025",
+            "only_valid_votes": True,
+            "district_name_mapping": True,
+            "columns_mapping": {
+                "voter_id": "IDWPIS",
+                "sex": "PLEC",
+                "age": "WIEK",
+                "district": "REJON_ID",
+                "subdistrict": "OSIEDLE_ID",
+                "voting_method": "FORMAGLOSOWANIA",
+                "vote_column": "PROJEKT_ID",
+            },
+            "rows_iterator_handler": "one_voter_multiple_rows_no_points",
+        },
+        "projects_data": {
+            "unit_fields": [
+                "project_id",
+                "cost",
+                "votes",
+                "name",
+                "selected",
+                "category",
+            ]
+        },
+        "votes_data": {
+            "unit_fields": ["voter_id", "age", "sex", "vote", "voting_method"],
+            "districts_fields": ["voter_id", "age", "sex", "vote", "voting_method"],
+        },
+        "metadata": {
+            "vote_type": "approval",
+            "rule": "greedy-threshold",
+            "date_begin": "06.10.2025",
+            "date_end": "27.10.2025",
+            "language": "pl",
+            "edition": "13",
+            "currency": "PLN",
+            "max_length": "5",
+            "min_project_score_threshold": 50,
+            "unit": {
+                "comment": [
+                    "Initially, the budget for the citywide projects was set at 8,000,000. However, due to regulations, unused funds from district PBs were reallocated to citywide projects. Consequently, the citywide budget was increased to 8,694,120."
+                ]
+            },
+            "district": {},
+        },
+    },
     2024: {
         "base_data": {
             "country": "Poland",
