@@ -1,4 +1,62 @@
 all_data = {
+    2025: {
+        "base_data": {
+            "country": "Poland",
+            "unit": "Wrocław",
+            "instance": 2025,
+        },
+        "get_projects": {
+            "excel_filename": "wbo-2025-statystyki-do-open-data",
+            "votes_filename": "wbo-2025-lista-glosow-2025",
+        },
+        "get_votes": {
+            "excel_filename": "wbo-2025-lista-glosow-2025.csv",
+            "csv_settings": {"delimiter": ";", "encoding": "cp1250"},
+            "only_valid_votes": True,
+            "columns_mapping": {
+                "voter_id": "Lp",
+                "sex": "Plec",
+                "age": "Wiek",
+                "voting_method": "Zrodlo",
+                "votes_columns": {
+                    "unit": "Ponadosiedlowy",
+                    "local": "Osiedlowy",
+                },
+            },
+            "rows_iterator_handler": "one_voter_one_row_no_points",
+            "valid_value": "",
+        },
+        "projects_data": {
+            "unit_fields": [
+                "project_id",
+                "cost",
+                "votes",
+                "name",
+                "selected",
+                "category",
+                "neighborhood",
+            ]
+        },
+        "votes_data": {
+            "unit_fields": ["voter_id", "age", "sex", "vote", "voting_method"],
+            "districts_fields": ["voter_id", "age", "sex", "vote", "voting_method"],
+        },
+        "metadata": {
+            "vote_type": "choose-1",
+            "rule": "greedy-no-skip",
+            "date_begin": "03.10.2025",
+            "date_end": "20.10.2025",
+            "language": "pl",
+            "min_length": "1",
+            "max_length": "1",
+            "edition": "13",
+            "currency": "PLN",
+            "unit": {},
+            "district": {
+                "description": "PB in Wrocław, projects of local significance"
+            },
+        },
+    },
     2024: {
         "base_data": {
             "country": "Poland",

@@ -1,4 +1,6 @@
 budgets = {
+    # https://www.wroclaw.pl/rozmawia/znamy-liste-projektow-ktore-beda-poddane-pod-glosowanie-w-wbo-2025
+    2025: {"citywide": 21000000, "local": 14000000},
     # https://www.wroclaw.pl/rozmawia/zasady-wbo-2024
     2024: {"citywide": 21000000, "local": 12000000},
     2023: {"citywide": 21000000, "local": 10000000},

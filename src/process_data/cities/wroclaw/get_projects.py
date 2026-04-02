@@ -4,6 +4,8 @@ import json
 import re
 from dataclasses import dataclass
 
+import pandas as pd
+
 import helpers.utilities as utils
 from helpers.mappings import wroclaw_mapping
 from process_data.base_config import BaseConfig
@@ -14,6 +16,7 @@ from process_data.models import ProjectItem
 class GetProjects(BaseConfig):
     district_projects: bool = True
     excel_filename: str = None
+    votes_filename: str = None
 
     def __post_init__(self):
         self.logger = utils.create_logger()
@@ -74,11 +77,23 @@ class GetProjects(BaseConfig):
         return categories
 
     def handle_categories_excel(self, category_pl):
-        try:
-            category_eng = wroclaw_mapping[category_pl]
-            return category_eng
-        except KeyError:
-            self.logger.error(f"I didn't find category! {category_pl}")
+        categories = []
+        for value in str(category_pl).split(","):
+            category_pl = value.strip()
+            if not category_pl:
+                continue
+            try:
+                category_eng = wroclaw_mapping[category_pl]
+                categories.append(category_eng)
+            except KeyError:
+                self.logger.error(f"I didn't find category! {category_pl}")
+        return ",".join(categories)
+
+    def get_excel_column_index(self, col_names_indexes, *column_names):
+        for column_name in column_names:
+            if column_name in col_names_indexes:
+                return column_name
+        raise KeyError(f"Cannot find any of columns: {column_names}")
 
     def get_map_geojson(self, soup):
         script_pattern = re.compile(r"geojsonFeature = (\{.*?\});", re.DOTALL)
@@ -197,38 +212,62 @@ class GetProjects(BaseConfig):
                     projects_votes[project_id] = votes
         return projects_votes
 
-    def get_data_from_excel(self):
-        projects_votes = self.get_projects_votes_from_url()
-        path_to_excel = utils.get_path_to_file_by_unit(self.excel_filename, self.unit)
-        wb_sheet = utils.open_excel_workbook(path_to_excel)
-        col_names_indexes = utils.get_col_names_indexes(wb_sheet)
-        for col_idx in range(1, wb_sheet.nrows):
-            row_values = wb_sheet.row_values(col_idx)
+    def get_projects_votes_from_file(self):
+        projects_votes = {}
+        path_to_file = utils.get_path_to_file_by_unit(
+            self.votes_filename, self.unit, ext="csv"
+        )
+        votes_df = pd.read_csv(path_to_file, sep=";", encoding="cp1250")
+        for project_column in ["Osiedlowy", "Ponadosiedlowy"]:
+            counts = (
+                votes_df[votes_df[project_column] != 0][project_column]
+                .value_counts()
+                .to_dict()
+            )
+            for project_id, votes in counts.items():
+                projects_votes[int(project_id)] = int(votes)
+        return projects_votes
 
-            name = row_values[col_names_indexes["Nazwa projektu"]]
-            cost = row_values[col_names_indexes["Zweryfikowany budżet"]]
+    def get_data_from_excel(self):
+        if self.votes_filename:
+            projects_votes = self.get_projects_votes_from_file()
+        else:
+            projects_votes = self.get_projects_votes_from_url()
+        path_to_excel = utils.get_path_to_file_by_unit(self.excel_filename, self.unit)
+        df = pd.read_excel(path_to_excel, header=1)
+        winners_col = self.get_excel_column_index(
+            df.columns, "Projekty wygrane", "Wygrany projekt"
+        )
+        votes_col = self.get_excel_column_index(
+            df.columns,
+            "Liczba głosów projektów wygranych",
+            "Liczba głosów na wygrane projekty",
+        )
+        for _, row in df.iterrows():
+            name = row["Nazwa projektu"]
+            cost = row["Zweryfikowany budżet"]
+            if pd.isna(name):
+                continue
             if name.startswith("[PROJEKT WYCOFANY") or not cost:
                 continue
-            project_id = int(row_values[col_names_indexes["Numer projektu"]])
+            project_id = int(row["Numer projektu"])
             item = ProjectItem(project_id)
             item.add_name(name)
-            selected = row_values[col_names_indexes["Projekty wygrane"]]
+            selected = row[winners_col]
             item.selected = 1 if selected in ["wygrany", "tak"] else 0
             item.project_url = f"https://www.wroclaw.pl/wbo/projekty-{self.instance}/projekt,id,{project_id}"
-            item.district = row_values[col_names_indexes["Nazwa osiedla"]]
-            item.neighborhood = row_values[col_names_indexes["Nazwa osiedla"]]
-            category_pl = row_values[col_names_indexes["Kategoria projektu"]]
+            item.district = row["Nazwa osiedla"]
+            item.neighborhood = row["Nazwa osiedla"]
+            category_pl = row["Kategoria projektu"]
             item.category = self.handle_categories_excel(category_pl)
-            project_type = row_values[col_names_indexes["Zasięg projektu"]]
+            project_type = row["Zasięg projektu"]
             if project_type.lower() == "ponadosiedlowy":
                 district = "CITYWIDE"
             elif project_type.lower() == "osiedlowy":
                 district = "LOCAL"
 
             item.add_cost(cost)
-            votes_from_excel = row_values[
-                col_names_indexes["Liczba głosów projektów wygranych"]
-            ]
+            votes_from_excel = row[votes_col]
             try:
                 votes_from_url = projects_votes[project_id]
             except KeyError:
@@ -237,7 +276,7 @@ class GetProjects(BaseConfig):
                     f"url: https://www.wroclaw.pl/wbo/projekty-{self.instance}/projekt,id,{project_id}"
                 )
                 continue
-            if votes_from_excel:
+            if pd.notna(votes_from_excel):
                 votes_from_excel = int(votes_from_excel)
                 if votes_from_excel != votes_from_url:
                     raise RuntimeError(
