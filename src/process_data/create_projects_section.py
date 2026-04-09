@@ -33,6 +33,8 @@ class CreateProjectsSections(BaseConfig):
 
     def create_projects_sections(self):
         self.logger.info("Creating PROJECTS sections")
+        if self.subdistricts:
+            self.warn_on_missing_subdistrict_variants()
 
         for district, projects in self.projects_data_per_district.items():
             if self.subdistricts:
@@ -43,6 +45,29 @@ class CreateProjectsSections(BaseConfig):
                 self.unpack_district_projects(district, projects)
 
         self.logger.info("PROJECTS sections created")
+
+    def warn_on_missing_subdistrict_variants(self):
+        expected_subdistricts = set()
+        for district, subdistricts in self.projects_data_per_district.items():
+            if district.upper().startswith("CITYWIDE"):
+                continue
+            expected_subdistricts.update(subdistricts.keys())
+
+        if len(expected_subdistricts) < 2:
+            return
+
+        for district, subdistricts in self.projects_data_per_district.items():
+            if district.upper().startswith("CITYWIDE"):
+                continue
+            missing = expected_subdistricts.difference(subdistricts.keys())
+            if missing:
+                district_name = utils.change_district_into_name(district)
+                self.logger.warning(
+                    "Missing subdistrict variants for "
+                    f"{self.unit} {district_name}: "
+                    f"present={sorted(subdistricts.keys())} "
+                    f"missing={sorted(missing)}"
+                )
 
     def unpack_district_projects(self, district, projects, subdistrict=None):
         if district.upper().startswith("CITYWIDE"):

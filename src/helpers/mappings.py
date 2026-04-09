@@ -45,6 +45,9 @@ category_mapping = {
     "komunikacja publiczna i infrastruktura drogowa": "public transit and roads",
     "zieleń i natura": "nature and greenery",
     "ochrona środowiska i zwierzęta": "environmental protection",
+    "zakup inwestycyjny": "capital purchase",
+    "zadanie inwestycyjne": "investment project",
+    "zadanie miękkie": "soft project",
 }
 
 target_mapping = {

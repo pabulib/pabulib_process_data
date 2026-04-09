@@ -50,6 +50,10 @@ class GetProjects(BaseConfig):
             raise RuntimeError(f"Cannot translate category: {category_pl}")
 
     def iterate_through_projects(self):
+        # By default PROJECTS should reflect the official project/results source.
+        # If a city also has an anonymized ballots source, do not silently
+        # recompute project-level votes/score from ballots unless that behavior
+        # is explicitly enabled in a city-specific pipeline.
         for col_idx in range(1, self.sheet.nrows):
             row_values = self.sheet.row_values(col_idx)
             project_id = row_values[self.col["project_id"]]
@@ -85,11 +89,15 @@ class GetProjects(BaseConfig):
                 item.add_selected(selected)
 
             district = row_values[self.col["district"]].strip()
+            if self.col.get("neighborhood"):
+                neighborhood = row_values[self.col["neighborhood"]]
+                item.neighborhood = str(neighborhood).strip()
+            else:
+                item.neighborhood = district
             if district.lower().startswith("ogólnomi") or district.lower() == "miejski":
                 district = "CITYWIDE"
                 if self.unit == "Poznań":
                     district = "_CITYWIDE"
-            item.neighborhood = district
             if self.unit == "Kraków":
                 district = self.check_if_citywide_krakow(district, project_id)
             item.district = district

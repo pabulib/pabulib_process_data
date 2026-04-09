@@ -49,6 +49,23 @@ pip install --upgrade pabulib-checker
     start_process.py
 ```
 
+### Dual-source data policy
+
+Some cities send two separate sources at once:
+
+- a projects sheet with official totals per project,
+- a votes sheet with anonymized ballots.
+
+If these two sources disagree, do not silently replace the project-level totals
+with values recomputed from the ballots. The default interpretation should be:
+
+- `PROJECTS` follows the official projects/results source,
+- `VOTES` follows the anonymized ballots source,
+- any mismatch between the two should remain visible and be documented.
+
+If a city really requires recomputing project totals from ballots, make that an
+explicit city-level decision in `settings.py` or a custom city pipeline.
+
 ### Example processing run
 To better understand how the pipeline works, you can use the provided example template. This example processes a fictional city (a_city_template) for the year 2025 and generates .pb files based on example data:
 

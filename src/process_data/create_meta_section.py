@@ -95,8 +95,9 @@ class CreateMetaSections(BaseConfig):
 
     def create_metadata(self, path_to_file, district, budget, subdistrict):
         temp_meta = deepcopy(self.metadata)
+        unit_display = "Ruda Śląska" if self.unit == "Ruda_Slaska" else self.unit.title()
         if district == "unit":
-            description = f"Municipal PB in {self.unit.title()}"
+            description = f"Municipal PB in {unit_display}"
             subunit = ""
             district_txt = ""
             dict_to_update = temp_meta.pop("unit", None)
@@ -105,8 +106,12 @@ class CreateMetaSections(BaseConfig):
         else:
             if self.subdistricts_mapping:
                 district = self.subdistricts_mapping[district]
-            unit = self.unit.title()
+            unit = unit_display
             district_title = district.title()
+            ruda_pool = False
+            if self.unit == "Ruda_Slaska" and district.lower().startswith("municipal "):
+                district_title = district.split(" ", 1)[1].strip().lower()
+                ruda_pool = True
             if temp_meta.get("district") and temp_meta["district"].get("description"):
                 description = temp_meta["district"].pop("description")
             elif self.subdistricts_mapping or subdistrict:
@@ -122,7 +127,10 @@ class CreateMetaSections(BaseConfig):
                         f"Local PB in {unit}, " f"{district_title} | {subdistrict_txt}"
                     )
             else:
-                description = f"District PB in {unit}, {district_title}"
+                if self.unit == "Ruda_Slaska" and district.lower().startswith("municipal "):
+                    description = f"Municipal PB in {unit}, {district_title}"
+                else:
+                    description = f"District PB in {unit}, {district_title}"
             if not subdistrict:
                 subdistrict_txt = district.title()
             district_txt = district_title
@@ -130,6 +138,10 @@ class CreateMetaSections(BaseConfig):
             subunit = self.create_subunit_value(
                 temp_meta, district_title, subdistrict_txt
             )
+
+            if ruda_pool:
+                district_txt = ""
+                subunit = district_title
 
             if self.unit == "Warszawa" and int(self.instance) > 2025:
                 if district == subdistrict:
@@ -150,7 +162,7 @@ class CreateMetaSections(BaseConfig):
         metadata = {
             "description": description,
             "country": self.country,
-            "unit": self.unit,
+            "unit": unit_display,
             "instance": self.instance,
             "num_projects": num_projects,
             "num_votes": num_votes,
@@ -177,7 +189,10 @@ class CreateMetaSections(BaseConfig):
             try:
                 projects = all_projects[district.upper()]
             except KeyError:
-                projects = all_projects[district.title()]
+                try:
+                    projects = all_projects[district.title()]
+                except KeyError:
+                    projects = all_projects[district]
         fully_funded = utils.check_if_fully_funded(budget, projects)
         if fully_funded:
             metadata["fully_funded"] = 1

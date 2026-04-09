@@ -128,7 +128,13 @@ class VoterItem:
             "elektroniczny",
         ):
             self.voting_method = "internet"
-        elif method.lower() in ("papierowo", "papier", "papierowe", "p"):
+        elif method.lower() in (
+            "papierowo",
+            "papier",
+            "papierowe",
+            "p",
+            "papierowy",
+        ):
             self.voting_method = "paper"
 
     def add_neighborhood(self, district):
