@@ -50,7 +50,7 @@ category_mapping = {
     "zadanie miękkie": "soft project",
 }
 
-target_mapping = {
+beneficiaries_mapping = {
     "dorosli": "adults",
     "dzieci": "children",
     "mlodziez": "youth",

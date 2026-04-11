@@ -11,7 +11,7 @@ class ProjectItem:
     cost: int = None
     category: str = None
     name: str = None
-    target: str = None
+    beneficiaries: str = None
     votes: int = None
     score: int = None
     selected: int = None
@@ -74,8 +74,8 @@ class ProjectItem:
         except ValueError:
             self.selected = mapps.selected_mapping[status.lower()]
 
-    def add_target(self, target_list):
-        self.target = ",".join(target_list)
+    def add_beneficiaries(self, beneficiaries_list):
+        self.beneficiaries = ",".join(beneficiaries_list)
 
     def add_name(self, name):
         self.name = utils.clean_name(name)

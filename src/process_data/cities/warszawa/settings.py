@@ -18,7 +18,7 @@ all_data = {
                 "district": "Dzielnica",
                 "subdistrict": "Obszar",
                 "selected": "Status",
-                # "category": "multiple category & target columns",
+                # "category": "multiple category & beneficiaries columns",
             },
         },
         "get_votes": {
@@ -50,7 +50,7 @@ all_data = {
                 "name",
                 "selected",
                 "category",
-                # "target", # there is no more target data
+                # "beneficiaries", # there is no more beneficiaries data
                 "longitude",
                 "latitude",
             ]
@@ -114,7 +114,7 @@ all_data = {
                 "votes": "Liczba głosów ważnych",
                 "district": "Dzielnica",
                 "selected": "Status",
-                # "category": "multiple category & target columns",
+                # "category": "multiple category & beneficiaries columns",
             },
         },
         "get_votes": {
@@ -144,7 +144,7 @@ all_data = {
                 "name",
                 "selected",
                 "category",
-                "target",
+                "beneficiaries",
                 "longitude",
                 "latitude",
             ]
@@ -199,7 +199,7 @@ all_data = {
                 "votes": "Liczba głosów ważnych",
                 "district": "Dzielnica",
                 "selected": "Status",
-                # "category": "multiple category & target columns",
+                # "category": "multiple category & beneficiaries columns",
             },
         },
         "get_votes": {
@@ -229,7 +229,7 @@ all_data = {
                 "name",
                 "selected",
                 "category",
-                "target",
+                "beneficiaries",
                 "longitude",
                 "latitude",
             ]

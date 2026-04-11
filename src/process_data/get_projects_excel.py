@@ -2,7 +2,7 @@ import collections
 from dataclasses import dataclass
 
 import helpers.utilities as utils
-from helpers.mappings import category_mapping, target_mapping
+from helpers.mappings import beneficiaries_mapping, category_mapping
 from process_data.base_config import BaseConfig
 from process_data.models import ProjectItem
 
@@ -107,7 +107,9 @@ class GetProjects(BaseConfig):
             elif self.unit == "Warszawa":
                 item.category = self.get_mappings_warszawa("categories", row_values)
                 if self.instance < 2026:
-                    item.target = self.get_mappings_warszawa("targets", row_values)
+                    item.beneficiaries = self.get_mappings_warszawa(
+                        "beneficiaries", row_values
+                    )
             cost = row_values[self.col["cost"]]
             item.add_cost(cost)
             if self.subdistricts:
@@ -161,8 +163,8 @@ class GetProjects(BaseConfig):
     def get_mappings_warszawa(self, mapping_type, row_values):
         if mapping_type == "categories":
             mapping = category_mapping
-        elif mapping_type == "targets":
-            mapping = target_mapping
+        elif mapping_type == "beneficiaries":
+            mapping = beneficiaries_mapping
 
         mappings = []
         for cat_pl, cat_eng in mapping.items():

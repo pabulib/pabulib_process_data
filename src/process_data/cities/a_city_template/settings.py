@@ -18,7 +18,7 @@ all_data = {
                 "votes": "Votes",  # Number of votes for the project
                 "district": "District",  # District or neighborhood for the project
                 "selected": "Selected",  # Optional: whether the project was selected or not
-                # You can add or modify fields based on your data, e.g., "category", "target", etc.
+                # You can add or modify fields based on your data, e.g., "category", "beneficiaries", etc.
             },
         },
         # --- Vote Data Configuration ---
@@ -58,7 +58,7 @@ all_data = {
                 "name",
                 "selected",
                 # "category",
-                # "target",
+                # "beneficiaries",
             ],
             # Specify which project fields should be included in the output `.pb` files.
             # Add additional fields as needed based on your data schema.

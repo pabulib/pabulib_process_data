@@ -7,6 +7,7 @@ all_data = {
         },
         "preprocess": {
             "source_excel": "Ruda_Slaska_2026",
+            "votes_source_excel": "UJ_dane_niewazne_glosy",
             "data_dir": "2026",
             "projects_excel": "Ruda_Slaska_2026_projects_processed",
             "votes_excel": "Ruda_Slaska_2026_votes_processed",
