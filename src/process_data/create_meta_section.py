@@ -156,6 +156,14 @@ class CreateMetaSections(BaseConfig):
             temp_meta.pop("unit", None)
 
         if dict_to_update:
+            if (
+                self.unit == "Ruda_Slaska"
+                and district != "unit"
+                and district.lower() == "municipal large"
+                and isinstance(dict_to_update.get("comment"), list)
+            ):
+                dict_to_update = deepcopy(dict_to_update)
+                dict_to_update.pop("comment", None)
             temp_meta.update(dict_to_update)
         num_projects, num_votes = utils.count_projects_and_votes(path_to_file)
 

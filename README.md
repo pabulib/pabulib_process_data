@@ -127,3 +127,20 @@ python src/ssh_client/click_cli.py upload-dirs src/output another/dir
 ```
 
 Tip: set SSH connection details in `.env` (or use `--host` to reference an entry in `~/.ssh/config`). For Admin uploads, set `SSH_DOCKER_CONTAINER` so the Admin UI can see the uploaded files inside the container.
+
+## Upload .pb files to the admin waiting room
+
+If you want a simple script like `start_process.py` / `run_output_checks.py`, use:
+
+```bash
+python src/upload_to_waiting_room.py
+```
+
+By default it uploads all `.pb` files from `src/output` into the same container tmp directory that powers `/admin/upload` on the server. This is only the waiting room: files are not ingested into the main library until you click `Upload` in the admin panel.
+
+You can edit the constants at the top of `src/upload_to_waiting_room.py` to:
+
+- limit the filename pattern,
+- point to a custom absolute glob,
+- choose an SSH config host,
+- enable overwrite.
