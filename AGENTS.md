@@ -14,9 +14,20 @@ Preferred rule:
 
 - `PROJECTS` should follow the official projects/results source,
 - `VOTES` should follow the anonymized votes source,
-- any mismatch between those sources should stay visible and be documented,
+- there cannot be any mismatch between those sources. so if any, we need to investigate
 - only add city-specific recomputation when we are sure the ballots are the
   authoritative final source.
 
 For new cities, make this choice explicit in city settings instead of relying on
 implicit behavior.
+
+## Metadata comments
+
+When adding metadata comments, prefer short, case-specific notes modeled on
+existing Pabulib comments:
+
+- https://pabulib.org/details
+
+Avoid boilerplate comments such as saying that `PROJECTS` were reconstructed
+from ballots or matched from another source, unless the user explicitly asks for
+that wording.

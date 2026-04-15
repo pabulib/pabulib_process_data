@@ -47,7 +47,7 @@ class CreateVotesSections(BaseConfig):
         self.logger.info("VOTES sections created")
 
     def unpack_district_votes(self, district, votes, subdistrict=None):
-        if district.upper().startswith("CITYWIDE"):
+        if district.upper() == "CITYWIDE":
             fields = self.unit_fields
             path_to_file = utils.get_path_to_file(self.unit_file_name)
         else:

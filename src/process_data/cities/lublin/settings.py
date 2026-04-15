@@ -8,11 +8,14 @@ all_data = {
         "get_projects": {
             # "projects_docx": "lista_zlozonych_projektow_bo2020.pdf",
             # if already converted
-            "projects_excel": "Lublin2020"
+            "projects_excel": "Lublin2020",
+            "data_dir": "2020",
+            "csv_settings": {"encoding": "cp1250"},
         },
         "get_votes": {
             "excel_filename": "Lublin2020.csv",
-            "csv_settings": {"encoding": "ANSI"},
+            "data_dir": "2020",
+            "csv_settings": {"encoding": "cp1250"},
             "columns_mapping": {
                 "voter_id": "ID głosującego",
                 "sex": "Płeć słownie",
@@ -27,8 +30,7 @@ all_data = {
             "only_valid_votes": True,
         },
         "projects_data": {
-            # "unit_fields": ["project_id", "cost", "votes", "name", "selected"]
-            "unit_fields": ["project_id", "cost", "votes", "name"]
+            "unit_fields": ["project_id", "cost", "votes", "name", "selected"]
         },
         "votes_data": {
             "unit_fields": ["voter_id", "age", "sex", "vote", "neighborhood"],
@@ -42,9 +44,27 @@ all_data = {
             "language": "pl",
             "min_length": "1",
             "max_length": "2",
-            "edition": "7",
-            "unit": {},
-            "district": {"description": "PB in Lublin, projects of local significance"},
+            "edition": "6",
+            "unit": {
+                "comment": [
+                    (
+                        "The initial citywide budgets were 4,830,000 PLN for "
+                        "infrastructural ('hard') projects and 2,070,000 PLN for "
+                        "non-infrastructural ('soft') projects. Unused funds from the "
+                        "district pools were later added to these citywide pools."
+                    ),
+                    (
+                        "Due to an error in the voting system, one citywide ballot "
+                        "(voter_id 23819) was incorrectly merged into a single vote with "
+                        "four citywide projects instead of at most two. The city counted "
+                        "these indications, so for consistency with the official project "
+                        "totals we split this ballot into two citywide votes and marked "
+                        "the second one with the prefix 9999. This did not affect the "
+                        "election outcome."
+                    ),
+                ]
+            },
+            "district": {},
             "currency": "PLN",
         },
     },

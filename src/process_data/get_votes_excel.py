@@ -181,11 +181,8 @@ class GetVotesExcel(BaseConfig):
     def handle_lublin_district(self, vote, district):
         neighborhood = district
         vote = vote.replace(" ", "")
-        if vote[0].lower() == "o":
-            district = "CITYWIDE"
-        elif vote[0].lower() == "d":
-            district = "LOCAL"
-        else:
+        district = self.project_district_mapping.get(vote)
+        if district is None:
             self.logger.error("Lublin, vote other than D or O!")
         return district, vote, neighborhood
 
@@ -256,11 +253,35 @@ class GetVotesExcel(BaseConfig):
         except IndexError:
             next_voter = None
         if str(voter_id) != str(next_voter):
+            if self.handle_lublin_2020_malformed_citywide_vote(row, voter_id):
+                self.voter_votes = collections.defaultdict(list)
+                return
             voter_item = self.create_voter_item(row, voter_id, neighborhood)
             if self.no_points:
                 self.handle_multiple_rows_no_points(voter_item)
             else:
                 self.handle_multiple_rows_with_points(voter_item)
+
+    def handle_lublin_2020_malformed_citywide_vote(self, row, voter_id):
+        if self.unit != "Lublin" or self.instance != 2020:
+            return False
+        citywide_votes = self.voter_votes.get("CITYWIDE", [])
+        if str(voter_id) == "23819" and len(citywide_votes) == 4:
+            self.logger.warning(
+                "Splitting malformed merged Lublin 2020 ballot for voter_id=23819 "
+                "into two citywide votes with two projects each."
+            )
+            voter_item = self.create_voter_item(row, voter_id)
+            first_vote = deepcopy(voter_item)
+            first_vote.vote = ",".join(citywide_votes[:2])
+            self.votes_data_per_district["CITYWIDE"].append(vars(first_vote))
+
+            second_vote = deepcopy(voter_item)
+            second_vote.voter_id = int(f"9999{voter_id}")
+            second_vote.vote = ",".join(citywide_votes[2:])
+            self.votes_data_per_district["CITYWIDE"].append(vars(second_vote))
+            return True
+        return False
 
     def get_neighborhood_from_districts_list(self):
         districts = list(self.voter_votes.keys())

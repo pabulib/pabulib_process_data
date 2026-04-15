@@ -70,7 +70,7 @@ class CreateProjectsSections(BaseConfig):
                 )
 
     def unpack_district_projects(self, district, projects, subdistrict=None):
-        if district.upper().startswith("CITYWIDE"):
+        if district.upper() == "CITYWIDE":
             file_, csv_file = utils.create_csv_file(self.unit_file_name)
             fields = self.unit_fields
         else:

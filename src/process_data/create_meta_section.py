@@ -73,7 +73,7 @@ class CreateMetaSections(BaseConfig):
             self.handle_file(district, district_upper, budget)
 
     def handle_file(self, district, district_upper, budget, subdistrict=None):
-        if district_upper.startswith("CITYWIDE"):
+        if district_upper == "CITYWIDE":
             path_to_file = utils.get_path_to_file(self.unit_file_name)
             district = "unit"
         else:
@@ -184,6 +184,11 @@ class CreateMetaSections(BaseConfig):
             if key == "comment":
                 comments = [f"#{idx}: {com}" for idx, com in enumerate(value, 1)]
                 value = " ".join(comments)
+            elif key == "max_length":
+                try:
+                    value = str(min(int(value), num_projects))
+                except (TypeError, ValueError):
+                    pass
             metadata[key] = value
 
         # ADD fully_funded flag
