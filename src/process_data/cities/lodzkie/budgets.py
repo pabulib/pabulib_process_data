@@ -1,0 +1,27 @@
+budgets = {
+    2024: {
+        "Belchatowski": 160000,
+        "Brzezinski": 164477,
+        "Laski": 151500,
+        "Leczycki": 160000,
+        "Lodz": 165495,
+        "Lodzki_Wschodni": 158800,
+        "Lowicki": 163777,
+        "Opoczynski": 166000,
+        "Pabianicki": 165800,
+        "Pajeczanski": 160000,
+        "Piotrkowski": 166000,
+        "Poddebicki": 165000,
+        "Radomszczanski": 165000,
+        "Rawski": 159500,
+        "Sieradzki": 165546,
+        "Skierniewice": 159772,
+        "Skierniewicki": 158740,
+        "Tomaszowski": 165560,
+        "Wielunski": 144500,
+        "Wieruszowski": 159980,
+        "Zdunowolski": 150200,
+        "Zgierski": 152799,
+        "CITYWIDE": 3917200,
+    }
+}

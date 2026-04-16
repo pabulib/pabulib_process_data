@@ -95,9 +95,18 @@ class CreateMetaSections(BaseConfig):
 
     def create_metadata(self, path_to_file, district, budget, subdistrict):
         temp_meta = deepcopy(self.metadata)
-        unit_display = "Ruda Śląska" if self.unit == "Ruda_Slaska" else self.unit.title()
+        district_display_names = temp_meta.pop("district_display_names", None) or {}
+        description_prefix = temp_meta.pop("description_prefix", "District PB")
+        unit_description_prefix = temp_meta.pop(
+            "unit_description_prefix", "Municipal PB"
+        )
+        _unit_display_names = {
+            "Ruda_Slaska": "Ruda Śląska",
+            "Lodzkie": "Łódzkie Voivodeship",
+        }
+        unit_display = _unit_display_names.get(self.unit, self.unit.title())
         if district == "unit":
-            description = f"Municipal PB in {unit_display}"
+            description = f"{unit_description_prefix} in {unit_display}"
             subunit = ""
             district_txt = ""
             dict_to_update = temp_meta.pop("unit", None)
@@ -107,7 +116,7 @@ class CreateMetaSections(BaseConfig):
             if self.subdistricts_mapping:
                 district = self.subdistricts_mapping[district]
             unit = unit_display
-            district_title = district.title()
+            district_title = district_display_names.get(district, district.title())
             ruda_pool = False
             if self.unit == "Ruda_Slaska" and district.lower().startswith("municipal "):
                 district_title = district.split(" ", 1)[1].strip().lower()
@@ -127,12 +136,14 @@ class CreateMetaSections(BaseConfig):
                         f"Local PB in {unit}, " f"{district_title} | {subdistrict_txt}"
                     )
             else:
-                if self.unit == "Ruda_Slaska" and district.lower().startswith("municipal "):
+                if self.unit == "Ruda_Slaska" and district.lower().startswith(
+                    "municipal "
+                ):
                     description = f"Municipal PB in {unit}, {district_title}"
                 else:
-                    description = f"District PB in {unit}, {district_title}"
+                    description = f"{description_prefix} in {unit}, {district_title}"
             if not subdistrict:
-                subdistrict_txt = district.title()
+                subdistrict_txt = district_display_names.get(district, district.title())
             district_txt = district_title
 
             subunit = self.create_subunit_value(

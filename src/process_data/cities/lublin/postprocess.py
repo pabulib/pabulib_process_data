@@ -9,8 +9,25 @@ from pabulib.checker import flds
 import helpers.utilities as utils
 
 CITYWIDE_COMMENT = (
-    "Lublin's citywide budget was split into two pools: 'hard' for "
-    "infrastructural projects and 'soft' for non-infrastructural projects."
+    "#1: Lublin's citywide budget was split into two pools: 'hard' for "
+    "infrastructural projects and 'soft' for non-infrastructural projects. "
+    "Each voter had two citywide votes and could use both on 'hard', both "
+    "on 'soft', or split them between the two pools. This hard/soft "
+    "distinction was not indicated to voters during voting and only "
+    "mattered during tallying. "
+    "#2: Initially, 6,900,000 PLN was allocated to citywide projects, with "
+    "30% reserved for 'soft' projects (2,070,000 PLN) and 70% for 'hard' "
+    "projects (4,830,000 PLN). After the district results were finalized, "
+    "the actual district allocation was 7,887,385 PLN, leaving 7,112,615 "
+    "PLN for citywide projects. The city then set the final citywide "
+    "budgets to 2,133,785 PLN for 'soft' projects and 4,978,830 PLN for "
+    "'hard' projects. "
+    "#3: Due to an error in the voting system, one citywide ballot "
+    "(voter_id 23819) was incorrectly merged into a single vote with four "
+    "citywide projects: two 'hard' and two 'soft', instead of at most two "
+    "citywide projects in total. The city counted these indications, so for "
+    "consistency with the official project totals we also keep them in the "
+    "dataset. This did not affect the election outcome."
 )
 
 
@@ -93,7 +110,7 @@ def fix_citywide_meta(country: str, unit: str, instance: int, **_) -> None:
         fixed_meta["instance"] = int(instance)
         fixed_meta["num_projects"] = len(projects)
         fixed_meta["num_votes"] = len(votes)
-        fixed_meta["comment"] = f"#1: {CITYWIDE_COMMENT}"
+        fixed_meta["comment"] = CITYWIDE_COMMENT
         fixed_meta.pop("district", None)
 
         _write_pb(path, fixed_meta, projects, votes)
