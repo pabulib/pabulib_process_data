@@ -5,6 +5,7 @@ import re
 from dataclasses import dataclass
 
 import pandas as pd
+from openpyxl import load_workbook
 
 import helpers.utilities as utils
 from process_data.base_config import BaseConfig
@@ -18,10 +19,18 @@ class Preprocess(BaseConfig):
         self.votes_excel = self.preprocess["votes_xls"]
         self.projects_excel = self.preprocess["projects_xls"]
         self.data_dir = self.preprocess["data_dir"]
+        self.extra_funded_project_ids = set(
+            self.preprocess.get("extra_funded_project_ids", [])
+        )
         return super().__post_init__()
 
     def get_existing_excel_path(self, filename, extensions=("xls", "xlsx")):
         for ext in extensions:
+            raw_path = utils.get_path_to_file_by_unit(
+                filename, self.unit, os.path.join(self.data_dir, "raw"), ext=ext
+            )
+            if os.path.exists(raw_path):
+                return raw_path
             path = utils.get_path_to_file_by_unit(
                 filename, self.unit, self.data_dir, ext=ext
             )
@@ -30,6 +39,36 @@ class Preprocess(BaseConfig):
         raise FileNotFoundError(
             f"No Excel file found with extensions {extensions} for {filename}"
         )
+
+    def get_selected_statuses(self, excel_path):
+        if not excel_path.endswith(".xlsx"):
+            return {}
+
+        wb = load_workbook(excel_path, data_only=True)
+        selected_statuses = {}
+
+        for sheet_name in ("Ogólnomiejskie", "Dzielnicowe"):
+            if sheet_name not in wb.sheetnames:
+                continue
+
+            sheet = wb[sheet_name]
+            headers = [cell.value for cell in sheet[1]]
+            try:
+                project_id_col = headers.index("Nr zadania") + 1
+            except ValueError:
+                continue
+
+            for row in range(2, sheet.max_row + 1):
+                project_id = sheet.cell(row=row, column=project_id_col).value
+                if project_id in (None, ""):
+                    continue
+                if isinstance(project_id, str) and not project_id.strip().isdigit():
+                    continue
+
+                fill_color = sheet.cell(row=row, column=1).fill.fgColor.rgb
+                selected_statuses[int(project_id)] = int(fill_color == "FFE5E58C")
+
+        return selected_statuses
 
     def get_votes_data(self):
         excel_path = self.get_existing_excel_path(self.votes_excel)
@@ -70,6 +109,7 @@ class Preprocess(BaseConfig):
         self.logger.info(f"Loading `{excel_path}` file...")
 
         self.project_id_district_mapping = {}
+        selected_statuses = self.get_selected_statuses(excel_path)
 
         citywide_sheet = utils.open_excel_workbook(excel_path, name="Ogólnomiejskie")
         district_sheet = utils.open_excel_workbook(excel_path, name="Dzielnicowe")
@@ -122,9 +162,13 @@ class Preprocess(BaseConfig):
                 )
 
                 # Append the row data with additional fields to the main data list
-                data.append(current_data)
-
                 project_id = int(row[col_names_indexes["Nr zadania"]].value)
+                if "Selected" not in current_data:
+                    current_data["Selected"] = selected_statuses.get(project_id, 0)
+                if project_id in self.extra_funded_project_ids:
+                    current_data["Selected"] = 2
+
+                data.append(current_data)
                 self.project_id_district_mapping[project_id] = current_district
 
         return data

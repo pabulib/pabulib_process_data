@@ -1,3 +1,7 @@
+2026:
+* Unused citywide and district funds were passed to the districts with the highest turnout. Additional funded projects in Kiedrzyn, Gnaszyn - Kawodrza, and Wyczerpy - Aniołów are marked with `selected=2`.
+* `selected=2` project IDs: Kiedrzyn `22`, `20`; Gnaszyn - Kawodrza `486`, `33`; Wyczerpy - Aniołów `524`, `109`.
+
 2024, used comments:
 * comment;#1: The cost of Project 237 was exceeding the district budget (546 000), which should not have happened. Unfortunately, it was eligible to be voted on; therefore, we reduced its cost to align with the budget (542 052). (Wrzosowiak)
 * comment;#1: If there are unused funds remaining in any district or the citywide budget, they are aggregated and allocated to the district with the highest turnout. Therefore, we adjusted the budget from 194 431 to 236 277. (Kiedrzyn)

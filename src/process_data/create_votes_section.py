@@ -1,6 +1,7 @@
 import csv
 from dataclasses import dataclass
 
+from natsort import natsorted
 from pabulib.checker import flds
 
 import helpers.utilities as utils
@@ -12,8 +13,10 @@ class CreateVotesSections(BaseConfig):
     unit_fields: list
     districts_fields: list = None
     subdistricts: bool = False
+    output_file_name_mapping: dict = None
 
     def __post_init__(self):
+        self.output_file_name_mapping = self.output_file_name_mapping or {}
         self.load_json_files()
         self.check_if_districts_fields()
         return super().__post_init__()
@@ -42,7 +45,7 @@ class CreateVotesSections(BaseConfig):
                     for subdistrict, votes in votes.items():
                         self.unpack_district_votes(district, votes, subdistrict)
             else:
-                votes = sorted(votes, key=lambda d: d["voter_id"])
+                votes = natsorted(votes, key=lambda d: d["voter_id"])
                 self.unpack_district_votes(district, votes)
         self.logger.info("VOTES sections created")
 
@@ -56,7 +59,9 @@ class CreateVotesSections(BaseConfig):
                 district_upper = utils.create_district_subdistrict_upper(
                     district_upper, subdistrict
                 )
-            path_to_file = utils.get_path_to_file(self.unit_file_name, district_upper)
+            path_to_file = utils.get_path_to_file(
+                self.unit_file_name, self.output_district_name(district_upper)
+            )
             fields = self.districts_fields
 
         # sort to be consistent with order in fields.py file

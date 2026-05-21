@@ -72,17 +72,3 @@ budgets = {
         "ZAWODZIE-DABIE": 432562,
     },
 }
-
-
-# sum check
-
-suma = 0
-year = 2024
-
-for budget in budgets[year].values():
-    # print(budget)
-    suma += budget
-
-print(suma)
-
-# print(suma)

@@ -14,6 +14,9 @@ class BaseConfig:
     def __post_init__(self):
         self.logger = utils.create_logger()
         self.unit_file_name = f"{self.country}_{self.unit}_{self.instance}_"
+        self.output_file_name_mapping = getattr(
+            self, "output_file_name_mapping", {}
+        )
 
     def save_mappings_as_jsons(self, objects):
         self.logger.info("Saving JSON files...")
@@ -28,3 +31,6 @@ class BaseConfig:
         return utils.name_and_load_dict_as_json(
             self.country, self.unit, self.instance, file_name
         )
+
+    def output_district_name(self, district_upper):
+        return self.output_file_name_mapping.get(district_upper, district_upper)

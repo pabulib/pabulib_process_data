@@ -10,22 +10,29 @@ from process_data.base_config import BaseConfig
 class CreateProjectsSections(BaseConfig):
     unit_fields: list
     districts_fields: list = None
+    districts_fields_overrides: dict = None
+    output_file_name_mapping: dict = None
 
     def __post_init__(self):
+        self.output_file_name_mapping = self.output_file_name_mapping or {}
         self.load_json_files()
         self.check_if_districts_fields()
         return super().__post_init__()
 
     def check_if_districts_fields(self):
         self.districts_fields = self.districts_fields or self.unit_fields
+        self.districts_fields_overrides = self.districts_fields_overrides or {}
 
     def load_json_files(self):
         self.district_projects_mapping = self.get_json_file("district_projects_mapping")
         self.project_district_mapping = self.get_json_file("project_district_mapping")
         projects_data_per_district = self.get_json_file("projects_data_per_district")
-        self.projects_data_per_district = utils.sort_projects_data_per_dictrict(
-            projects_data_per_district, subdistricts=self.subdistricts
-        )
+        if self.unit == "Swiecie":
+            self.projects_data_per_district = projects_data_per_district
+        else:
+            self.projects_data_per_district = utils.sort_projects_data_per_dictrict(
+                projects_data_per_district, subdistricts=self.subdistricts
+            )
 
     def add_projects_section(self, csv_file, fields):
         csv_file.writerow(["PROJECTS"])
@@ -79,8 +86,10 @@ class CreateProjectsSections(BaseConfig):
                 district_upper = utils.create_district_subdistrict_upper(
                     district_upper, subdistrict
                 )
-            file_, csv_file = utils.create_csv_file(self.unit_file_name, district_upper)
-            fields = self.districts_fields
+            file_, csv_file = utils.create_csv_file(
+                self.unit_file_name, self.output_district_name(district_upper)
+            )
+            fields = self.districts_fields_overrides.get(district, self.districts_fields)
 
         # sort to be consistent with order in fields.py file
         fields = [field for field in flds.PROJECTS_FIELDS_ORDER if field in fields]

@@ -160,7 +160,7 @@ class GetVotesExcel(BaseConfig):
             row_values = self.sheet.row_values(row)
             if any(row_values):
                 row_values = [str(value) for value in row_values]
-                row_txt = "".join(row_values)
+                row_txt = "\x1f".join(row_values)
                 if row_txt in all_rows:
                     raise RuntimeError(f"There is a duplicated row! {row_values}")
                 all_rows.add(row_txt)
@@ -339,8 +339,9 @@ class GetVotesExcel(BaseConfig):
         for idx, row_data in enumerate(self.data):
             valid = self.check_if_vote_is_valid(row_data)
             if valid:
+                voter_id = row_data[self.col["voter_id"]]
                 if self.voter_id_integer:
-                    voter_id = int(row_data[self.col["voter_id"]])
+                    voter_id = int(voter_id)
                 if not voter_id:
                     return
                 self.handler(idx, row_data, voter_id)
@@ -355,6 +356,8 @@ class GetVotesExcel(BaseConfig):
             item.add_sex(row[self.col["sex"]])
         if self.get_voting_method:
             item.add_voting_method(row[self.col["voting_method"]])
+        if self.col.get("neighborhood"):
+            item.add_neighborhood(row[self.col["neighborhood"]])
         return item
 
     def get_voter_district(self, row, voter_id):

@@ -1,4 +1,87 @@
 all_data = {
+    2026: {
+        "base_data": {
+            "country": "Poland",
+            "unit": "Częstochowa",
+            "instance": 2026,
+        },
+        "preprocess": {
+            "votes_xls": "glosy_2025_12_03",
+            "projects_xls": "raport_2026_04_27",
+            "data_dir": "2026",
+            "extra_funded_project_ids": [486, 33, 22, 20, 524, 109],
+        },
+        "get_projects": {
+            "data_dir": "2026",
+            "excel_filename": "raport_2026_04_27",
+            "columns_mapping": {
+                "project_id": "Nr zadania",
+                "name": "Zadanie",
+                "cost": "Koszt",
+                "score": "Punkty WAŻNE",
+                "votes": "Głosy WAŻNE:",
+                "district": "district",
+                "selected": "Selected",
+            },
+        },
+        "get_votes": {
+            "excel_filename": "glosy_2025_12_03",
+            "data_dir": "2026",
+            "only_valid_votes": True,
+            "columns_mapping": {
+                "voter_id": "Lp.",
+                "voting_method": "Typ głosu",
+                "sex": "Płeć",
+                "points": "pkt",
+                "vote_column": "nr",
+                "district": "district",
+            },
+            "rows_iterator_handler": "one_voter_multiple_rows_with_points",
+        },
+        "projects_data": {
+            "unit_fields": [
+                "project_id",
+                "cost",
+                "votes",
+                "score",
+                "name",
+                "selected",
+            ]
+        },
+        "votes_data": {
+            "unit_fields": [
+                "voter_id",
+                "sex",
+                "vote",
+                "points",
+                "voting_method",
+                "neighborhood",
+            ],
+            "districts_fields": ["voter_id", "sex", "vote", "points", "voting_method"],
+        },
+        "metadata": {
+            "vote_type": "cumulative",
+            "rule": "greedy-threshold",
+            "date_begin": "22.09.2025",
+            "date_end": "07.10.2025",
+            "language": "pl",
+            "max_sum_points": "10",
+            "edition": "12",
+            "currency": "PLN",
+            "unit": {
+                "min_project_score_threshold": 1000,
+                "comment": [
+                    "Unused funds from the citywide and district pools were allocated to the districts with the highest turnout. Projects marked with selected=2 were funded from these additional funds outside the regular district budget."
+                ],
+            },
+            "district": {
+                "min_project_score_threshold": 300,
+                "comment": [
+                    "Unused funds from the citywide and district pools were allocated to the districts with the highest turnout. Projects marked with selected=2 were funded from these additional funds outside the regular district budget."
+                ],
+            },
+        },
+    },
     2025: {
         "base_data": {
             "country": "Poland",

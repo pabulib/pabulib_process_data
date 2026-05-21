@@ -1,5 +1,6 @@
 from copy import deepcopy
 from dataclasses import dataclass
+from pathlib import Path
 
 from pabulib.checker import flds
 
@@ -13,6 +14,9 @@ class CreateMetaSections(BaseConfig):
     metadata: dict
 
     def __post_init__(self):
+        self.output_file_name_mapping = self.metadata.pop(
+            "output_file_name_mapping", {}
+        )
         self.set_up_iterator()
 
         if self.metadata.get("subdistricts_mapping"):
@@ -65,7 +69,15 @@ class CreateMetaSections(BaseConfig):
                 self.handle_file(district, district_upper, budget, subdistrict)
 
     def iterate_through_districts(self):
+        all_projects = self.get_json_file("projects_data_per_district")
         for district_upper, district in self.iterator.items():
+            if (
+                district_upper == "CITYWIDE"
+                and "CITYWIDE" not in self.budgets
+                and "citywide" not in self.budgets
+                and "CITYWIDE" not in all_projects
+            ):
+                continue
             try:
                 budget = self.budgets[district]
             except KeyError:
@@ -77,7 +89,9 @@ class CreateMetaSections(BaseConfig):
             path_to_file = utils.get_path_to_file(self.unit_file_name)
             district = "unit"
         else:
-            path_to_file = utils.get_path_to_file(self.unit_file_name, district_upper)
+            path_to_file = utils.get_path_to_file(
+                self.unit_file_name, self.output_district_name(district_upper)
+            )
         metadata = self.create_metadata(path_to_file, district, budget, subdistrict)
         metadata = {
             key: metadata[key] for key in flds.META_FIELDS_ORDER if key in metadata
@@ -95,6 +109,10 @@ class CreateMetaSections(BaseConfig):
 
     def create_metadata(self, path_to_file, district, budget, subdistrict):
         temp_meta = deepcopy(self.metadata)
+        district_key = district
+        district_comments = temp_meta.pop("district_comments", {}) or {}
+        district_descriptions = temp_meta.pop("district_descriptions", {}) or {}
+        district_metadata = temp_meta.pop("district_metadata", {}) or {}
         district_display_names = temp_meta.pop("district_display_names", None) or {}
         description_prefix = temp_meta.pop("description_prefix", "District PB")
         unit_description_prefix = temp_meta.pop(
@@ -103,6 +121,8 @@ class CreateMetaSections(BaseConfig):
         _unit_display_names = {
             "Ruda_Slaska": "Ruda Śląska",
             "Lodzkie": "Łódzkie Voivodeship",
+            "Swiecie": "Świecie",
+            "Rzeszow": "Rzeszów",
         }
         unit_display = _unit_display_names.get(self.unit, self.unit.title())
         if district == "unit":
@@ -176,7 +196,31 @@ class CreateMetaSections(BaseConfig):
                 dict_to_update = deepcopy(dict_to_update)
                 dict_to_update.pop("comment", None)
             temp_meta.update(dict_to_update)
+
+        district_metadata_update = deepcopy(district_metadata.get(district_key, {}))
+        metadata_fields_to_remove = []
+        metadata_direct_updates = {}
+        if district_metadata_update:
+            metadata_fields_to_remove = district_metadata_update.pop("remove_fields", [])
+            metadata_comments = district_metadata_update.pop("comment", [])
+            metadata_direct_updates = {
+                key: district_metadata_update.pop(key)
+                for key in ("description", "district", "subunit")
+                if key in district_metadata_update
+            }
+            temp_meta.update(district_metadata_update)
+            if metadata_comments:
+                temp_meta["comment"] = temp_meta.get("comment", []) + metadata_comments
+
+        district_comment = district_comments.get(district_key)
+        if district_comment:
+            temp_meta["comment"] = temp_meta.get("comment", []) + district_comment
         num_projects, num_votes = utils.count_projects_and_votes(path_to_file)
+
+        if district_key in district_descriptions:
+            description = district_descriptions[district_key]
+        if "description" in metadata_direct_updates:
+            description = metadata_direct_updates.pop("description")
 
         metadata = {
             "description": description,
@@ -191,6 +235,7 @@ class CreateMetaSections(BaseConfig):
             metadata["district"] = district_txt
         if subunit:
             metadata["subunit"] = subunit.strip("\n")
+        metadata.update(metadata_direct_updates)
         for key, value in temp_meta.items():
             if key == "comment":
                 comments = [f"#{idx}: {com}" for idx, com in enumerate(value, 1)]
@@ -201,6 +246,9 @@ class CreateMetaSections(BaseConfig):
                 except (TypeError, ValueError):
                     pass
             metadata[key] = value
+
+        for field in metadata_fields_to_remove:
+            metadata.pop(field, None)
 
         # ADD fully_funded flag
         all_projects = self.get_json_file("projects_data_per_district")
