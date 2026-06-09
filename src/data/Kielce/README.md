@@ -21,8 +21,11 @@ available on the public KBO archive pages:
 - https://bo.kielce.eu/2025-wyniki.html
 
 The regular 2026 KBO budget was 10,500,000 PLN: 40% for citywide projects and
-60% split equally between five regions. The official winning projects have a
-combined verified cost of 11,296,145 PLN. Public reporting says the city added
-funds to implement them fully, and Rejon 2 also received a turnout bonus
-project. Projects OG.09, RE.05, RE.50, and RE.43 are therefore marked with
-`selected=2`.
+60% split equally between five regions. In response DS-II.1431.209.1.2026, the
+city clarified that the citywide pool was increased from 4,200,000 PLN to
+4,672,275 PLN before final selection. The city also clarified that OG.24 was not
+funded because it ranked below the projects covered by the increased pool.
+
+District projects RE.05 and RE.50 are marked with `selected=2`. Project RE.43
+in Rejon 5 originally cost 205,660 PLN, but the city reduced its cost to 187,350
+PLN under the local rule, which allowed the project to be funded.

@@ -23,6 +23,7 @@ class Preprocess(BaseConfig):
         self.additional_funded_project_ids = set(
             self.preprocess.get("additional_funded_project_ids", [])
         )
+        self.project_cost_overrides = self.preprocess.get("project_cost_overrides", {})
         self.space_re = re.compile(r"\s+")
         return super().__post_init__()
 
@@ -110,6 +111,7 @@ class Preprocess(BaseConfig):
                     text, r"KOSZT ZADANIA PO\s+WERYFIKACJI:\s*([\d\s,.]+)\s*zł"
                 )
             )
+            cost = int(self.project_cost_overrides.get(project_id, cost))
             votes = self.parse_int(
                 self.match_field(
                     text,

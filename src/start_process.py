@@ -23,7 +23,8 @@ logger = create_logger()
 # city = "Kraków"
 # city = "Katowice"
 # city = "Częstochowa"
-city = "ruda_slaska"
+# city = "ruda_slaska"
+city = "Radom"
 
 settings["unit"] = city
 

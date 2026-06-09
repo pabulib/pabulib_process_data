@@ -1,6 +1,6 @@
 budgets = {
     2026: {
-        "CITYWIDE": 4200000,
+        "CITYWIDE": 4672275,
         "Rejon 1": 1260000,
         "Rejon 2": 1260000,
         "Rejon 3": 1260000,

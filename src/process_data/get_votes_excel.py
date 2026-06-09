@@ -199,6 +199,10 @@ class GetVotesExcel(BaseConfig):
         col_name = "subdistrict" if self.col.get("subdistrict") else "district"
 
         vote = row[self.vote_field]
+        if isinstance(vote, float) and vote.is_integer():
+            vote = str(int(vote))
+        else:
+            vote = str(vote).strip()
 
         neighborhood = None
 
