@@ -42,3 +42,8 @@ src/ssh_client/downloads/
 
 scripts/
 
+# Budapest 2025 is temporarily withheld because the official per-project online
+# vote totals do not match the anonymized vote-level export. The city has been
+# asked to provide a corrected export before the pipeline and source data are committed.
+src/data/Budapest/
+src/process_data/cities/budapest/
