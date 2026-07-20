@@ -8,7 +8,7 @@ from helpers.settings import output_path
 from helpers.utilities import create_logger
 from process_data.run_it import run_it
 
-settings = {"year": 2026}
+settings = {"year": 2025}
 
 logger = create_logger()
 
@@ -24,7 +24,7 @@ logger = create_logger()
 # city = "Katowice"
 # city = "Częstochowa"
 # city = "ruda_slaska"
-city = "Radom"
+city = "Budapest"
 
 settings["unit"] = city
 

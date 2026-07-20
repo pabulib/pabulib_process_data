@@ -1,0 +1,28 @@
+budgets = {
+    2027: {
+        "CITYWIDE": 3000000,
+        "Brzeziny": 183457,
+        "Dajtki": 276000,
+        "Generałów": 604832,
+        "Grunwaldzkie": 231606,
+        "Gutkowo": 227920,
+        "Jaroty": 1157775,
+        "Kortowo": 165587,
+        "Kościuszki": 252130,
+        "Kormoran": 337066,
+        "Kętrzyńskiego": 247109,
+        "Likusy": 183457,
+        "Mazurskie": 233787,
+        "Nad Jez. Długim": 404198,
+        "Nagórki": 430000,
+        "Pieczewo": 301310,
+        "Podgrodzie": 377000,
+        "Podleśna": 404500,
+        "Pojezierze": 390650,
+        "Redykajny": 186991,
+        "Śródmieście": 193178,
+        "Wojska Polskiego": 240735,
+        "Zatorze": 476026,
+        "Zielona Górka": 172773,
+    }
+}
