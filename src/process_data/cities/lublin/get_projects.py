@@ -238,10 +238,46 @@ class GetProjects(BaseConfig):
             unit=self.unit,
             instance=int(self.instance),
         )
+        if int(self.instance) == 2026:
+            return self.start_2026()
         data = self.get_sheet_data()
         self.iterate_through_rows(data)
         projects_costs = get_projects_costs()
         self.iterate_through_projects(projects_costs)
+        self.create_district_upper_mapping()
+        objects = {
+            "district_projects_mapping": self.district_projects_mapping,
+            "projects_data_per_district": self.projects_data_per_district,
+            "project_district_mapping": self.project_district_mapping,
+            "district_upper_district_mapping": self.district_upper_district_mapping,
+        }
+        self.save_mappings_as_jsons(objects)
+
+    def start_2026(self):
+        sheet = utils.open_excel_workbook(self.path_to_excel)
+        columns = utils.get_col_names_indexes(sheet)
+        for row_idx in range(1, sheet.nrows):
+            row = sheet.row_values(row_idx)
+            project_id = str(row[columns["project_id"]]).strip()
+            votes = int(row[columns["votes"]])
+            # Keep the repository-wide convention of omitting projects with no
+            # votes; they also cannot occur in the anonymized ballot source.
+            if not project_id or votes == 0:
+                continue
+            district = str(row[columns["district"]]).strip()
+            neighborhood = str(row[columns["neighborhood"]]).strip()
+            project = {
+                "project_id": project_id,
+                "cost": int(row[columns["cost"]]),
+                "votes": votes,
+                "name": str(row[columns["name"]]).strip(),
+                "selected": int(row[columns["selected"]]),
+                "neighborhood": neighborhood,
+            }
+            self.district_projects_mapping[district].append(project_id)
+            self.projects_data_per_district[district].append(project)
+            self.project_district_mapping[project_id] = district
+
         self.create_district_upper_mapping()
         objects = {
             "district_projects_mapping": self.district_projects_mapping,

@@ -8,7 +8,7 @@ from pabulib.checker import flds
 
 import helpers.utilities as utils
 
-CITYWIDE_COMMENT = (
+CITYWIDE_COMMENT_2020 = (
     "#1: Lublin's citywide budget was split into two pools: 'hard' for "
     "infrastructural projects and 'soft' for non-infrastructural projects. "
     "Each voter had two citywide votes and could use both on 'hard', both "
@@ -28,6 +28,15 @@ CITYWIDE_COMMENT = (
     "citywide projects in total. The city counted these indications, so for "
     "consistency with the official project totals we also keep them in the "
     "dataset. This did not affect the election outcome."
+)
+
+CITYWIDE_HARD_COMMENT_2026 = (
+    "#1: At most one citywide infrastructural project could be selected in a "
+    "given district. Therefore O-4 and O-21 were not selected despite their "
+    "ranking positions because higher-ranked projects had already been selected "
+    "in Zemborzyce and Czuby Północne, respectively. "
+    "#2: Only 425,498 PLN remained for O-67, so the city reduced the project's "
+    "cost from 966,000 PLN to 425,498 PLN."
 )
 
 
@@ -110,7 +119,17 @@ def fix_citywide_meta(country: str, unit: str, instance: int, **_) -> None:
         fixed_meta["instance"] = int(instance)
         fixed_meta["num_projects"] = len(projects)
         fixed_meta["num_votes"] = len(votes)
-        fixed_meta["comment"] = CITYWIDE_COMMENT
+        fixed_meta["rule"] = (
+            "greedy-exclusive" if pool == "hard" else "greedy"
+        )
+        fixed_meta.pop("min_project_score_threshold", None)
+        if int(instance) == 2026:
+            if pool == "hard":
+                fixed_meta["comment"] = CITYWIDE_HARD_COMMENT_2026
+            else:
+                fixed_meta.pop("comment", None)
+        else:
+            fixed_meta["comment"] = CITYWIDE_COMMENT_2020
         fixed_meta.pop("district", None)
 
         _write_pb(path, fixed_meta, projects, votes)

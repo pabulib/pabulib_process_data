@@ -82,4 +82,76 @@ all_data = {
             "currency": "PLN",
         },
     },
+    2026: {
+        "base_data": {
+            "country": "Poland",
+            "unit": "Lublin",
+            "instance": 2026,
+        },
+        "preprocess": {
+            "data_dir": "2026",
+            "results_source": "Wyniki_pełne.xlsx",
+            "votes_source": "raport_BO_2026.xlsx",
+            "projects_excel": "Lublin_2026_projects_processed",
+            "votes_excel": "Lublin_2026_votes_processed",
+        },
+        "get_projects": {
+            "projects_excel": "Lublin_2026_projects_processed",
+            "data_dir": "2026",
+        },
+        "get_votes": {
+            "excel_filename": "Lublin_2026_votes_processed",
+            "data_dir": "2026",
+            "only_valid_votes": True,
+            "voter_id_integer": False,
+            "columns_mapping": {
+                "voter_id": "voter_id",
+                "sex": "sex",
+                "voting_method": "voting_method",
+                "district": "district",
+                "vote_column": "vote",
+            },
+            "rows_iterator_handler": "one_voter_multiple_rows_no_points",
+        },
+        "projects_data": {
+            "unit_fields": [
+                "project_id",
+                "cost",
+                "votes",
+                "name",
+                "selected",
+            ],
+            "districts_fields": [
+                "project_id",
+                "cost",
+                "votes",
+                "name",
+                "selected",
+            ],
+        },
+        "votes_data": {
+            "unit_fields": ["voter_id", "sex", "vote", "voting_method"],
+            "districts_fields": ["voter_id", "sex", "vote", "voting_method"],
+        },
+        "metadata": {
+            "vote_type": "approval",
+            "rule": "greedy-threshold",
+            "date_begin": "23.09.2025",
+            "date_end": "05.11.2025",
+            "language": "pl",
+            "min_length": "1",
+            "max_length": "2",
+            "edition": "12",
+            "currency": "PLN",
+            "unit": {},
+            "district": {
+                "min_project_score_threshold": "100",
+            },
+            "district_comments": {
+                "Stare Miasto": [
+                    "No project was selected in Stare Miasto."
+                ]
+            },
+        },
+    },
 }

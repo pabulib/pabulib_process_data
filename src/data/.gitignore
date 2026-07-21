@@ -6,6 +6,7 @@
 *.docx
 *.csv
 *.pb
+*.ods
 
 # but keep directories
 
