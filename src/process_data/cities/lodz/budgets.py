@@ -1,7 +1,57 @@
-# https://uml.lodz.pl/budzet-obywatelski/lbo-20232024/podzial-srodkow-w-ramach-lbo/
+# 2026: https://uml.lodz.pl/budzet-obywatelski/lbo-2026/2027/podzial-srodkow-w-ramach-lbo/
+# 2023: https://uml.lodz.pl/budzet-obywatelski/lbo-20232024/podzial-srodkow-w-ramach-lbo/
 
 
 budgets = {
+    2026: {
+        "BAŁUTY": {
+            "BAŁUTY-CENTRUM": 1236000,
+            "BAŁUTY-DOŁY": 1158000,
+            "BAŁUTY ZACHODNIE": 554000,
+            "JULIANÓW-MARYSIN-ROGI": 646000,
+            "ŁAGIEWNIKI": 435000,
+            "RADOGOSZCZ": 1017000,
+            "TEOFILÓW-WIELKOPOLSKA": 1197000,
+            "WZNIESIEŃ ŁÓDZKICH": 429000,
+        },
+        "GÓRNA": {
+            "CHOJNY": 1056000,
+            "CHOJNY-DĄBROWA": 1272000,
+            "GÓRNIAK": 728000,
+            "NAD NEREM": 424000,
+            "PIASTÓW-KURAK": 758000,
+            "ROKICIE": 730000,
+            "RUDA": 627000,
+            "WISKITNO": 486000,
+        },
+        "POLESIE": {
+            "KAROLEW-RETKINIA WSCHÓD": 1084000,
+            "KOZINY": 583000,
+            "LUBLINEK-PIENISTA": 539000,
+            "IM. JÓZEFA MONTWIŁŁA-MIRECKIEGO": 431000,
+            "RETKINIA ZACHÓD-SMULSKO": 907000,
+            "STARE POLESIE": 1012000,
+            "ZŁOTNO": 636000,
+            "ZDROWIE-MANIA": 477000,
+        },
+        "ŚRÓDMIEŚCIE": {
+            "KATEDRALNA": 1054000,
+            "ŚRÓDMIEŚCIE-WSCHÓD": 721000,
+        },
+        "WIDZEW": {
+            "ANDRZEJÓW": 533000,
+            "DOLINA ŁÓDKI": 461000,
+            "MILESZKI": 457000,
+            "NOWOSOLNA": 510000,
+            "OLECHÓW-JANÓW": 844000,
+            "NR 33": 434000,
+            "STARY WIDZEW": 805000,
+            "STOKI-SIKAWA-PODGÓRZE": 637000,
+            "WIDZEW-WSCHÓD": 1136000,
+            "ZARZEW": 786000,
+        },
+        "CITYWIDE": {"CITYWIDE": 8741200},
+    },
     2025: {
         "BAŁUTY": {
             "BAŁUTY-CENTRUM": 1228000,

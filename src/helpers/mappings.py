@@ -37,7 +37,7 @@ category_mapping = {
     "kultura i dziedzictwo": "culture",
     "zdrowie i pomoc społeczna": "health and welfare",
     "inne": None,
-    "edukacja, dzieci i młodzież": "education, children and youth",
+    "edukacja, dzieci i młodzież": "education,children and youth",
     "drogi/komunikacja": "public transit and roads",
     "kultura i sztuka": "culture",
     "edukacja i nauka": "education and science",

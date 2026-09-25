@@ -1,4 +1,118 @@
 all_data = {
+    2027: {
+        "base_data": {
+            "country": "Poland",
+            "unit": "Warszawa",
+            "instance": 2027,
+            "subdistricts": True,
+        },
+        "preprocess": {
+            "project_totals_source": "official_projects_results",
+            "votes_source": "anonymized_ballots",
+            "require_matching_project_vote_totals": True,
+            "data_dir": "2027",
+            "projects_excel_filename": "projekty-BO2027_PBL",
+            "votes_excel_filename": "Karty-do-glosowania_anonim_BO2027_PBL",
+            "project_id_column": "Numer projektu",
+            "official_votes_column": "Liczba głosów ważnych",
+            "validity_column": "Status karty do głosowania",
+            "valid_value": "ważny",
+            "ballot_vote_columns": [
+                "Numery projektów miejskich",
+                "Numery projektów dzielnicowych",
+                "Numery projektów lokalnych",
+            ],
+        },
+        "get_projects": {
+            "data_dir": "2027",
+            "excel_filename": "projekty-BO2027_PBL",
+            "columns_mapping": {
+                "project_id": "Numer projektu",
+                "name": "Tytuł",
+                "cost": "Koszt",
+                "votes": "Liczba głosów ważnych",
+                "district": "Dzielnica",
+                "subdistrict": "Obszar",
+                "selected": "Status",
+                # "category": "multiple category columns",
+            },
+        },
+        "get_votes": {
+            "excel_filename": "Karty-do-glosowania_anonim_BO2027_PBL",
+            "data_dir": "2027",
+            "only_valid_votes": False,
+            "valid_value": "ważny",
+            "load_subdistricts_mapping": True,
+            "columns_mapping": {
+                "voter_id": "ID karty",
+                "sex": "Płeć",
+                "age": "Wiek",
+                "district": "Dzielnica",
+                "voting_method": "Sposób głosowania",
+                "if_valid": "Status karty do głosowania",
+                "votes_columns": {
+                    "unit": "Numery projektów miejskich",
+                    "local": "Numery projektów dzielnicowych",
+                    "subdistrict": "Numery projektów lokalnych",
+                },
+            },
+            "rows_iterator_handler": "one_voter_one_row_no_points",
+        },
+        "projects_data": {
+            "unit_fields": [
+                "project_id",
+                "cost",
+                "votes",
+                "name",
+                "selected",
+                "category",
+                "longitude",
+                "latitude",
+            ]
+        },
+        "votes_data": {
+            "unit_fields": [
+                "voter_id",
+                "age",
+                "sex",
+                "vote",
+                "neighborhood",
+                "voting_method",
+            ],
+            "districts_fields": ["voter_id", "age", "sex", "vote", "voting_method"],
+        },
+        "metadata": {
+            "vote_type": "approval",
+            "rule": "greedy-threshold",
+            "date_begin": "01.06.2026",
+            "date_end": "15.06.2026",
+            "language": "pl",
+            "edition": "13",
+            "currency": "PLN",
+            "unit": {
+                "max_length": "5",
+                "comment": [
+                    "The metadata regarding the age of voters shows very low values (starting from zero), indicating that one doesn't need to be an adult to vote: If a voter is under 13, they can vote with the consent of a parent or guardian. Hence, for example, age 0 likely corresponds to cases where parents/guardians are voting on behalf of their children.",
+                ],
+                "min_project_score_threshold": "3000",
+            },
+            "district": {
+                "max_length": "5",
+                "comment": [
+                    "The metadata regarding the age of voters shows very low values (starting from zero), indicating that one doesn't need to be an adult to vote: If a voter is under 13, they can vote with the consent of a parent or guardian. Hence, for example, age 0 likely corresponds to cases where parents/guardians are voting on behalf of their children.",
+                ],
+                "min_project_score_threshold": "150",
+            },
+            "local": {
+                "max_length": "5",
+                "comment": [
+                    "The metadata regarding the age of voters shows very low values (starting from zero), indicating that one doesn't need to be an adult to vote: If a voter is under 13, they can vote with the consent of a parent or guardian. Hence, for example, age 0 likely corresponds to cases where parents/guardians are voting on behalf of their children.",
+                    "The anonymized source contains 59 valid local ballots with repeated project IDs. We moved the repeated indications to separate synthetic votes to preserve the official project totals.",
+                ],
+                "min_project_score_threshold": "30",
+            },
+        },
+    },
     2026: {
         "base_data": {
             "country": "Poland",

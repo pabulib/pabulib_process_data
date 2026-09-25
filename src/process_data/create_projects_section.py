@@ -54,6 +54,9 @@ class CreateProjectsSections(BaseConfig):
         self.logger.info("PROJECTS sections created")
 
     def warn_on_missing_subdistrict_variants(self):
+        if self.unit != "Gdynia":
+            return
+
         expected_subdistricts = set()
         for district, subdistricts in self.projects_data_per_district.items():
             if district.upper().startswith("CITYWIDE"):

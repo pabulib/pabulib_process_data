@@ -1,4 +1,84 @@
 all_data = {
+    2026: {
+        "base_data": {
+            "country": "Poland",
+            "unit": "Łódź",
+            "instance": 2026,
+            "subdistricts": True,
+        },
+        "preprocess": {
+            "excel_to_preprocess": "WYNIKI_-_LBO_2026-27",
+            "data_dir": "2026",
+            "output_excel_path": "Lodz_2026_projects_processed",
+        },
+        "get_projects": {
+            "data_dir": "2026",
+            "excel_filename": "Lodz_2026_projects_processed",
+            "columns_mapping": {
+                "project_id": "Id",
+                "name": "Tytuł",
+                "cost": "Kwota",
+                "votes": "Głosów",
+                "district": "district",
+                "subdistrict": "subdistrict",
+                "selected": "selected",
+                "category": "Kategoria",
+            },
+        },
+        "get_votes": {
+            "excel_filename": "Głosowanie - dane XIV edycja",
+            "data_dir": "2026",
+            "only_valid_votes": True,
+            "district_name_mapping": True,
+            "columns_mapping": {
+                "voter_id": "IDWPIS",
+                "sex": "PLEC",
+                "age": "WIEK",
+                "district": "REJON_ID",
+                "subdistrict": "OSIEDLE_ID",
+                "voting_method": "FORMAGLOSOWANIA",
+                "vote_column": "PROJEKT_ID",
+            },
+            "rows_iterator_handler": "one_voter_multiple_rows_no_points",
+        },
+        "projects_data": {
+            "unit_fields": [
+                "project_id",
+                "cost",
+                "votes",
+                "name",
+                "selected",
+                "category",
+            ]
+        },
+        "votes_data": {
+            "unit_fields": ["voter_id", "age", "sex", "vote", "voting_method"],
+            "districts_fields": [
+                "voter_id",
+                "age",
+                "sex",
+                "vote",
+                "voting_method",
+            ],
+        },
+        "metadata": {
+            "vote_type": "approval",
+            "rule": "greedy-threshold",
+            "date_begin": "01.06.2026",
+            "date_end": "30.06.2026",
+            "language": "pl",
+            "edition": "14",
+            "currency": "PLN",
+            "max_length": "5",
+            "min_project_score_threshold": 50,
+            "unit": {
+                "comment": [
+                    "The city increased the citywide budget from 7,900,000 to 8,741,200."
+                ]
+            },
+            "district": {},
+        },
+    },
     2025: {
         "base_data": {
             "country": "Poland",

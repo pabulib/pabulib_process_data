@@ -428,6 +428,27 @@ class GetVotesExcel(BaseConfig):
                 district = next(iter(districts))
                 self.votes_data_per_district[district].append(vars(voter_item_cp))
 
+    def split_warszawa_2027_repeated_votes(self, votes):
+        """Move repeated local project indications into synthetic votes.
+
+        The Warsaw 2027 anonymized source contains valid local ballots with the
+        same project ID listed more than once. Official per-project totals count
+        every occurrence, so the extra indications must be retained while each
+        approval vote remains a list of distinct projects.
+        """
+        votes = str(self.clean_votes_field(votes))
+        project_ids = [project_id for project_id in votes.split(",") if project_id]
+        unique_project_ids = []
+        repeated_project_ids = []
+        seen = set()
+        for project_id in project_ids:
+            if project_id in seen:
+                repeated_project_ids.append(project_id)
+            else:
+                seen.add(project_id)
+                unique_project_ids.append(project_id)
+        return ",".join(unique_project_ids), repeated_project_ids
+
     def create_voter_item(self, row, voter_id, neighborhood=None):
         item = VoterItem(voter_id)
         if self.col.get("district"):
@@ -505,6 +526,16 @@ class GetVotesExcel(BaseConfig):
             #         f"{neighborhood}, {subdistrict}, {subdistrict_level}, {voter_item.neighborhood}"
             #     )
             if district_votes and district_votes not in utils.wrong_votes:
+                repeated_project_ids = []
+                if (
+                    self.unit == "Warszawa"
+                    and self.instance == 2027
+                    and self.load_subdistricts_mapping
+                    and subdistrict_level == "subdistrict"
+                ):
+                    district_votes, repeated_project_ids = (
+                        self.split_warszawa_2027_repeated_votes(district_votes)
+                    )
                 voter_item_cp = deepcopy(voter_item)
                 voter_item_cp.vote = self.clean_votes_field(district_votes)
                 if self.subdistricts:
@@ -516,6 +547,17 @@ class GetVotesExcel(BaseConfig):
                     self.votes_data_per_district[neighborhood][subdistrict].append(
                         vars(voter_item_cp)
                     )
+                    for duplicate_number, project_id in enumerate(
+                        repeated_project_ids, start=1
+                    ):
+                        repeated_vote = deepcopy(voter_item_cp)
+                        repeated_vote.voter_id = int(
+                            f"999999{duplicate_number}{voter_id}"
+                        )
+                        repeated_vote.vote = project_id
+                        self.votes_data_per_district[neighborhood][
+                            subdistrict
+                        ].append(vars(repeated_vote))
                 else:
                     if self.unit == "Warszawa" and self.instance == 2024:
                         # Warszawa 2024 bug

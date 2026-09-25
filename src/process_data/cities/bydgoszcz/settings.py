@@ -64,6 +64,22 @@ district_metadata = {
     },
 }
 
+district_metadata["Błonie"]["comment"] = [
+    "The budget was adjusted from 516,336 PLN to 516,338 PLN because the selected projects cost 516,338 PLN."
+]
+
+district_metadata["Bydgoszcz Wschód - Siernieczek"]["comment"] = [
+    "The budget was adjusted from 347,171 PLN to 347,172 PLN because the selected projects cost 347,172 PLN."
+]
+
+district_metadata["Flisy"]["comment"] = [
+    "The budget was adjusted from 182,687 PLN to 182,688 PLN because the selected projects cost 182,688 PLN."
+]
+
+district_metadata["Okole"]["comment"] = [
+    "The budget was adjusted from 384,467 PLN to 384,468 PLN because the selected projects cost 384,468 PLN."
+]
+
 district_metadata["Szwederowo"]["comment"] = [
     "There is a difference between the number of votes in the file (173) and the official results (174) for project 466. Since the discrepancy concerns only one vote, we kept the number from the file (173) to maintain internal consistency."
 ]

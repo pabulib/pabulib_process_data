@@ -63,9 +63,10 @@ class CreateMetaSections(BaseConfig):
             for subdistrict, _ in projects.items():
                 budget = self.get_subdistrict_budget(district, subdistrict)
                 district_upper = utils.change_district_into_name(district)
-                district_upper = utils.create_district_subdistrict_upper(
-                    district_upper, subdistrict
-                )
+                if district_upper != "CITYWIDE":
+                    district_upper = utils.create_district_subdistrict_upper(
+                        district_upper, subdistrict
+                    )
                 self.handle_file(district, district_upper, budget, subdistrict)
 
     def iterate_through_districts(self):
