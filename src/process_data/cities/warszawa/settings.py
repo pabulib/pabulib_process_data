@@ -1,3 +1,55 @@
+WARSAW_2027_DUPLICATE_LOCAL_VOTES_COMMENT = (
+    "The city confirmed that connection or browser problems allowed repeated "
+    "clicks to save the same local project more than once. Across the election, "
+    "this caused 60 duplicate indications on 59 valid electronic ballots. The "
+    "official results include them, but they did not affect which projects were "
+    "selected."
+)
+
+WARSAW_2027_AFFECTED_LOCAL_POOLS = (
+    ("Bemowo", "Jelonki Północne, Jelonki Południowe, Chrzanów"),
+    ("Białołęka", "Kobiałka, Grodzisk, Brzeziny"),
+    ("Białołęka", "Nowodwory"),
+    ("Bielany", "Las Bielański, Marymont-Ruda, Marymont-Kaskada"),
+    ("Bielany", "Młociny, Wólka Węglowa, Placówka, Radiowo, Huta"),
+    ("Bielany", "Stare Bielany"),
+    ("Bielany", "Słodowiec, Piaski"),
+    ("Mokotów", "Czerniaków, Sadyba"),
+    ("Mokotów", "Sielce"),
+    ("Mokotów", "Stegny"),
+    ("Ochota", "Rakowiec"),
+    ("Praga-Południe", "Gocław"),
+    ("Praga-Południe", "Grochów"),
+    ("Praga-Południe", "Kamionek, Saska Kępa"),
+    ("Praga-Północ", "Pelcowizna, Nowa Praga"),
+    ("Praga-Północ", "Stara Praga, Szmulowizna"),
+    ("Targówek", "Bródno"),
+    ("Targówek", "Bródno-Podgrodzie, Zacisze"),
+    (
+        "Targówek",
+        "Targówek Mieszkaniowy, Targówek Fabryczny, Elsnerów, Utrata",
+    ),
+    ("Ursus", "Gołąbki, Szamoty, Niedźwiadek"),
+    ("Ursynów", "Natolin, Kabaty"),
+    (
+        "Ursynów",
+        "Ursynów Północny, Ursynów-Centrum, Stary Służew, Stary Imielin",
+    ),
+    ("Wawer", "Nadwiśle, Miedzeszyn, Aleksandrów, Falenica"),
+    (
+        "Wilanów",
+        "Wilanów Niski, Wilanów Wysoki, Wilanów Królewski, Zawady, "
+        "Powsinek, Kępa Zawadowska, Powsin",
+    ),
+    ("Wola", "Koło, Ulrychów"),
+    ("Wola", "Mirów, Czyste, Odolany"),
+    ("Śródmieście", "Muranów, Nowe Miasto, Stare Miasto"),
+    ("Śródmieście", "Powiśle, Solec, Ujazdów"),
+    ("Żoliborz", "Marymont-Potok, Stary Żoliborz"),
+    ("Żoliborz", "Sady Żoliborskie"),
+)
+
+
 all_data = {
     2027: {
         "base_data": {
@@ -107,9 +159,12 @@ all_data = {
                 "max_length": "5",
                 "comment": [
                     "The metadata regarding the age of voters shows very low values (starting from zero), indicating that one doesn't need to be an adult to vote: If a voter is under 13, they can vote with the consent of a parent or guardian. Hence, for example, age 0 likely corresponds to cases where parents/guardians are voting on behalf of their children.",
-                    "The anonymized source contains 59 valid local ballots with repeated project IDs. We moved the repeated indications to separate synthetic votes to preserve the official project totals.",
                 ],
                 "min_project_score_threshold": "30",
+            },
+            "subdistrict_comments": {
+                pool: [WARSAW_2027_DUPLICATE_LOCAL_VOTES_COMMENT]
+                for pool in WARSAW_2027_AFFECTED_LOCAL_POOLS
             },
         },
     },

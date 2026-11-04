@@ -112,6 +112,7 @@ class CreateMetaSections(BaseConfig):
         temp_meta = deepcopy(self.metadata)
         district_key = district
         district_comments = temp_meta.pop("district_comments", {}) or {}
+        subdistrict_comments = temp_meta.pop("subdistrict_comments", {}) or {}
         district_descriptions = temp_meta.pop("district_descriptions", {}) or {}
         district_metadata = temp_meta.pop("district_metadata", {}) or {}
         district_display_names = temp_meta.pop("district_display_names", None) or {}
@@ -216,6 +217,10 @@ class CreateMetaSections(BaseConfig):
         district_comment = district_comments.get(district_key)
         if district_comment:
             temp_meta["comment"] = temp_meta.get("comment", []) + district_comment
+
+        subdistrict_comment = subdistrict_comments.get((district_key, subdistrict))
+        if subdistrict_comment:
+            temp_meta["comment"] = temp_meta.get("comment", []) + subdistrict_comment
         num_projects, num_votes = utils.count_projects_and_votes(path_to_file)
 
         if district_key in district_descriptions:
