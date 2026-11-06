@@ -105,11 +105,12 @@ class VoterItem:
         self.vote = vote
 
     def add_age(self, age):
-        if age:
-            try:
-                self.age = int(age)
-            except ValueError:
-                print(f"Cannot handle such age! {age}")
+        if age is None or age == "":
+            return
+        try:
+            self.age = int(age)
+        except (TypeError, ValueError):
+            print(f"Cannot handle such age! {age}")
 
     def add_sex(self, sex):
         if sex:

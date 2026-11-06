@@ -1,4 +1,95 @@
 all_data = {
+    2026: {
+        "base_data": {
+            "country": "Poland",
+            "unit": "Katowice",
+            "instance": 2026,
+        },
+        "preprocess": {
+            "excel_to_preprocess": "XIII edycja BO - wyniki glosowania",
+            "votes_excel": "DanePubliczne",
+            "votes_output_excel": "DanePubliczne_processed",
+            "data_dir": "2026",
+            "output_excel_path": "Katowice_2026_projects_processed",
+            "source_schema": "katowice_2026",
+            "expected_projects": 213,
+            "expected_selected": 149,
+            "expected_voters": 38128,
+            "expected_vote_rows": 98442,
+            "expected_score": 203784,
+            "project_metadata_source": "official_projects_results",
+            "project_score_source": "official_projects_results",
+            "project_vote_counts_source": "valid_ballots",
+            "votes_source": "anonymized_ballots",
+            "require_matching_project_score_totals": True,
+        },
+        "get_projects": {
+            "data_dir": "2026",
+            "excel_filename": "Katowice_2026_projects_processed",
+            "columns_mapping": {
+                "project_id": "NR ID",
+                "name": "TYTUŁ ZADANIA",
+                "cost": "KOSZT ZADANIA",
+                "votes": "LICZBA_GLOSUJACYCH",
+                "score": "SUMA_PUNKTOW",
+                "district": "DZIELNICA",
+                "selected": "WYBRANE / NIEWYBRANE W GŁOSOWANIU",
+            },
+        },
+        "get_votes": {
+            "excel_filename": "DanePubliczne_processed",
+            "data_dir": "2026",
+            "only_valid_votes": True,
+            "district_name_mapping": True,
+            "columns_mapping": {
+                "voter_id": "IDWPIS",
+                "sex": "PLEC",
+                "age": "WIEK",
+                "points": "PUNKTY",
+                "vote_column": "ID",
+                "district": "DZIELNICA_KOD",
+            },
+            "rows_iterator_handler": "one_voter_multiple_rows_with_points",
+        },
+        "projects_data": {
+            "unit_fields": [
+                "project_id",
+                "cost",
+                "votes",
+                "score",
+                "name",
+                "selected",
+            ]
+        },
+        "votes_data": {
+            "unit_fields": [
+                "voter_id",
+                "age",
+                "sex",
+                "vote",
+                "points",
+                "neighborhood",
+            ],
+            "districts_fields": ["voter_id", "age", "sex", "vote", "points"],
+        },
+        "metadata": {
+            "vote_type": "cumulative",
+            "rule": "greedy-threshold",
+            "date_begin": "10.09.2026",
+            "date_end": "23.09.2026",
+            "language": "pl",
+            "min_sum_points": "1",
+            "max_sum_points": "3",
+            "edition": "13",
+            "currency": "PLN",
+            "comment": [
+                "The voter-age metadata contains very low values, starting "
+                "from zero. Residents of all ages could vote."
+            ],
+            "unit": {"min_project_score_threshold": 200},
+            "district": {"min_project_score_threshold": 50},
+        },
+    },
     2025: {
         "base_data": {
             "country": "Poland",

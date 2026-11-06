@@ -48,5 +48,10 @@ budgets = {
         "Kategoria I": 2000000,
         "Kategoria III": 1000000,
         **category_ii_budgets,
-    }
+    },
+    2027: {
+        "Kategoria I": 2000000,
+        "Kategoria III": 1000000,
+        **category_ii_budgets,
+    },
 }

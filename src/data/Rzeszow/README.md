@@ -18,3 +18,19 @@ The city project/results sheet omits project 36 from Generała Grota Roweckiego,
 but the public voting list includes it and valid ballots contain 94 indications
 for it. We add project 36 from the voting list and count its votes from the
 ballots.
+
+2027
+----
+
+The city provided an official project/results sheet and anonymized ballot data
+in response to public information request KP-P.3027.20.2026.ŁCH. The selected
+projects are published at:
+
+https://erzeszow.pl/3108-rbo/139779-rzeszowski-budzet-obywatelski-2027.html
+
+The preprocessor counts project indications from valid ballots and requires
+every count to match the official project total before writing the processed
+files. Card numbers restart between electronic and paper voting, and ten card
+numbers also occur twice within the electronic source. All rows are retained;
+the processed voter IDs include the voting method and, where needed, an
+occurrence suffix so distinct cards cannot be merged.

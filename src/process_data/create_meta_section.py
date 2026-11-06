@@ -125,6 +125,7 @@ class CreateMetaSections(BaseConfig):
             "Lodzkie": "Łódzkie Voivodeship",
             "Swiecie": "Świecie",
             "Rzeszow": "Rzeszów",
+            "Bialystok": "Białystok",
         }
         unit_display = _unit_display_names.get(self.unit, self.unit.title())
         if district == "unit":

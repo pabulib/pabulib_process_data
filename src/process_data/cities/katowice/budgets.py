@@ -1,4 +1,30 @@
 budgets = {
+    2026: {
+        # https://bo.katowice.eu/add/file/1400396414-305e53ab504f979ee24dd8f62ea26b0126a5d08cd257474c8d8158c8ee32e00d.pdf
+        "CITYWIDE": 3006958,
+        "SRODMIESCIE": 1160191,
+        "ZALESKA_HALDA-BRYNOW_CZESC_ZACHODNIA": 787344,
+        "ZAWODZIE": 644064,
+        "OSIEDLE_PADEREWSKIEGO-MUCHOWIEC": 705578,
+        "BRYNOW_CZESC_WSCHODNIA-OSIEDLE_ZGRZEBNIOKA": 826140,
+        "LIGOTA-PANEWNIKI": 1258310,
+        "ZALEZE": 584258,
+        "OSIEDLE_WITOSA": 709318,
+        "OSIEDLE_TYSIACLECIA": 982883,
+        "DAB": 520540,
+        "WELNOWIEC-JOZEFOWIEC": 771527,
+        "KOSZUTKA": 668605,
+        "BOGUCICE": 750041,
+        "DABROWKA_MALA": 519755,
+        "SZOPIENICE-BUROWIEC": 761357,
+        "JANOW-NIKISZOWIEC": 856398,
+        "GISZOWIEC": 794641,
+        "MURCKI": 503606,
+        "PIOTROWICE-OCHOJEC": 1082039,
+        "ZARZECZE": 580841,
+        "KOSTUCHNA": 713811,
+        "PODLESIE": 580502,
+    },
     2025: {
         # https://bo.katowice.eu/budzet-obywatelski-pliki-do-pobrania-2026
         "CITYWIDE": 3003675,

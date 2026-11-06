@@ -64,6 +64,67 @@ accepted_project_ids_2026 = [
     134,
 ]
 
+accepted_project_ids_2027 = [
+    13,
+    149,
+    17,
+    18,
+    20,
+    21,
+    22,
+    23,
+    27,
+    29,
+    34,
+    35,
+    36,
+    28,
+    37,
+    40,
+    42,
+    44,
+    46,
+    49,
+    50,
+    51,
+    55,
+    56,
+    57,
+    61,
+    62,
+    74,
+    75,
+    68,
+    73,
+    70,
+    79,
+    84,
+    83,
+    87,
+    89,
+    90,
+    97,
+    146,
+    114,
+    139,
+    133,
+    135,
+    94,
+    105,
+    116,
+    122,
+    92,
+    109,
+    96,
+    113,
+    99,
+    115,
+    100,
+    136,
+    118,
+    101,
+]
+
 category_ii_districts = [
     "1000-LECIA",
     "BARANÓWKA",
@@ -231,6 +292,139 @@ all_data = {
                     category_ii_comment,
                     "Project 36 was present in the voting list and received 94 valid ballot indications, but it was missing from the official project results provided by the city. Its project metadata was taken from the voting list and its vote total was counted from the ballots.",
                 ],
+            },
+        },
+    },
+}
+
+
+all_data[2027] = {
+    "base_data": {
+        "country": "Poland",
+        "unit": "Rzeszow",
+        "instance": 2027,
+    },
+    "preprocess": {
+        "data_dir": "2027",
+        "source_projects_excel": "rbo2027_projekty",
+        "source_votes_excel": "rbo2027_karty",
+        "projects_excel": "Rzeszow_2027_projects_processed",
+        "votes_excel": "Rzeszow_2027_votes_processed",
+        "source_schema": "rbo_2027",
+        "expected_projects": 149,
+        "expected_valid_ballots": 49768,
+        "expected_valid_indications": 114637,
+        "votes_column": "Numery projektów",
+        "prefix_voter_ids_by_method": True,
+        "enforce_one_per_category": True,
+        "accepted_project_ids": accepted_project_ids_2027,
+        "project_metadata_source": "official_projects_results",
+        "project_vote_totals_reference_source": "official_projects_results",
+        "votes_source": "anonymized_ballots",
+        "require_matching_project_vote_totals": True,
+        "project_totals_output_source": (
+            "valid_ballots_after_matching_official_results"
+        ),
+    },
+    "get_projects": {
+        "data_dir": "2027",
+        "excel_filename": "Rzeszow_2027_projects_processed",
+        "columns_mapping": {
+            "project_id": "project_id",
+            "name": "name",
+            "cost": "cost",
+            "votes": "votes",
+            "district": "district",
+            "neighborhood": "neighborhood",
+            "selected": "selected",
+        },
+    },
+    "get_votes": {
+        "excel_filename": "Rzeszow_2027_votes_processed",
+        "data_dir": "2027",
+        "only_valid_votes": True,
+        "voter_id_integer": False,
+        "columns_mapping": {
+            "voter_id": "voter_id",
+            "vote_column": "vote",
+            "district": "district",
+            "voting_method": "voting_method",
+        },
+        "rows_iterator_handler": "one_voter_multiple_rows_no_points",
+    },
+    "projects_data": {
+        "output_file_name_mapping": {
+            "KATEGORIA_I": "",
+            "KATEGORIA_III": "SOCIAL_ACTIVITIES",
+        },
+        "unit_fields": [
+            "project_id",
+            "cost",
+            "votes",
+            "name",
+            "selected",
+            "neighborhood",
+        ],
+        "districts_fields": [
+            "project_id",
+            "cost",
+            "votes",
+            "name",
+            "selected",
+            "neighborhood",
+        ],
+        "districts_fields_overrides": {
+            "Kategoria I": ["project_id", "cost", "votes", "name", "selected"],
+            **{
+                district: ["project_id", "cost", "votes", "name", "selected"]
+                for district in category_ii_districts
+            },
+        },
+    },
+    "votes_data": {
+        "output_file_name_mapping": {
+            "KATEGORIA_I": "",
+            "KATEGORIA_III": "SOCIAL_ACTIVITIES",
+        },
+        "unit_fields": ["voter_id", "vote", "voting_method"],
+        "districts_fields": ["voter_id", "vote", "voting_method"],
+    },
+    "metadata": {
+        "output_file_name_mapping": {
+            "KATEGORIA_I": "",
+            "KATEGORIA_III": "SOCIAL_ACTIVITIES",
+        },
+        "vote_type": "choose-1",
+        "rule": "greedy",
+        "date_begin": "20.05.2026",
+        "date_end": "04.06.2026",
+        "language": "pl",
+        "min_length": "1",
+        "max_length": "1",
+        "edition": "14",
+        "currency": "PLN",
+        "district_display_names": {
+            "Kategoria I": "Kategoria I",
+            "Kategoria III": "Kategoria III",
+        },
+        "district_descriptions": {
+            "Kategoria I": "Municipal PB in Rzeszów",
+            "Kategoria III": (
+                "Municipal PB in Rzeszów, Social Activities Budget"
+            ),
+        },
+        "district_metadata": {
+            "Kategoria I": {"remove_fields": ["district", "subunit"]},
+            "Kategoria III": {
+                "remove_fields": ["district"],
+                "subunit": "Social Activities Budget",
+            },
+            **category_ii_metadata,
+        },
+        "district_comments": {
+            **{
+                district: [category_ii_comment]
+                for district in category_ii_districts
             },
         },
     },
